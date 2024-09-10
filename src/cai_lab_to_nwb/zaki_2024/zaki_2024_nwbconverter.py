@@ -5,7 +5,7 @@ from neuroconv.datainterfaces import (
     PhySortingInterface,
 )
 
-from cai_lab_to_nwb.embargo_2024 import Embargo2024BehaviorInterface
+from cai_lab_to_nwb.zaki_2024 import Embargo2024BehaviorInterface
 
 
 class Embargo2024NWBConverter(NWBConverter):

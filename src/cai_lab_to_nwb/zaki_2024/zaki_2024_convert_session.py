@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
-from cai_lab_to_nwb.embargo_2024 import Embargo2024NWBConverter
+from cai_lab_to_nwb.zaki_2024 import Embargo2024NWBConverter
 
 
 def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, Path], stub_test: bool = False):
