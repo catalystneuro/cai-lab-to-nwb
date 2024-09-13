@@ -1,10 +1,23 @@
-# Notes concerning the embargo_2024 conversion
+# Notes concerning the Zaki 2024 conversion
 
-## Questions:
+## General Information
+The lab page
+https://www.denisecailab.com/
+
+
+
+
+## Questions and To-do:
 * Why sometimes the exposure has more than one attempt?
 * Inside the behavior tracking in the raw data for offline data there is a pose.csv, what is it?
 * What are the pickle files in the EDF folder?
 * How comes that pyedflib is not able to read the EDF files?
+* Get a description of the HDX-02 channels: `['Activity', 'BattVolt', 'EEG', 'EMG', 'OnTime', 'SignalStr', 'Temp']`
+* Where is EZ track data?
+* What is `headOrientation.csv` inside a miniscope folder?
+* Where is the information of the context? that is, they say that they distinguish them by oddor and other features of the context, where is this.
+* Behavior tracking data for offline days, it says deep cut live but data is empty. What is it?
+* In the raw imaging data there is failed to fix and bad frames, what to do with them?
 
 ## Experiment Protocol
 
@@ -36,6 +49,13 @@ What data is available per protocol day:
   * Video of behavior
 * Day 6: 5 minutes of video
   * Video of behavior
+
+
+A description of what I believe is the experiments we are converting the data for is given in the methods section of the paper:
+
+> For calcium imaging experiments with simultaneous EEG and EMG recordings, mice lived in a custom-made homecage where offline recordings could take place. These homecages (Maze Engineers) were custom designed to accommodate mice wearing a Miniscope chronically for the duration of the experiment (about 2 weeks total). The water spout and food hopper were side-mounted and there was a slit along the top of the homecage so that the Miniscope coaxial cable could freely move. This homecage was placed on top of a receiver that would wirelessly receive EEG, EMG, temperature, and locomotion telemetry data continuously throughout the experiment (HD-X02, Data Science International). Mice had a Miniscope attached on the first day and allowed to wear it for an hour in their homecage to acclimate to its weight, after which it was removed. On the second day, the Miniscope was attached and remained on for the duration of the experiment, for a total of 2 weeks. The Miniscope was connected to a lightweight coaxial cable (Cooner Wire) which connected to a low-torque passive commutator (Neurotek) to allow the mice to freely move around the homecage with minimal rotational force. After exposure to the neutral context during encoding, mice were immediately returned to their homecage in the vivarium and the first calcium imaging recording began. The Miniscope DAQ was connected to an Arduino with a schedule set up to send a 10-minute long TTL pulse to record for 10 minutes, with a 20-minute break in between, repeated 24 times. Thus, we sampled 4 hours worth of calcium imaging data across 12 hours. The telemetry probe recorded continuously for the duration of the experiment while the mouse was in its homecage in the vivarium.
+
+
 
 
 ## File structure
@@ -165,38 +185,15 @@ They contain the minian data, a freezing output csv and the cell registration th
 
 The cell freezing output behavior csv looks like this:
 
+TODO:
 ```
-|------------------|--------------|--------------|-------------------|-------|--------|----------|
-| File             | MotionCutoff | FreezeThresh | MinFreezeDuration | Frame | Motion | Freezing |
-|------------------|--------------|--------------|-------------------|-------|--------|----------|
-| Ca_EEG2-1_FC.wmv |         10.0 |        200.0 |              15.0 |     0 |    0.0 |        0 |
-|------------------|--------------|--------------|-------------------|-------|--------|----------|
-| Ca_EEG2-1_FC.wmv |         10.0 |        200.0 |              15.0 |     1 |  171.0 |        0 |
-|------------------|--------------|--------------|-------------------|-------|--------|----------|
-| Ca_EEG2-1_FC.wmv |         10.0 |        200.0 |              15.0 |     2 |  251.0 |        0 |
-|------------------|--------------|--------------|-------------------|-------|--------|----------|
-| Ca_EEG2-1_FC.wmv |         10.0 |        200.0 |              15.0 |     3 |  378.0 |        0 |
+
 ```
 
 The cell registration csv looks like this:
 
-
+TODO:
 ```
-|--------------|---------------------------|-------------------------------|-------------------|
-| Ca_EEG2-1_FC | Ca_EEG2-1_NeutralExposure | Ca_EEG2-1_OfflineDay2Session1 | Ca_EEG2-1_Recall1 |
-|--------------|---------------------------|-------------------------------|-------------------|
-|            0 |                         2 |                             2 |             -9999 |
-|--------------|---------------------------|-------------------------------|-------------------|
-|        -9999 |                     -9999 |                             4 |             -9999 |
-|--------------|---------------------------|-------------------------------|-------------------|
-|            2 |                     -9999 |                         -9999 |             -9999 |
-|--------------|---------------------------|-------------------------------|-------------------|
-|            3 |                     -9999 |                         -9999 |             -9999 |
-|--------------|---------------------------|-------------------------------|-------------------|
-|            4 |                     -9999 |                             7 |             -9999 |
-|--------------|---------------------------|-------------------------------|-------------------|
-|            5 |                     -9999 |                             6 |             -9999 |
-|--------------|---------------------------|-------------------------------|-------------------|
 ```
 
 
@@ -508,6 +505,7 @@ The sleep looks like this
 
 ### Ca_EEG_EDF
 
+These files are full day recordings. Their filename contains a timestamps with american format of month first.
 
 ```
 ├── Ca_EEG2-1_EDF
@@ -564,7 +562,14 @@ The sleep looks like this
 ```
 ## EEG and MEG
 
+The EDF format specification:
+https://doi.org/10.1016/S1388-2457(03)00123-8
+
+
 ### Exploration with MNE
+
+The chann
+
 
 ```python
 
@@ -678,4 +683,22 @@ info["chs"]
 HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/docs/default-source/implantable-telemetry/hd-x02_s02.pdf)
 
 ### Surgery 
-> For calcium imaging experiments with EEG/EMG implants, mice underwent three serial procedures spaced ~two weeks apart. During the first surgery, mice had 300nL of AAV1-Syn-GCaMP6f injected into dorsal CA1 as described above, but had the incision sutured after the surgery. Two weeks later during a second surgery, mice had their overlying cortex aspirated and a GRIN lens implanted above the injection site, as above. During this surgery, a wireless telemetry probe (HD-X02, Data Science International) was also implanted with EEG and EMG wires. Two EMG wires were implanted into the left trapezius muscle. One EEG wire was implanted between skull and dura mater above dorsal hippocampus on the contralateral hemisphere to the GRIN lens (left hemisphere; AP -2mm, ML -1.5mm), and a reference EEG wire was implanted between skull and dura on the right hemisphere overlying prefrontal cortex (AP + 1.75mm, ML -0.5mm). Cyanoacrylate and dental cement fixed the GRIN lens, anchor screw, and EEG wires in place. The telemetry probes were implanted during the second surgery rather than the first to minimize the time that the mice needed to live with the implant (because the mice sometimes reject the implant after long periods). During the third procedure, the mice were returned to implant the baseplate, as described above.`
+> For calcium imaging experiments with EEG/EMG implants, mice underwent three serial procedures spaced ~two weeks apart. During the first surgery, mice had 300nL of AAV1-Syn-GCaMP6f injected into dorsal CA1 as described above, but had the incision sutured after the surgery. Two weeks later during a second surgery, mice had their overlying cortex aspirated and a GRIN lens implanted above the injection site, as above. During this surgery, a wireless telemetry probe (HD-X02, Data Science International) was also implanted with EEG and EMG wires. Two EMG wires were implanted into the left trapezius muscle. One EEG wire was implanted between skull and dura mater above dorsal hippocampus on the contralateral hemisphere to the GRIN lens (left hemisphere; AP -2mm, ML -1.5mm), and a reference EEG wire was implanted between skull and dura on the right hemisphere overlying prefrontal cortex (AP + 1.75mm, ML -0.5mm). Cyanoacrylate and dental cement fixed the GRIN lens, anchor screw, and EEG wires in place. The telemetry probes were implanted during the second surgery rather than the first to minimize the time that the mice needed to live with the implant (because the mice sometimes reject the implant after long periods). During the third procedure, the mice were returned to implant the baseplate, as described above.
+
+
+## Cross Registration
+
+
+> Cells recorded across sessions within a mouse were cross-registered using a previously published open-source cross-registration algorithm, CellReg, using the spatial correlations of nearby cells to determine whether highly correlated footprints close in space are likely to be the same cell across sessions. For calcium imaging experiments with EEG/EMG, each offline recording was cross-registered with all the encoding and recall sessions, but not with the other offline sessions because cross-registering between all sessions would lead to too many conflicts and thus, to no cells cross-registered across all sessions.
+
+
+### Segmentation
+
+Paper:
+https://elifesciences.org/articles/70661
+
+Github:
+https://github.com/denisecailab/minian
+
+Read the docs:
+https://minian.readthedocs.io/en/stable/
