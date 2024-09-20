@@ -1,5 +1,8 @@
 # Notes concerning the Zaki 2024 conversion
 
+
+
+
 ## General Information
 The lab page
 https://www.denisecailab.com/
@@ -10,16 +13,25 @@ https://med-associates.com/product-category/software-all/software-software/
 
 
 ## Questions and To-do:
-* Why sometimes the exposure has more than one attempt?
-* Inside the behavior tracking in the raw data for offline data there is a pose.csv, what is it?
-* What are the pickle files in the EDF folder?
-* How comes that pyedflib is not able to read the EDF files?
-* Get a description of the HDX-02 channels: `['Activity', 'BattVolt', 'EEG', 'EMG', 'OnTime', 'SignalStr', 'Temp']`
-* Where is EZ track data?
-* What is `headOrientation.csv` inside a miniscope folder?
+* Why sometimes the exposure has more than one attempt? Can you describe more about this?
+* Inside the behavior tracking in the raw data for offline data there is a pose.csv, what is it? I see a lot of references to deep lab cut, was that attempted?  (Yes, v4 of miniscope has that possibility but they are not using it. Ignore it)
+* What are the pickle files in the EDF folder? (they can be ignored)
+* How comes that pyedflib is not able to read the EDF files? (this is probably the proprietary format that they used)
+* What is `headOrientation.csv` inside a miniscope folder? (this is another feature of miniscope that they are not using in Zaki conversion. Maybe it would be good to get data with this features for future conversions)
 * Where is the information of the context? that is, they say that they distinguish them by oddor and other features of the context, where is this.
-* Behavior tracking data for offline days, it says deep cut live but data is empty. What is it?
-* In the raw imaging data there is failed to fix and bad frames, what to do with them?
+* In the Miniscope data, there are folders with `failed_to_fix` and `bad_frames`. Can you tell me more about those things?
+* What are the raw files like `Ca_EEG2-1_Recall3.raw`?
+* How to synch the edf with the video (the freeze data is synch to the video)
+* According to Alessandra notes, the behavior videos are synch to the miniscope data. I remember a pulse, can you confirm this? Basically, how to synch the miniscope data with the video? Usually they are part of the same system in miniscope, was it the case here?  
+* What happens in day two? Are offline days 1 and 2 (which is actually three) different?
+* Is the freezing output on the segmentation folder the same that the one in the corresponding imaging folder? It seems that they are for some files, confirm this.
+* The aligned sleep data has a column called frame but the corresponding ophys data is many videos? Again, how are they aligned? is the frame aggregated? In this case they are aligned to an idealized clock.
+
+What version of miniscope they used? do they know how it changes the configuration, the data? THEY ARE USING V4.
+
+DAQ:
+
+
 
 ## Experiment Protocol
 
@@ -590,6 +602,20 @@ raw.info["ch_names"]
 
 ```
 
+Here is a description of the channel after the discussion with Joe Zaki on 2024-10-20:
+
+* OnTime: not used, should ignore.
+* BaTTVolt: Battery voltage of the transmitter.
+* SignalStr: How strong the signal of the wirless transmission is, this can be used for quality control as well as to know when the animals are taken out of the cage.
+* Activity: It usees the motion of the probe relative to the receiver to creater a sudo locomotion. They don't use in the experiment but seems useful to have.
+
+A visual representation of the setup can be found here:
+https://www.datasci.com/telemetry
+
+
+#### Data Extraction
+The paper mentions two wires for the EEG and MEG but that's because one is the reference.
+
 To extract the data the following methods are available:
 
 https://mne.tools/stable/auto_tutorials/raw/10_raw_overview.html#summary-of-ways-to-extract-data-from-raw-objects
@@ -691,6 +717,76 @@ info["chs"]
 HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/docs/default-source/implantable-telemetry/hd-x02_s02.pdf)
 
 
+## Miniscope
+
+Talks about the topic:
+https://sites.google.com/metacell.us/miniscope-workshop-2021
+
+Usual DAQ software for Miniscope is GPIOx3.
+
+The expected structure of the file according to the Miniscope wiki is described here:
+
+http://miniscope.org/index.php/Data_Acquisition_Software
+
+But that does not match the structure of the files discussed above.
+
+Also, check out here:
+https://github.com/catalystneuro/roiextractors/issues/356
+
+The difference in folder organization is a version number:
+- 
+- 
+
+V4 just enumerates them in the same folder.
+This is because this is more general to add arbitrary behavioral cameras (you don't need the behavior)
+
+Right 
+
+Other changes
+
+AMU: Inertia Motion 
+
+
+
+This is the metadata file in the same directory that the minian videos:
+```json
+{
+    "compression": "FFV1",
+    "deviceDirectory": "C:/Users/CaiLab/Documents//Joe/Ca_EEG2/Ca_EEG2-1/2021_10_14/10_11_24/Miniscope",
+    "deviceID": 0,
+    "deviceName": "Miniscope",
+    "deviceType": "Miniscope_V4_BNO",
+    "ewl": 70,
+    "frameRate": "30FPS",
+    "framesPerFile": 1000,
+    "gain": 3.5,
+    "led0": 12
+}
+```
+
+And this is the one in the parent folder. Both are called `metaData.json`
+
+```json
+{
+    "animalName": "Ca_EEG2-1",
+    "baseDirectory": "C:/Users/CaiLab/Documents//Joe/Ca_EEG2/Ca_EEG2-1/2021_10_14/10_11_24",
+    "cameras": [
+    ],
+    "day": 14,
+    "experimentName": "Ca_EEG2",
+    "hour": 10,
+    "miniscopes": [
+        "Miniscope"
+    ],
+    "minute": 11,
+    "month": 10,
+    "msec": 779,
+    "msecSinceEpoch": 1634220684779,
+    "researcherName": "Joe",
+    "second": 24,
+    "year": 2021
+}
+```
 
 ## Cross Registration
 
@@ -711,7 +807,52 @@ https://minian.readthedocs.io/en/stable/
 
 ## Freezing Behavior and Video
 
+I think this data was extracted with the ezTrack package:
+This is how the data looks like:
+
+![freeze_data](./assets/freeze_data_frame.png)
+
+MotionCutoff, FreezeThreshd, MinFreezeDuration are the same for the whole dataframe. The seem to be the parameters of the algorithm.
+
+Freeze Threshold: 
+MotionCuttoff: minimal pixel change so "it is moving" 
+FreezeThreshold: the motion across some frames has to be
+MinFreezeDuration: 
+
+
+Description of the columns:
+* Frame: Of the video
+* Motion: This s a float, an int? what it indicates? Aggregated pixel change from frame to frame as a measure of the motion. Higher means more change so more motion. 
+* Freezing: This is a boolean, 100 is freezing, 0 is not not
+
 According to Alessandra notes the behavioral videos are synch to the miniscope data. 
+We have some tracking in other experiments. They don't have behavior tracking. 
+
+
 
 ###  ezTrack
+
+The webpage:
 https://github.com/denisecailab/ezTrack
+
+This package is used for two things:
+1) Track the position of the animal in the open field. A detailed walkthrough of the capabilities can be found here:
+
+https://youtu.be/BKgh-XcZhIM?t=1905
+
+2) The freezing behavior analysis that is done for this specific conversion.
+
+## Sleep
+
+
+
+
+
+## Some synch information
+How does the miniscope system synchs, here in this video are some notes:
+
+https://youtu.be/BKgh-XcZhIM?t=731
+
+
+More about synch can be found in the video to align with behavior on this timestamp
+https://youtu.be/BKgh-XcZhIM?t=1338
