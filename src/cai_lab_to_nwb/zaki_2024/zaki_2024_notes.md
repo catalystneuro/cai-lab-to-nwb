@@ -14,9 +14,6 @@ https://med-associates.com/product-category/software-all/software-software/
 
 ## Questions and To-do:
 * Why sometimes the exposure has more than one attempt? Can you describe more about this?
-
-* How comes that pyedflib is not able to read the EDF files? (this is probably the proprietary format that they used)
-* What is `headOrientation.csv` inside a miniscope folder? (this is another feature of miniscope that they are not using in Zaki conversion. Maybe it would be good to get data with this features for future conversions)
 * Where is the information of the context? that is, they say that they distinguish them by oddor and other features of the context, where is this.
 * In the Miniscope data, there are folders with `failed_to_fix` and `bad_frames`. Can you tell me more about those things?
 * What are the raw files like `Ca_EEG2-1_Recall3.raw`?
@@ -594,6 +591,13 @@ https://doi.org/10.1016/S1388-2457(03)00123-8
 
 The pickle files related to the edf data can be ignored.
 
+* How comes that pyedflib is not able to read the EDF files? The EDFs are produce with the HD-X02 device and is unclear to the authors.
+
+
+### Device:
+HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/docs/default-source/implantable-telemetry/hd-x02_s02.pdf)
+
+
 ### Exploration with MNE
 
 The chann
@@ -721,8 +725,6 @@ info["chs"]
 ```
 
 
-### Device:
-HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/docs/default-source/implantable-telemetry/hd-x02_s02.pdf)
 
 
 ## Miniscope
@@ -753,8 +755,9 @@ Other changes
 AMU: Inertia Motion 
 
 
-`pose.csv` is related to deep lab cut estimation of the pose of the animal. This is a feature on the latest version of minian that is currently not used in this conversion.
+`pose.csv` files are related to deep lab cut estimation of the pose of the animal. This is a feature on the latest version of minian that is currently not used in this conversion.
 
+* What is `headOrientation.csv` inside a miniscope folder? this is another feature of miniscope that they are not using in Zaki conversion. 
 
 
 This is the metadata file in the same directory that the minian videos:
