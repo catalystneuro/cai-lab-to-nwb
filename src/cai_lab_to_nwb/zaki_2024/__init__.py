@@ -1,1 +1,3 @@
 from .implant_interface import ImplantInterface
+from .behaviorinterface import FreezingBehaviorInterface
+from .sleepinterface import SleepBehaviorInterface
