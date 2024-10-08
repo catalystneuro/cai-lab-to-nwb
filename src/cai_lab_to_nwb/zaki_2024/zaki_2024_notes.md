@@ -733,9 +733,7 @@ But that does not match the structure of the files discussed above.
 Also, check out here:
 https://github.com/catalystneuro/roiextractors/issues/356
 
-The difference in folder organization is a version number:
-- 
-- 
+**The difference in folder organization is a version number**
 
 V4 just enumerates them in the same folder.
 This is because this is more general to add arbitrary behavioral cameras (you don't need the behavior)
@@ -807,7 +805,7 @@ https://minian.readthedocs.io/en/stable/
 
 ## Freezing Behavior and Video
 
-I think this data was extracted with the ezTrack package:
+This data was extracted from the the ezTrack package:
 This is how the data looks like:
 
 ![freeze_data](./assets/freeze_data_frame.png)
@@ -844,7 +842,22 @@ https://youtu.be/BKgh-XcZhIM?t=1905
 
 ## Sleep
 
+The data looks like this:
 
+| Index | Frame | SleepState |
+|-------|-------|------------|
+|     0 |     0 | wake       |
+|     1 |     1 | wake       |
+|     2 |     2 | wake       |
+|     3 |     3 | wake       |
+|     4 |     4 | wake       |
+|     5 |     5 | wake       |
+
+
+The possible sleep states are:
+* wake
+* quite wake
+* sws
 
 
 
