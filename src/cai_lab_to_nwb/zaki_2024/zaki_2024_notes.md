@@ -14,8 +14,7 @@ https://med-associates.com/product-category/software-all/software-software/
 
 ## Questions and To-do:
 * Why sometimes the exposure has more than one attempt? Can you describe more about this?
-* Inside the behavior tracking in the raw data for offline data there is a pose.csv, what is it? I see a lot of references to deep lab cut, was that attempted?  (Yes, v4 of miniscope has that possibility but they are not using it. Ignore it)
-* What are the pickle files in the EDF folder? (they can be ignored)
+
 * How comes that pyedflib is not able to read the EDF files? (this is probably the proprietary format that they used)
 * What is `headOrientation.csv` inside a miniscope folder? (this is another feature of miniscope that they are not using in Zaki conversion. Maybe it would be good to get data with this features for future conversions)
 * Where is the information of the context? that is, they say that they distinguish them by oddor and other features of the context, where is this.
@@ -25,11 +24,13 @@ https://med-associates.com/product-category/software-all/software-software/
 * According to Alessandra notes, the behavior videos are synch to the miniscope data. I remember a pulse, can you confirm this? Basically, how to synch the miniscope data with the video? Usually they are part of the same system in miniscope, was it the case here?  
 * What happens in day two? Are offline days 1 and 2 (which is actually three) different?
 * Is the freezing output on the segmentation folder the same that the one in the corresponding imaging folder? It seems that they are for some files, confirm this.
-* The aligned sleep data has a column called frame but the corresponding ophys data is many videos? Again, how are they aligned? is the frame aggregated? In this case they are aligned to an idealized clock.
+* For the sleep data, the labels in the paper are : NREM, REM, WAKE (Extended Figure 9 F) but in the data we only found labels: 
+        `sleep_states = ['quiet wake', 'rem', 'sws', 'wake']`
+
+Relationship?
 
 What version of miniscope they used? do they know how it changes the configuration, the data? THEY ARE USING V4.
 
-DAQ:
 
 
 
@@ -586,11 +587,12 @@ These files are full day recordings. Their filename contains a timestamps with a
     └── summary_files
 
 ```
-## EEG and MEG
+## EDF (EEG and MEG)
 
 The EDF format specification:
 https://doi.org/10.1016/S1388-2457(03)00123-8
 
+The pickle files related to the edf data can be ignored.
 
 ### Exploration with MNE
 
@@ -751,6 +753,9 @@ Other changes
 AMU: Inertia Motion 
 
 
+`pose.csv` is related to deep lab cut estimation of the pose of the animal. This is a feature on the latest version of minian that is currently not used in this conversion.
+
+
 
 This is the metadata file in the same directory that the minian videos:
 ```json
@@ -863,8 +868,10 @@ The data looks like this:
 The possible sleep states are:
 * wake
 * quite wake
-* sws
+* sws (slow wave sleep)
+* rem
 
+* The aligned sleep data has a column called frame but the corresponding ophys data is many videos? Again, how are they aligned? is the frame aggregated? In this case they are aligned to an idealized clock. They interpolated from the video timestamps that used the perfect sampling rate. Check this with the authors when we are working with synchronization.
 
 
 ## Some synch information
