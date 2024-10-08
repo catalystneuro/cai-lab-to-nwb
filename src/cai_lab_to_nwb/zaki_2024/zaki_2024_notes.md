@@ -76,6 +76,12 @@ This is the surgery performed on the experiments that we are converting the data
 
 > For calcium imaging experiments with EEG/EMG implants, mice underwent three serial procedures spaced ~two weeks apart. During the first surgery, mice had 300nL of AAV1-Syn-GCaMP6f injected into dorsal CA1 as described above, but had the incision sutured after the surgery. Two weeks later during a second surgery, mice had their overlying cortex aspirated and a GRIN lens implanted above the injection site, as above. During this surgery, a wireless telemetry probe (HD-X02, Data Science International) was also implanted with EEG and EMG wires. Two EMG wires were implanted into the left trapezius muscle. One EEG wire was implanted between skull and dura mater above dorsal hippocampus on the contralateral hemisphere to the GRIN lens (left hemisphere; AP -2mm, ML -1.5mm), and a reference EEG wire was implanted between skull and dura on the right hemisphere overlying prefrontal cortex (AP + 1.75mm, ML -0.5mm). Cyanoacrylate and dental cement fixed the GRIN lens, anchor screw, and EEG wires in place. The telemetry probes were implanted during the second surgery rather than the first to minimize the time that the mice needed to live with the implant (because the mice sometimes reject the implant after long periods). During the third procedure, the mice were returned to implant the baseplate, as described above.
 
+### Subject
+
+
+Adult C57BL/6J wild-type mice from Jackson Laboratories were used in all experiments except for inhibitory tagging experiments (Extended Figures 5,6). In those experiments, Gad2-cre mice from Jackson Laboratories (or bred in-house from Jackson Laboratories) were used. Mice ordered from Jackson arrived group-housed in cages of 4 mice/cage and were singly housed for the experiment. For behavioral experiments where mice did not undergo surgery, mice were ordered to arrive at 12 weeks of age and underwent behavioral testing 1-2 weeks from then. For experiments where mice underwent surgery, mice were ordered to arrive at 8-9 weeks of age and underwent behavioral testing about 4-6 weeks after the arrival date. For experiments where mice underwent PSAM virus injections, mice were included in the experiment if there was expression of GFP+ cell bodies in both the dorsal and ventral hippocampus. All experimental procedures were approved by the Icahn School of Medicine at Mount Sinai’s IACUC.
+
+
 
 
 ## File structure
