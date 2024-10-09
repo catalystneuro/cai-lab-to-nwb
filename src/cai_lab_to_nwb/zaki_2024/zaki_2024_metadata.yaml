@@ -1,6 +1,6 @@
 NWBFile:
   related_publications:
-    https://doi.org/### or link to APA or MLA citation of the publication
+    - https://www.biorxiv.org/content/10.1101/2023.03.13.532469v2
   session_description:
     A rich text description of the experiment. Can also just be the abstract of the publication.
   institution: Icahn School of Medicine at Mount Sinai
@@ -10,5 +10,5 @@ NWBFile:
     - Zaki, Yosif
 Subject:
   species: Rattus norvegicus
-  age: TBD  # in ISO 8601, such as "P1W2D"
-  sex: TBD  # One of M, F, U, or O
+  age: P1W2D  # to ask
+  sex: U  # to ask
