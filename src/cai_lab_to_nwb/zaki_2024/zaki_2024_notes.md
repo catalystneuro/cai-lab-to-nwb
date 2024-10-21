@@ -776,6 +776,8 @@ This is the metadata file in the same directory that the minian videos:
 }
 ```
 
+Something concerning is that the 30FPS does not correspond to the videos. The metadata says 30 FPS but the videos are 60 FPS.
+
 And this is the one in the parent folder. Both are called `metaData.json`
 
 ```json
@@ -799,6 +801,38 @@ And this is the one in the parent folder. Both are called `metaData.json`
     "year": 2021
 }
 ```
+
+One big question is why the json in examples that we have in gin is different, the most important issue is that the session start time has its own key on the gin data but not here:
+
+```json
+{
+    "animalName": "",
+    "baseDirectory": "C:/mData/2021_10_07/C6-J588_Disc5/15_03_28",
+    "cameras": [
+        "BehavCam 2"
+    ],
+    "experimentName": "",
+    "miniscopes": [
+        "Miniscope"
+    ],
+    "nameExpMouse": "C6-J588_Disc5",
+    "recordingStartTime": {
+        "day": 7,
+        "hour": 15,
+        "minute": 3,
+        "month": 10,
+        "msec": 635,
+        "msecSinceEpoch": 1633644208635,
+        "second": 28,
+        "year": 2021
+    },
+    "researcherName": ""
+}
+```
+
+Find out why is this different.
+
+Also, 
 
 ## Cross Registration
 
