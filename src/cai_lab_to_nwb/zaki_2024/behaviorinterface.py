@@ -1,13 +1,17 @@
 """Primary class for converting experiment-specific behavior."""
 
 import numpy as np
+from pynwb import TimeSeries
+from pynwb.epoch import TimeIntervals
 from pynwb.file import NWBFile
 
 from neuroconv.basedatainterface import BaseDataInterface
 from neuroconv.utils import DeepDict
 from pydantic import FilePath
 from typing import Optional
-from pynwb.epoch import TimeIntervals
+
+from explore_segmentation_data import unit_ids
+
 
 class FreezingBehaviorInterface(BaseDataInterface):
     """Adds intervals of freezing behavior interface."""
@@ -32,6 +36,20 @@ class FreezingBehaviorInterface(BaseDataInterface):
         import pandas as pd
 
         freezing_behavior_df = pd.read_csv(self.file_path)
+
+        #Extract motion data
+        motion_data = freezing_behavior_df["Motion"].values
+
+        motion_series = TimeSeries(
+            name="MotionSeries",
+            description="ezTrack measures the motion of the animal by assessing the number of pixels of the behavioral "
+                        "video whose grayscale change exceeds a particular threshold from one frame to the next.",
+            data=motion_data,
+            unit="n.a",
+            starting_time=freezing_behavior_df["Frame"][0] / self.video_sampling_frequency,
+            rate=self.video_sampling_frequency,
+        )
+
 
         # Extract parameters, those values are unique per run
         file = freezing_behavior_df["File"].unique()[0]
@@ -67,9 +85,8 @@ class FreezingBehaviorInterface(BaseDataInterface):
 
         freeze_intervals = TimeIntervals(name="TimeIntervalsFreezingBehavior", description=description)
         for start_time, stop_time in zip(start_times, stop_times):
-            freeze_intervals.add_interval(start_time=start_time, stop_time=stop_time)
+            freeze_intervals.add_interval(start_time=start_time, stop_time=stop_time, timeseries=[motion_series])
 
-        
         if "behavior" not in nwbfile.processing:
             behavior_module = nwbfile.create_processing_module(
                 name="behavior", description="Contains behavior data"
@@ -77,4 +94,5 @@ class FreezingBehaviorInterface(BaseDataInterface):
         else:
             behavior_module = nwbfile.processing["behavior"]
 
+        behavior_module.add(motion_series)
         behavior_module.add(freeze_intervals)

@@ -885,3 +885,7 @@ https://youtu.be/BKgh-XcZhIM?t=731
 
 More about synch can be found in the video to align with behavior on this timestamp
 https://youtu.be/BKgh-XcZhIM?t=1338
+
+
+## Figures to reproduce in the example notebook:
+1) ![img.png](assets/motion_freezing_across_session.png)
