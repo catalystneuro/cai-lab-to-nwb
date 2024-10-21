@@ -56,8 +56,14 @@ class SleepBehaviorInterface(BaseDataInterface):
         )        
         
         sleep_intervals = TimeIntervals(name="SleepIntervals", description=description)
-        description = "Sleep State Classification, it can be one of the following: 'quiet wake', 'rem', 'sws', 'wake'"
-        sleep_intervals.add_column(name="sleep_state", description="")
+        column_description = """
+            Sleep State Classification, it can be one of the following: 
+            - 'quiet wake': The animal is awake and alert but at rest, without engaging in any voluntary movement or significant cognitive activity
+            - 'rem': Sleep stage characterized by Rapid Eye Movements (REM) beneath closed eyelids.
+            - 'sws':  Slow-Wave Sleep (SWS) is a stage of non-REM (NREM) sleep characterized by slow, high-amplitude brain waves
+            - 'wake': State of full consciousness when the animal is alert, responsive to the environment, and capable of voluntary movement
+        """
+        sleep_intervals.add_column(name="sleep_state", description=column_description)
         
         for start_time, stop_time, state in zip(start_times, stop_times, slep_state):
             sleep_intervals.add_interval(start_time=start_time, stop_time=stop_time, sleep_state=state)
