@@ -14,10 +14,6 @@ https://med-associates.com/product-category/software-all/software-software/
 
 ## Questions and To-do:
 * Why sometimes the exposure has more than one attempt? Can you describe more about this?
-* Inside the behavior tracking in the raw data for offline data there is a pose.csv, what is it? I see a lot of references to deep lab cut, was that attempted?  (Yes, v4 of miniscope has that possibility but they are not using it. Ignore it)
-* What are the pickle files in the EDF folder? (they can be ignored)
-* How comes that pyedflib is not able to read the EDF files? (this is probably the proprietary format that they used)
-* What is `headOrientation.csv` inside a miniscope folder? (this is another feature of miniscope that they are not using in Zaki conversion. Maybe it would be good to get data with this features for future conversions)
 * Where is the information of the context? that is, they say that they distinguish them by oddor and other features of the context, where is this.
 * In the Miniscope data, there are folders with `failed_to_fix` and `bad_frames`. Can you tell me more about those things?
 * What are the raw files like `Ca_EEG2-1_Recall3.raw`?
@@ -25,11 +21,13 @@ https://med-associates.com/product-category/software-all/software-software/
 * According to Alessandra notes, the behavior videos are synch to the miniscope data. I remember a pulse, can you confirm this? Basically, how to synch the miniscope data with the video? Usually they are part of the same system in miniscope, was it the case here?  
 * What happens in day two? Are offline days 1 and 2 (which is actually three) different?
 * Is the freezing output on the segmentation folder the same that the one in the corresponding imaging folder? It seems that they are for some files, confirm this.
-* The aligned sleep data has a column called frame but the corresponding ophys data is many videos? Again, how are they aligned? is the frame aggregated? In this case they are aligned to an idealized clock.
+* For the sleep data, the labels in the paper are : NREM, REM, WAKE (Extended Figure 9 F) but in the data we only found labels: 
+        `sleep_states = ['quiet wake', 'rem', 'sws', 'wake']`
+
+Relationship?
 
 What version of miniscope they used? do they know how it changes the configuration, the data? THEY ARE USING V4.
 
-DAQ:
 
 
 
@@ -75,6 +73,12 @@ A description of what I believe is the experiments we are converting the data fo
 This is the surgery performed on the experiments that we are converting the data for:
 
 > For calcium imaging experiments with EEG/EMG implants, mice underwent three serial procedures spaced ~two weeks apart. During the first surgery, mice had 300nL of AAV1-Syn-GCaMP6f injected into dorsal CA1 as described above, but had the incision sutured after the surgery. Two weeks later during a second surgery, mice had their overlying cortex aspirated and a GRIN lens implanted above the injection site, as above. During this surgery, a wireless telemetry probe (HD-X02, Data Science International) was also implanted with EEG and EMG wires. Two EMG wires were implanted into the left trapezius muscle. One EEG wire was implanted between skull and dura mater above dorsal hippocampus on the contralateral hemisphere to the GRIN lens (left hemisphere; AP -2mm, ML -1.5mm), and a reference EEG wire was implanted between skull and dura on the right hemisphere overlying prefrontal cortex (AP + 1.75mm, ML -0.5mm). Cyanoacrylate and dental cement fixed the GRIN lens, anchor screw, and EEG wires in place. The telemetry probes were implanted during the second surgery rather than the first to minimize the time that the mice needed to live with the implant (because the mice sometimes reject the implant after long periods). During the third procedure, the mice were returned to implant the baseplate, as described above.
+
+### Subject
+
+
+Adult C57BL/6J wild-type mice from Jackson Laboratories were used in all experiments except for inhibitory tagging experiments (Extended Figures 5,6). In those experiments, Gad2-cre mice from Jackson Laboratories (or bred in-house from Jackson Laboratories) were used. Mice ordered from Jackson arrived group-housed in cages of 4 mice/cage and were singly housed for the experiment. For behavioral experiments where mice did not undergo surgery, mice were ordered to arrive at 12 weeks of age and underwent behavioral testing 1-2 weeks from then. For experiments where mice underwent surgery, mice were ordered to arrive at 8-9 weeks of age and underwent behavioral testing about 4-6 weeks after the arrival date. For experiments where mice underwent PSAM virus injections, mice were included in the experiment if there was expression of GFP+ cell bodies in both the dorsal and ventral hippocampus. All experimental procedures were approved by the Icahn School of Medicine at Mount Sinai’s IACUC.
+
 
 
 
@@ -580,10 +584,18 @@ These files are full day recordings. Their filename contains a timestamps with a
     └── summary_files
 
 ```
-## EEG and MEG
+## EDF (EEG and MEG)
 
 The EDF format specification:
 https://doi.org/10.1016/S1388-2457(03)00123-8
+
+The pickle files related to the edf data can be ignored.
+
+* How comes that pyedflib is not able to read the EDF files? The EDFs are produce with the HD-X02 device and is unclear to the authors.
+
+
+### Device:
+HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/docs/default-source/implantable-telemetry/hd-x02_s02.pdf)
 
 
 ### Exploration with MNE
@@ -713,8 +725,6 @@ info["chs"]
 ```
 
 
-### Device:
-HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/docs/default-source/implantable-telemetry/hd-x02_s02.pdf)
 
 
 ## Miniscope
@@ -744,6 +754,10 @@ Other changes
 
 AMU: Inertia Motion 
 
+
+`pose.csv` files are related to deep lab cut estimation of the pose of the animal. This is a feature on the latest version of minian that is currently not used in this conversion.
+
+* What is `headOrientation.csv` inside a miniscope folder? this is another feature of miniscope that they are not using in Zaki conversion. 
 
 
 This is the metadata file in the same directory that the minian videos:
@@ -857,8 +871,10 @@ The data looks like this:
 The possible sleep states are:
 * wake
 * quite wake
-* sws
+* sws (slow wave sleep)
+* rem
 
+* The aligned sleep data has a column called frame but the corresponding ophys data is many videos? Again, how are they aligned? is the frame aggregated? In this case they are aligned to an idealized clock. They interpolated from the video timestamps that used the perfect sampling rate. Check this with the authors when we are working with synchronization.
 
 
 ## Some synch information
