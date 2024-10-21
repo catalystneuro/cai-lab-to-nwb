@@ -3,10 +3,10 @@
 from pynwb.file import NWBFile
 
 from neuroconv.basedatainterface import BaseDataInterface
-from neuroconv.datainterfaces import VideoInterface
 from neuroconv.utils import DeepDict
 from pydantic import FilePath
 from typing import Optional
+from pynwb.epoch import TimeIntervals
 
 
 class SleepBehaviorInterface(BaseDataInterface):
@@ -34,28 +34,38 @@ class SleepBehaviorInterface(BaseDataInterface):
 
         sleep_behavior_df = pd.read_csv(self.file_path)
 
-        sleep_frames = sleep_behavior_df["Frame"].values
-        timestamps = sleep_frames / self.video_sampling_frequency
+        import numpy as np
 
-        sleep_states = ['quiet wake', 'rem', 'sws', 'wake']
-        # correspondin positionally to the sleep states
-        labels = ["Quiet wake", "REM", "Slow Wave Sleep", "Wake"]
-        state_to_index = {state: i for i, state in enumerate(sleep_states)}
+        # Note this will have the first row as None
+        shifted_sleep_state = sleep_behavior_df['SleepState'].shift()
+        start_indices = np.where(sleep_behavior_df['SleepState'] != shifted_sleep_state)[0]
+        stop_indices = [i - 1 for i in start_indices[1:]]
+        stop_indices.append(len(sleep_behavior_df) - 1)
+        stop_indices = np.array(stop_indices)
 
-        data = [state_to_index[sleep_state] for sleep_state in sleep_behavior_df.SleepState]
+        start_frames = sleep_behavior_df['Frame'][start_indices].values
+        start_times = start_frames / self.video_sampling_frequency
+        stop_frames = sleep_behavior_df['Frame'][stop_indices].values
+        stop_times = stop_frames / self.video_sampling_frequency
+        slep_state = sleep_behavior_df['SleepState'][start_indices].values
 
 
         description = (
             "Sleep states classified with custom algorithm using the data "
             "from the HD-X02 sensor (EEG, EMG, temperature, etc.)."
-        )
+        )        
         
-        labeled_events = LabeledEvents(name="SleepEvents", description=description, labels=labels, data=data, timestamps=timestamps)
+        sleep_intervals = TimeIntervals(name="SleepIntervals", description=description)
+        description = "Sleep State Classification, it can be one of the following: 'quiet wake', 'rem', 'sws', 'wake'"
+        sleep_intervals.add_column(name="sleep_state", description="")
+        
+        for start_time, stop_time, state in zip(start_times, stop_times, slep_state):
+            sleep_intervals.add_interval(start_time=start_time, stop_time=stop_time, sleep_state=state)
 
         if "sleep" not in nwbfile.processing:
             sleep_module = nwbfile.create_processing_module(name="sleep", description="Sleep data")
         else:
             sleep_module = nwbfile.processing["sleep"]
         
-        sleep_module.add(labeled_events)
+        sleep_module.add(sleep_intervals)
 
