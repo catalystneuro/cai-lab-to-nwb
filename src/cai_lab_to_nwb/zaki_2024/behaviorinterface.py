@@ -10,9 +10,6 @@ from neuroconv.utils import DeepDict
 from pydantic import FilePath
 from typing import Optional
 
-from explore_segmentation_data import unit_ids
-
-
 class FreezingBehaviorInterface(BaseDataInterface):
     """Adds intervals of freezing behavior interface."""
 
