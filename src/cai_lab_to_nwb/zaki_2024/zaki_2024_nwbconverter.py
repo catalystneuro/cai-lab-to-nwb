@@ -1,10 +1,7 @@
 """Primary NWBConverter class for this dataset."""
 from neuroconv import NWBConverter
-from neuroconv.datainterfaces import (
-    MinianSegmentationInterface,
-)
-
-
+# from neuroconv.datainterfaces import MinianSegmentationInterface
+from minian_segmentation_interface import MinianSegmentationInterface
 
 class Zaki2024NWBConverter(NWBConverter):
     """Primary conversion class for my extracellular electrophysiology dataset."""
