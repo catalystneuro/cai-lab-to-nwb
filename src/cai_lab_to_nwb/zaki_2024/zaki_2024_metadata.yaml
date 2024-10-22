@@ -1,4 +1,15 @@
 NWBFile:
+  keywords:
+    - hippocampus
+    - memory integration
+    - memory-linking
+    - ensemble
+    - reactivation
+    - co-firing
+    - offline periods
+    - sleep
+    - stress
+    - PTSD
   related_publications:
     - https://www.biorxiv.org/content/10.1101/2023.03.13.532469v2
   session_description:
@@ -7,8 +18,24 @@ NWBFile:
   lab: Cai
   experimenter:
     - Cai, Denise
+    - Morales-Rodriguez, Denisse
+    - Bacon, Madeline E.
+    - Ko, BumJin
+    - Francisco, Taylor R.
+    - LaBanca, Alexa R.
+    - Sompolpong, Patlapa
+    - Dong, Zhe
+    - Lamsifer, Sophia
+    - Chen, Hung-Tu
+    - Carrillo Segura, Simón
+    - Christenson Wick, Zoé
+    - Silva, Alcino J.
+    - Rajan, Kanaka
+    - van der Meer, Matthijs
+    - Fenton, André
+    - Shuman, Tristan
     - Zaki, Yosif
 Subject:
-  species: Rattus norvegicus
-  age: P1W2D  # to ask
-  sex: U  # to ask
+  species: Mus musculus
+  age: TBD  # in ISO 8601, such as "P1W2D"
+  sex: TBD  # One of M, F, U, or O

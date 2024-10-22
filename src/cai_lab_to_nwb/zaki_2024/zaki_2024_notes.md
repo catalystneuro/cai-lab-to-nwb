@@ -1,23 +1,35 @@
 # Notes concerning the Zaki 2024 conversion
 
+
+
+
 ## General Information
 The lab page
 https://www.denisecailab.com/
 
+Med associated (a software that they used):
 
+https://med-associates.com/product-category/software-all/software-software/
 
 
 ## Questions and To-do:
-* Why sometimes the exposure has more than one attempt?
-* Inside the behavior tracking in the raw data for offline data there is a pose.csv, what is it?
-* What are the pickle files in the EDF folder?
-* How comes that pyedflib is not able to read the EDF files?
-* Get a description of the HDX-02 channels: `['Activity', 'BattVolt', 'EEG', 'EMG', 'OnTime', 'SignalStr', 'Temp']`
-* Where is EZ track data?
-* What is `headOrientation.csv` inside a miniscope folder?
+* Why sometimes the exposure has more than one attempt? Can you describe more about this?
 * Where is the information of the context? that is, they say that they distinguish them by oddor and other features of the context, where is this.
-* Behavior tracking data for offline days, it says deep cut live but data is empty. What is it?
-* In the raw imaging data there is failed to fix and bad frames, what to do with them?
+* In the Miniscope data, there are folders with `failed_to_fix` and `bad_frames`. Can you tell me more about those things?
+* What are the raw files like `Ca_EEG2-1_Recall3.raw`?
+* How to synch the edf with the video (the freeze data is synch to the video)
+* According to Alessandra notes, the behavior videos are synch to the miniscope data. I remember a pulse, can you confirm this? Basically, how to synch the miniscope data with the video? Usually they are part of the same system in miniscope, was it the case here?  
+* What happens in day two? Are offline days 1 and 2 (which is actually three) different?
+* Is the freezing output on the segmentation folder the same that the one in the corresponding imaging folder? It seems that they are for some files, confirm this.
+* For the sleep data, the labels in the paper are : NREM, REM, WAKE (Extended Figure 9 F) but in the data we only found labels: 
+        `sleep_states = ['quiet wake', 'rem', 'sws', 'wake']`
+
+Relationship?
+
+What version of miniscope they used? do they know how it changes the configuration, the data? THEY ARE USING V4.
+
+
+
 
 ## Experiment Protocol
 
@@ -54,6 +66,18 @@ What data is available per protocol day:
 A description of what I believe is the experiments we are converting the data for is given in the methods section of the paper:
 
 > For calcium imaging experiments with simultaneous EEG and EMG recordings, mice lived in a custom-made homecage where offline recordings could take place. These homecages (Maze Engineers) were custom designed to accommodate mice wearing a Miniscope chronically for the duration of the experiment (about 2 weeks total). The water spout and food hopper were side-mounted and there was a slit along the top of the homecage so that the Miniscope coaxial cable could freely move. This homecage was placed on top of a receiver that would wirelessly receive EEG, EMG, temperature, and locomotion telemetry data continuously throughout the experiment (HD-X02, Data Science International). Mice had a Miniscope attached on the first day and allowed to wear it for an hour in their homecage to acclimate to its weight, after which it was removed. On the second day, the Miniscope was attached and remained on for the duration of the experiment, for a total of 2 weeks. The Miniscope was connected to a lightweight coaxial cable (Cooner Wire) which connected to a low-torque passive commutator (Neurotek) to allow the mice to freely move around the homecage with minimal rotational force. After exposure to the neutral context during encoding, mice were immediately returned to their homecage in the vivarium and the first calcium imaging recording began. The Miniscope DAQ was connected to an Arduino with a schedule set up to send a 10-minute long TTL pulse to record for 10 minutes, with a 20-minute break in between, repeated 24 times. Thus, we sampled 4 hours worth of calcium imaging data across 12 hours. The telemetry probe recorded continuously for the duration of the experiment while the mouse was in its homecage in the vivarium.
+
+
+### Surgery 
+
+This is the surgery performed on the experiments that we are converting the data for:
+
+> For calcium imaging experiments with EEG/EMG implants, mice underwent three serial procedures spaced ~two weeks apart. During the first surgery, mice had 300nL of AAV1-Syn-GCaMP6f injected into dorsal CA1 as described above, but had the incision sutured after the surgery. Two weeks later during a second surgery, mice had their overlying cortex aspirated and a GRIN lens implanted above the injection site, as above. During this surgery, a wireless telemetry probe (HD-X02, Data Science International) was also implanted with EEG and EMG wires. Two EMG wires were implanted into the left trapezius muscle. One EEG wire was implanted between skull and dura mater above dorsal hippocampus on the contralateral hemisphere to the GRIN lens (left hemisphere; AP -2mm, ML -1.5mm), and a reference EEG wire was implanted between skull and dura on the right hemisphere overlying prefrontal cortex (AP + 1.75mm, ML -0.5mm). Cyanoacrylate and dental cement fixed the GRIN lens, anchor screw, and EEG wires in place. The telemetry probes were implanted during the second surgery rather than the first to minimize the time that the mice needed to live with the implant (because the mice sometimes reject the implant after long periods). During the third procedure, the mice were returned to implant the baseplate, as described above.
+
+### Subject
+
+
+Adult C57BL/6J wild-type mice from Jackson Laboratories were used in all experiments except for inhibitory tagging experiments (Extended Figures 5,6). In those experiments, Gad2-cre mice from Jackson Laboratories (or bred in-house from Jackson Laboratories) were used. Mice ordered from Jackson arrived group-housed in cages of 4 mice/cage and were singly housed for the experiment. For behavioral experiments where mice did not undergo surgery, mice were ordered to arrive at 12 weeks of age and underwent behavioral testing 1-2 weeks from then. For experiments where mice underwent surgery, mice were ordered to arrive at 8-9 weeks of age and underwent behavioral testing about 4-6 weeks after the arrival date. For experiments where mice underwent PSAM virus injections, mice were included in the experiment if there was expression of GFP+ cell bodies in both the dorsal and ventral hippocampus. All experimental procedures were approved by the Icahn School of Medicine at Mount Sinai’s IACUC.
 
 
 
@@ -560,10 +584,18 @@ These files are full day recordings. Their filename contains a timestamps with a
     └── summary_files
 
 ```
-## EEG and MEG
+## EDF (EEG and MEG)
 
 The EDF format specification:
 https://doi.org/10.1016/S1388-2457(03)00123-8
+
+The pickle files related to the edf data can be ignored.
+
+* How comes that pyedflib is not able to read the EDF files? The EDFs are produce with the HD-X02 device and is unclear to the authors.
+
+
+### Device:
+HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/docs/default-source/implantable-telemetry/hd-x02_s02.pdf)
 
 
 ### Exploration with MNE
@@ -581,6 +613,20 @@ raw.info["ch_names"]
 ['Activity', 'BattVolt', 'EEG', 'EMG', 'OnTime', 'SignalStr', 'Temp']
 
 ```
+
+Here is a description of the channel after the discussion with Joe Zaki on 2024-10-20:
+
+* OnTime: not used, should ignore.
+* BaTTVolt: Battery voltage of the transmitter.
+* SignalStr: How strong the signal of the wirless transmission is, this can be used for quality control as well as to know when the animals are taken out of the cage.
+* Activity: It usees the motion of the probe relative to the receiver to creater a sudo locomotion. They don't use in the experiment but seems useful to have.
+
+A visual representation of the setup can be found here:
+https://www.datasci.com/telemetry
+
+
+#### Data Extraction
+The paper mentions two wires for the EEG and MEG but that's because one is the reference.
 
 To extract the data the following methods are available:
 
@@ -679,12 +725,80 @@ info["chs"]
 ```
 
 
-### Device:
-HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/docs/default-source/implantable-telemetry/hd-x02_s02.pdf)
 
-### Surgery 
-> For calcium imaging experiments with EEG/EMG implants, mice underwent three serial procedures spaced ~two weeks apart. During the first surgery, mice had 300nL of AAV1-Syn-GCaMP6f injected into dorsal CA1 as described above, but had the incision sutured after the surgery. Two weeks later during a second surgery, mice had their overlying cortex aspirated and a GRIN lens implanted above the injection site, as above. During this surgery, a wireless telemetry probe (HD-X02, Data Science International) was also implanted with EEG and EMG wires. Two EMG wires were implanted into the left trapezius muscle. One EEG wire was implanted between skull and dura mater above dorsal hippocampus on the contralateral hemisphere to the GRIN lens (left hemisphere; AP -2mm, ML -1.5mm), and a reference EEG wire was implanted between skull and dura on the right hemisphere overlying prefrontal cortex (AP + 1.75mm, ML -0.5mm). Cyanoacrylate and dental cement fixed the GRIN lens, anchor screw, and EEG wires in place. The telemetry probes were implanted during the second surgery rather than the first to minimize the time that the mice needed to live with the implant (because the mice sometimes reject the implant after long periods). During the third procedure, the mice were returned to implant the baseplate, as described above.
 
+## Miniscope
+
+Talks about the topic:
+https://sites.google.com/metacell.us/miniscope-workshop-2021
+
+Usual DAQ software for Miniscope is GPIOx3.
+
+The expected structure of the file according to the Miniscope wiki is described here:
+
+http://miniscope.org/index.php/Data_Acquisition_Software
+
+But that does not match the structure of the files discussed above.
+
+Also, check out here:
+https://github.com/catalystneuro/roiextractors/issues/356
+
+**The difference in folder organization is a version number**
+
+V4 just enumerates them in the same folder.
+This is because this is more general to add arbitrary behavioral cameras (you don't need the behavior)
+
+Right 
+
+Other changes
+
+AMU: Inertia Motion 
+
+
+`pose.csv` files are related to deep lab cut estimation of the pose of the animal. This is a feature on the latest version of minian that is currently not used in this conversion.
+
+* What is `headOrientation.csv` inside a miniscope folder? this is another feature of miniscope that they are not using in Zaki conversion. 
+
+
+This is the metadata file in the same directory that the minian videos:
+```json
+{
+    "compression": "FFV1",
+    "deviceDirectory": "C:/Users/CaiLab/Documents//Joe/Ca_EEG2/Ca_EEG2-1/2021_10_14/10_11_24/Miniscope",
+    "deviceID": 0,
+    "deviceName": "Miniscope",
+    "deviceType": "Miniscope_V4_BNO",
+    "ewl": 70,
+    "frameRate": "30FPS",
+    "framesPerFile": 1000,
+    "gain": 3.5,
+    "led0": 12
+}
+```
+
+And this is the one in the parent folder. Both are called `metaData.json`
+
+```json
+{
+    "animalName": "Ca_EEG2-1",
+    "baseDirectory": "C:/Users/CaiLab/Documents//Joe/Ca_EEG2/Ca_EEG2-1/2021_10_14/10_11_24",
+    "cameras": [
+    ],
+    "day": 14,
+    "experimentName": "Ca_EEG2",
+    "hour": 10,
+    "miniscopes": [
+        "Miniscope"
+    ],
+    "minute": 11,
+    "month": 10,
+    "msec": 779,
+    "msecSinceEpoch": 1634220684779,
+    "researcherName": "Joe",
+    "second": 24,
+    "year": 2021
+}
+```
 
 ## Cross Registration
 
@@ -692,7 +806,7 @@ HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/
 > Cells recorded across sessions within a mouse were cross-registered using a previously published open-source cross-registration algorithm, CellReg, using the spatial correlations of nearby cells to determine whether highly correlated footprints close in space are likely to be the same cell across sessions. For calcium imaging experiments with EEG/EMG, each offline recording was cross-registered with all the encoding and recall sessions, but not with the other offline sessions because cross-registering between all sessions would lead to too many conflicts and thus, to no cells cross-registered across all sessions.
 
 
-### Segmentation
+## Segmentation
 
 Paper:
 https://elifesciences.org/articles/70661
@@ -702,3 +816,76 @@ https://github.com/denisecailab/minian
 
 Read the docs:
 https://minian.readthedocs.io/en/stable/
+
+## Freezing Behavior and Video
+
+This data was extracted from the the ezTrack package:
+This is how the data looks like:
+
+![freeze_data](./assets/freeze_data_frame.png)
+
+MotionCutoff, FreezeThreshd, MinFreezeDuration are the same for the whole dataframe. The seem to be the parameters of the algorithm.
+
+Freeze Threshold: 
+MotionCuttoff: minimal pixel change so "it is moving" 
+FreezeThreshold: the motion across some frames has to be
+MinFreezeDuration: 
+
+
+Description of the columns:
+* Frame: Of the video
+* Motion: This s a float, an int? what it indicates? Aggregated pixel change from frame to frame as a measure of the motion. Higher means more change so more motion. 
+* Freezing: This is a boolean, 100 is freezing, 0 is not not
+
+According to Alessandra notes the behavioral videos are synch to the miniscope data. 
+We have some tracking in other experiments. They don't have behavior tracking. 
+
+
+
+###  ezTrack
+
+The webpage:
+https://github.com/denisecailab/ezTrack
+
+This package is used for two things:
+1) Track the position of the animal in the open field. A detailed walkthrough of the capabilities can be found here:
+
+https://youtu.be/BKgh-XcZhIM?t=1905
+
+2) The freezing behavior analysis that is done for this specific conversion.
+
+## Sleep
+
+The data looks like this:
+
+| Index | Frame | SleepState |
+|-------|-------|------------|
+|     0 |     0 | wake       |
+|     1 |     1 | wake       |
+|     2 |     2 | wake       |
+|     3 |     3 | wake       |
+|     4 |     4 | wake       |
+|     5 |     5 | wake       |
+
+
+The possible sleep states are:
+* wake
+* quite wake
+* sws (slow wave sleep)
+* rem
+
+* The aligned sleep data has a column called frame but the corresponding ophys data is many videos? Again, how are they aligned? is the frame aggregated? In this case they are aligned to an idealized clock. They interpolated from the video timestamps that used the perfect sampling rate. Check this with the authors when we are working with synchronization.
+
+
+## Some synch information
+How does the miniscope system synchs, here in this video are some notes:
+
+https://youtu.be/BKgh-XcZhIM?t=731
+
+
+More about synch can be found in the video to align with behavior on this timestamp
+https://youtu.be/BKgh-XcZhIM?t=1338
+
+
+## Figures to reproduce in the example notebook:
+1) ![img.png](assets/motion_freezing_across_session.png)
