@@ -201,7 +201,13 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         self.session_folder = self.miniscope_folder.parent  
 
         self._miniscope_config = read_miniscope_config(folder_path=self.miniscope_folder)
-
+        
+        # use the frame rate of the json configuration to set the metadata
+        frame_rate_string = self._miniscope_config["frameRate"]
+        # frame_rate_string look like "30.0FPS", extract the float part
+        self._metadata_frame_rate = float(frame_rate_string.split("FPS")[0])
+        
+        
         self.photon_series_type = "OnePhotonSeries"
 
     def _get_session_start_time(self):
@@ -244,7 +250,7 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         imaging_plane_metadata = metadata["Ophys"]["ImagingPlane"][0]
         imaging_plane_metadata.update(
             device=device_name,
-            imaging_rate=self.imaging_extractor.get_sampling_frequency(),
+            imaging_rate=self._metadata_frame_rate,
         )
         one_photon_series_metadata = metadata["Ophys"]["OnePhotonSeries"][0]
         one_photon_series_metadata.update(unit="px")
