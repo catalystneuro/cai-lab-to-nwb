@@ -25,14 +25,13 @@ from neuroconv.utils import DeepDict, dict_deep_update
 class MiniscopeImagingExtractor(MultiImagingExtractor):
 
     def __init__(self, folder_path: DirectoryPath):
-        self.folder_path = Path(folder_path)
+        
+        self.miniscope_videos_folder_path =  Path(folder_path)
+        assert self.miniscope_videos_folder_path.exists(), f"Miniscope videos folder not found in {Path(folder_path)}"
 
-        miniscope_videos_folder_path = self.folder_path / "Miniscope"
-        assert miniscope_videos_folder_path.exists(), f"Miniscope videos folder not found in {self.folder_path}"
-
-        self._miniscope_avi_file_paths = [p for p in miniscope_videos_folder_path.iterdir() if p.suffix == ".avi"]
+        self._miniscope_avi_file_paths = [p for p in self.miniscope_videos_folder_path.iterdir() if p.suffix == ".avi"]
+        assert len(self._miniscope_avi_file_paths) > 0, f"No .avi files found in {self.miniscope_videos_folder_path}"
         import natsort
-
         self._miniscope_avi_file_paths = natsort.natsorted(self._miniscope_avi_file_paths)
 
         imaging_extractors = []
@@ -178,7 +177,7 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         source_schema = super().get_source_schema()
         source_schema["properties"]["folder_path"][
             "description"
-        ] = "The main Miniscope folder. The microscope movie files are expected to be in sub folders within the main folder."
+        ] = "The folder where the Miniscope videos are contained"
 
         return source_schema
 
@@ -190,23 +189,25 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         Parameters
         ----------
         folder_path : DirectoryPath
-            The main Miniscope folder.
-            The microscope movie files are expected to be in sub folders within the main folder.
+            The folder where the Miniscope videos are contained. The video files are expected to be in folder_path
+
         """
         from ndx_miniscope.utils import get_recording_start_times, read_miniscope_config
 
         super().__init__(folder_path=folder_path)
+        
+        self.miniscope_folder = Path(folder_path)        
+        # This contains the general metadata and might contain behavioral videos
+        self.session_folder = self.miniscope_folder.parent  
 
-        self.folder_path = Path(folder_path)
-        miniscope_folder = Path(folder_path) / "Miniscope"
-        self._miniscope_config = read_miniscope_config(folder_path=miniscope_folder)
+        self._miniscope_config = read_miniscope_config(folder_path=self.miniscope_folder)
 
         self.photon_series_type = "OnePhotonSeries"
 
     def _get_session_start_time(self):
 
-        general_metadata_json = self.folder_path / "metaData.json"
-        assert general_metadata_json.exists(), f"General metadata json not found in {self.folder_path}"
+        general_metadata_json = self.session_folder/ "metaData.json"
+        assert general_metadata_json.exists(), f"General metadata json not found in {self.session_folder}"
 
         ## Read metadata
         with open(general_metadata_json) as f:
@@ -257,8 +258,8 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
 
     def get_original_timestamps(self) -> np.ndarray:
 
-        timestamps_file_path = self.folder_path / "Miniscope" / "timeStamps.csv"
-        assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {self.folder_path}"
+        timestamps_file_path = self.miniscope_folder / "timeStamps.csv"
+        assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {self.miniscope_folder}"
         
         import pandas as pd 
         
