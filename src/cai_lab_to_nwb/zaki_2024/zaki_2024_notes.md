@@ -817,6 +817,75 @@ https://github.com/denisecailab/minian
 Read the docs:
 https://minian.readthedocs.io/en/stable/
 
+Supported output format: Zarr (for now)
+Similarly to Caiman uses CNMF to perform cell identification.
+
+Output structure (example):
+
+    minian/
+     ├── A.zarr 
+     │   ├── A (851, 608, 608) float64
+     │   ├── animal () <U7
+     │   ├── height (608,) int64
+     │   ├── session_id () <U9
+     │   ├── unit_id (851,) int64
+     │   └── width (608,) int64
+     ├── C.zarr
+     │   ├── C (851, 8931) float64
+     │   ├── animal () <U7
+     │   ├── frame (8931,) int64
+     │   ├── session () <U14
+     │   └── session_id () <U9
+     │   └── unit_id (851,) int64
+     ├── b.zarr
+     │   ├── animal () <U7
+     │   ├── b (608, 608) float64
+     │   ├── height (608,) int64
+     │   ├── session () <U14
+     │   ├── session_id () <U9
+     │   ├── unit_id () int64
+     │   └── width (608,) int64
+     ├── b0.zarr
+     │   ├── animal () <U7
+     │   ├── b0 (851, 8931) float64
+     │   ├── frame (8931,) int64
+     │   ├── session () <U14
+     │   ├── session_id () <U9
+     │   └── unit_id (851,) int64
+     ├── c0.zarr
+     │   ├── animal () <U7
+     │   ├── c0 (851, 8931) float64
+     │   ├── frame (8931,) int64
+     │   └── session () <U14
+     ├── f.zarr
+     │   ├── animal () <U7
+     │   ├── f (8931,) float64
+     │   └── frame (8931,) int64
+     ├── S.zarr
+     │   ├── S (851, 8931) float64
+     │   ├── animal () <U7
+     │   ├── frame (8931,) int64
+     │   ├── session () <U14
+     │   └── session_id () <U9
+     │   └── unit_id (851,) int64
+     ├── max_proj.zarr
+     │   ├── animal () <U7
+     │   ├── max_proj (608, 608) float64
+     │   ├── height (608,) int64
+     │   ├── session () <U14
+     │   ├── session_id () <U9
+     │   └── width (608,) int64
+
+- A: Spatial footprints of cells. Should have dimensions (“unit_id”, “height”, “width”). --> `image_masks`
+- C: Temporal components of cells. Should have dimensions “frame” and “unit_id”. --> `roi_response_denoised`
+- b: Spatial footprint of background. Should have dimensions (“height”, “width”). --> `background_image_masks`
+- f: Temporal dynamic of background. Should have dimension “frame”. --> `roi_response_neuropil`
+- b0: Baseline fluorescence for each cell. Should have dimensions (“frame”, “unit_id”) and same shape as C --> `roi_response_baseline`
+- c0: Initial calcium decay, in theory triggered by calcium events happened before the recording starts. Should have dimensions (“frame”, “unit_id”) and same shape as C
+- S: Deconvolved spikes for each cell. Should have dimensions (“frame”, “unit_id”) and same shape as C  --> `roi_response_deconvolved`
+- max_proj: the maximum projection --> `summary_image`
+
+
 ## Freezing Behavior and Video
 
 This data was extracted from the the ezTrack package:
@@ -889,3 +958,4 @@ https://youtu.be/BKgh-XcZhIM?t=1338
 
 ## Figures to reproduce in the example notebook:
 1) ![img.png](assets/motion_freezing_across_session.png)
+2) ![img.png](assets/spatial_temporal_comp_segmentation.png)
