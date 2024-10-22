@@ -1,3 +1,4 @@
 from .implant_interface import ImplantInterface
 from .behaviorinterface import FreezingBehaviorInterface
 from .sleepinterface import SleepBehaviorInterface
+from .minian_segmentation_interface import MinianSegmentationInterface
