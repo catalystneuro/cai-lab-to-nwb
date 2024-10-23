@@ -1,8 +1,15 @@
 """Primary NWBConverter class for this dataset."""
+
 from neuroconv import NWBConverter
+
 # from neuroconv.datainterfaces import MinianSegmentationInterface
-from .interfaces import (MinianSegmentationInterface, Zaki2024EDFInterface, EzTrackFreezingBehaviorInterface,
-                         Zaki2024SleepClassificationInterface, MiniscopeImagingInterface)
+from .interfaces import (
+    MinianSegmentationInterface,
+    Zaki2024EDFInterface,
+    EzTrackFreezingBehaviorInterface,
+    Zaki2024SleepClassificationInterface,
+    MiniscopeImagingInterface,
+)
 
 
 class Zaki2024NWBConverter(NWBConverter):

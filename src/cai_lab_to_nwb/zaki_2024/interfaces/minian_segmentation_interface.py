@@ -21,6 +21,7 @@ from typing import Optional
 
 from pynwb import NWBFile
 
+
 class MinianSegmentationExtractor(SegmentationExtractor):
     """A SegmentationExtractor for Minian.
 
@@ -207,6 +208,7 @@ class MinianSegmentationExtractor(SegmentationExtractor):
             maximum_projection=self._image_maximum_projection,
         )
 
+
 class MinianSegmentationInterface(BaseSegmentationExtractorInterface):
     """Data interface for MinianSegmentationExtractor."""
 
@@ -259,6 +261,3 @@ class MinianSegmentationInterface(BaseSegmentationExtractorInterface):
             plane_segmentation_name=plane_segmentation_name,
             iterator_options=iterator_options,
         )
-
-
-
