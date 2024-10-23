@@ -206,7 +206,6 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         self.photon_series_type = "OnePhotonSeries"
 
     def _get_session_start_time(self):
-
         general_metadata_json = self.session_folder / "metaData.json"
         assert general_metadata_json.exists(), f"General metadata json not found in {self.session_folder}"
 
@@ -215,13 +214,13 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
             general_metadata = json.load(f)
 
         session_start_time = datetime.datetime(
-            year=general_metadata["year"],
-            month=general_metadata["month"],
-            day=general_metadata["day"],
-            hour=general_metadata["hour"],
-            minute=general_metadata["minute"],
-            second=general_metadata["second"],
-            microsecond=general_metadata["msec"] * 1000,  # Convert milliseconds to microseconds
+            year=general_metadata["recordingStartTime"]["year"],
+            month=general_metadata["recordingStartTime"]["month"],
+            day=general_metadata["recordingStartTime"]["day"],
+            hour=general_metadata["recordingStartTime"]["hour"],
+            minute=general_metadata["recordingStartTime"]["minute"],
+            second=general_metadata["recordingStartTime"]["second"],
+            microsecond=general_metadata["recordingStartTime"]["msec"] * 1000,  # Convert milliseconds to microseconds
         )
 
         return session_start_time
