@@ -2,7 +2,8 @@
 
 from neuroconv import NWBConverter
 
-# from neuroconv.datainterfaces import MinianSegmentationInterface
+from neuroconv.datainterfaces import VideoInterface
+
 from .interfaces import (
     MinianSegmentationInterface,
     Zaki2024EDFInterface,
@@ -21,4 +22,5 @@ class Zaki2024NWBConverter(NWBConverter):
         SleepClassification=Zaki2024SleepClassificationInterface,
         EDFSignals=Zaki2024EDFInterface,
         FreezingBehavior=EzTrackFreezingBehaviorInterface,
+        Video=VideoInterface,
     )
