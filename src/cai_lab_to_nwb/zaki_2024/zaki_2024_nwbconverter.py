@@ -11,7 +11,7 @@ class Zaki2024NWBConverter(NWBConverter):
     data_interface_classes = dict(
         MiniscopeImaging=MiniscopeImagingInterface,
         MinianSegmentation=MinianSegmentationInterface,
-        SleepClassification = Zaki2024SleepClassificationInterface,
-        EDFSignals = Zaki2024EDFInterface,
-        FreezingBehavior = EzTrackFreezingBehaviorInterface,
+        SleepClassification=Zaki2024SleepClassificationInterface,
+        EDFSignals=Zaki2024EDFInterface,
+        FreezingBehavior=EzTrackFreezingBehaviorInterface,
     )
