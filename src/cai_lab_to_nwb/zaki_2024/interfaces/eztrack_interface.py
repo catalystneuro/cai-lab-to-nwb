@@ -10,10 +10,10 @@ from neuroconv.utils import DeepDict
 from pydantic import FilePath
 from typing import Optional
 
-class FreezingBehaviorInterface(BaseDataInterface):
-    """Adds intervals of freezing behavior interface."""
+class EzTrackFreezingBehaviorInterface(BaseDataInterface):
+    """Adds intervals of freezing behavior and motion series."""
 
-    keywords = ["behavior"]
+    keywords = ["behavior", "freezing", "motion"]
 
     def __init__(self, file_path: FilePath, video_sampling_frequency: float, verbose: bool = False):
         # This should load the data lazily and prepare variables you need

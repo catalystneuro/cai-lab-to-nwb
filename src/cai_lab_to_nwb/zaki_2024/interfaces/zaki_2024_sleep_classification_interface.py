@@ -9,10 +9,10 @@ from typing import Optional
 from pynwb.epoch import TimeIntervals
 
 
-class SleepBehaviorInterface(BaseDataInterface):
-    """Adds intervals of freezing behavior interface."""
+class Zaki2024SleepClassificationInterface(BaseDataInterface):
+    """Adds intervals of sleeping behavior."""
 
-    keywords = ["behavior"]
+    keywords = ["behavior", "sleep stages"]
 
     def __init__(self, file_path: FilePath, video_sampling_frequency: float, verbose: bool = False):
         # This should load the data lazily and prepare variables you need
@@ -30,7 +30,6 @@ class SleepBehaviorInterface(BaseDataInterface):
     def add_to_nwbfile(self, nwbfile: NWBFile, metadata: Optional[dict] = None):
 
         import pandas as pd
-        from ndx_events import LabeledEvents
 
         sleep_behavior_df = pd.read_csv(self.file_path)
 
@@ -47,7 +46,7 @@ class SleepBehaviorInterface(BaseDataInterface):
         start_times = start_frames / self.video_sampling_frequency
         stop_frames = sleep_behavior_df['Frame'][stop_indices].values
         stop_times = stop_frames / self.video_sampling_frequency
-        slep_state = sleep_behavior_df['SleepState'][start_indices].values
+        sleep_state = sleep_behavior_df['SleepState'][start_indices].values
 
 
         description = (
@@ -65,7 +64,7 @@ class SleepBehaviorInterface(BaseDataInterface):
         """
         sleep_intervals.add_column(name="sleep_state", description=column_description)
         
-        for start_time, stop_time, state in zip(start_times, stop_times, slep_state):
+        for start_time, stop_time, state in zip(start_times, stop_times, sleep_state):
             sleep_intervals.add_interval(start_time=start_time, stop_time=stop_time, sleep_state=state)
 
         if "sleep" not in nwbfile.processing:

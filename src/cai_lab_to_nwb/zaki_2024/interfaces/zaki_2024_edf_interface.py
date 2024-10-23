@@ -5,7 +5,7 @@ from neuroconv.basedatainterface import BaseDataInterface
 from pynwb import NWBFile, TimeSeries
 from pynwb.device import Device
 
-class ImplantInterface(BaseDataInterface):
+class Zaki2024EDFInterface(BaseDataInterface):
     
     def __init__(self, file_path: FilePath, verbose: bool = False):
         
