@@ -4,7 +4,7 @@ from neuroconv import NWBConverter
 
 from neuroconv.datainterfaces import VideoInterface
 
-from .interfaces import (
+from interfaces import (
     MinianSegmentationInterface,
     Zaki2024EDFInterface,
     EzTrackFreezingBehaviorInterface,

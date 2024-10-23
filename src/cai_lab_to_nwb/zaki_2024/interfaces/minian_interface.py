@@ -8,6 +8,7 @@ from neuroconv.datainterfaces.ophys.basesegmentationextractorinterface import Ba
 from roiextractors.segmentationextractor import SegmentationExtractor
 
 from typing import Optional
+from pynwb import NWBFile
 
 
 class MinianSegmentationExtractor(SegmentationExtractor):
