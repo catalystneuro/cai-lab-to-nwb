@@ -77,7 +77,7 @@ class EzTrackFreezingBehaviorInterface(BaseDataInterface):
             - Motion cutoff: The level of pixel intensity change required to register as motion.
         """
 
-        freeze_intervals = TimeIntervals(name="TimeIntervalsFreezingBehavior", description=description)
+        freeze_intervals = TimeIntervals(name="FreezingIntervals", description=description)
         for start_time, stop_time in zip(start_times, stop_times):
             freeze_intervals.add_interval(start_time=start_time, stop_time=stop_time, timeseries=[motion_series])
 
