@@ -2,13 +2,8 @@ from roiextractors.imagingextractor import ImagingExtractor
 from roiextractors.multiimagingextractor import MultiImagingExtractor
 from roiextractors.extraction_tools import PathType, DtypeType, get_package
 
-from typing import Optional
 import json
 import datetime
-
-from pydantic import DirectoryPath
-from pathlib import Path
-import numpy as np
 
 from copy import deepcopy
 from pathlib import Path
@@ -25,13 +20,14 @@ from neuroconv.utils import DeepDict, dict_deep_update
 class MiniscopeImagingExtractor(MultiImagingExtractor):
 
     def __init__(self, folder_path: DirectoryPath):
-        
-        self.miniscope_videos_folder_path =  Path(folder_path)
+
+        self.miniscope_videos_folder_path = Path(folder_path)
         assert self.miniscope_videos_folder_path.exists(), f"Miniscope videos folder not found in {Path(folder_path)}"
 
         self._miniscope_avi_file_paths = [p for p in self.miniscope_videos_folder_path.iterdir() if p.suffix == ".avi"]
         assert len(self._miniscope_avi_file_paths) > 0, f"No .avi files found in {self.miniscope_videos_folder_path}"
         import natsort
+
         self._miniscope_avi_file_paths = natsort.natsorted(self._miniscope_avi_file_paths)
 
         imaging_extractors = []
@@ -44,7 +40,7 @@ class MiniscopeImagingExtractor(MultiImagingExtractor):
         self._sampling_frequency = self._imaging_extractors[0].get_sampling_frequency()
         self._image_size = self._imaging_extractors[0].get_image_size()
         self._dtype = self._imaging_extractors[0].get_dtype()
-        
+
     def get_num_frames(self) -> int:
         return self._num_frames
 
@@ -195,38 +191,46 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         from ndx_miniscope.utils import get_recording_start_times, read_miniscope_config
 
         super().__init__(folder_path=folder_path)
-        
-        self.miniscope_folder = Path(folder_path)        
+
+        self.miniscope_folder = Path(folder_path)
         # This contains the general metadata and might contain behavioral videos
-        self.session_folder = self.miniscope_folder.parent  
+        self.session_folder = self.miniscope_folder.parent
 
         self._miniscope_config = read_miniscope_config(folder_path=self.miniscope_folder)
-        
+
         # use the frame rate of the json configuration to set the metadata
         frame_rate_string = self._miniscope_config["frameRate"]
         # frame_rate_string look like "30.0FPS", extract the float part
         self._metadata_frame_rate = float(frame_rate_string.split("FPS")[0])
-        
-        
+
         self.photon_series_type = "OnePhotonSeries"
 
     def _get_session_start_time(self):
-
-        general_metadata_json = self.session_folder/ "metaData.json"
+        general_metadata_json = self.session_folder / "metaData.json"
         assert general_metadata_json.exists(), f"General metadata json not found in {self.session_folder}"
 
         ## Read metadata
         with open(general_metadata_json) as f:
             general_metadata = json.load(f)
 
+        if "recordingStartTime" in general_metadata:
+            start_time_info = general_metadata["recordingStartTime"]
+        else:
+            start_time_info = general_metadata
+
+        required_keys = ["year", "month", "day", "hour", "minute", "second", "msec"]
+        for key in required_keys:
+            if key not in start_time_info:
+                raise KeyError(f"Missing required key '{key}' in the metadata")
+
         session_start_time = datetime.datetime(
-            year=general_metadata["year"],
-            month=general_metadata["month"],
-            day=general_metadata["day"],
-            hour=general_metadata["hour"],
-            minute=general_metadata["minute"],
-            second=general_metadata["second"],
-            microsecond=general_metadata["msec"] * 1000,  # Convert milliseconds to microseconds
+            year=start_time_info["year"],
+            month=start_time_info["month"],
+            day=start_time_info["day"],
+            hour=start_time_info["hour"],
+            minute=start_time_info["minute"],
+            second=start_time_info["second"],
+            microsecond=start_time_info["msec"] * 1000,  # Convert milliseconds to microseconds
         )
 
         return session_start_time
@@ -266,18 +270,18 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
 
         timestamps_file_path = self.miniscope_folder / "timeStamps.csv"
         assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {self.miniscope_folder}"
-        
-        import pandas as pd 
-        
-        timetsamps_df = pd.read_csv(timestamps_file_path)  
+
+        import pandas as pd
+
+        timetsamps_df = pd.read_csv(timestamps_file_path)
         timestamps_milliseconds = timetsamps_df["Time Stamp (ms)"].values.astype(float)
         timestamps_seconds = timestamps_milliseconds / 1000.0
-        
+
         # Shift when the first timestamp is negative
         # TODO: Figure why, I copied from miniscope
         if timestamps_seconds[0] < 0.0:
             timestamps_seconds += abs(timestamps_seconds[0])
-        
+
         return np.asarray(timestamps_seconds)
 
     def add_to_nwbfile(
@@ -285,6 +289,7 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         nwbfile: NWBFile,
         metadata: Optional[dict] = None,
         photon_series_type: Literal["TwoPhotonSeries", "OnePhotonSeries"] = "OnePhotonSeries",
+        photon_series_index: int = 0,
         stub_test: bool = False,
         stub_frames: int = 100,
     ):
@@ -313,4 +318,5 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
             nwbfile=nwbfile,
             metadata=metadata,
             photon_series_type=photon_series_type,
+            photon_series_index=photon_series_index,
         )

@@ -93,7 +93,7 @@ The top level of the data that they shared with us is divided by **modalities** 
 ├── Ca_EEG_EDF (this contains the EEG and EMG data)
 │   ├── Ca_EEG2-1_EDF
 │   └── Ca_EEG3-4_EDF
-├── Ca_EEG_Experiment (this contains the raw minian data and videos)
+├── Ca_EEG_Experiment (this contains the raw miniscope data and behavioral videos)
 │   ├── Ca_EEG2-1
 │   └── Ca_EEG3-4 
 └── Ca_EEG_Sleep  (Sleep data)

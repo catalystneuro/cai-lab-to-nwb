@@ -1,13 +1,3 @@
-"""A SegmentationExtractor for Minian.
-
-Classes
--------
-MinianSegmentationExtractor
-    A class for extracting segmentation from Minian output.
-"""
-
-from pathlib import Path
-
 import zarr
 import warnings
 import numpy as np
@@ -18,8 +8,8 @@ from neuroconv.datainterfaces.ophys.basesegmentationextractorinterface import Ba
 from roiextractors.segmentationextractor import SegmentationExtractor
 
 from typing import Optional
-
 from pynwb import NWBFile
+
 
 class MinianSegmentationExtractor(SegmentationExtractor):
     """A SegmentationExtractor for Minian.
@@ -58,13 +48,13 @@ class MinianSegmentationExtractor(SegmentationExtractor):
         """
         SegmentationExtractor.__init__(self)
         self.folder_path = folder_path
-        self._roi_response_denoised = self._read_trace_from_zarr_filed(field="C")
-        self._roi_response_baseline = self._read_trace_from_zarr_filed(field="b0")
-        self._roi_response_neuropil = self._read_trace_from_zarr_filed(field="f")
-        self._roi_response_deconvolved = self._read_trace_from_zarr_filed(field="S")
+        self._roi_response_denoised = self._read_trace_from_zarr_field(field="C")
+        self._roi_response_baseline = self._read_trace_from_zarr_field(field="b0")
+        self._roi_response_neuropil = self._read_trace_from_zarr_field(field="f")
+        self._roi_response_deconvolved = self._read_trace_from_zarr_field(field="S")
         self._image_maximum_projection = np.array(self._read_zarr_group("/max_proj.zarr/max_proj"))
-        self._image_masks = self._read_roi_image_mask_from_zarr_filed()
-        self._background_image_masks = self._read_background_image_mask_from_zarr_filed()
+        self._image_masks = self._read_roi_image_mask_from_zarr_field()
+        self._background_image_masks = self._read_background_image_mask_from_zarr_field()
         self._times = self._read_timestamps_from_csv()
 
     def _read_zarr_group(self, zarr_group=""):
@@ -81,7 +71,7 @@ class MinianSegmentationExtractor(SegmentationExtractor):
         else:
             return zarr.open(str(self.folder_path) + f"/{zarr_group}", "r")
 
-    def _read_roi_image_mask_from_zarr_filed(self):
+    def _read_roi_image_mask_from_zarr_field(self):
         """Read the image masks from the zarr output.
 
         Returns
@@ -95,7 +85,7 @@ class MinianSegmentationExtractor(SegmentationExtractor):
         else:
             return np.transpose(dataset["A"], (1, 2, 0))
 
-    def _read_background_image_mask_from_zarr_filed(self):
+    def _read_background_image_mask_from_zarr_field(self):
         """Read the image masks from the zarr output.
 
         Returns
@@ -109,7 +99,7 @@ class MinianSegmentationExtractor(SegmentationExtractor):
         else:
             return np.expand_dims(dataset["b"], axis=2)
 
-    def _read_trace_from_zarr_filed(self, field):
+    def _read_trace_from_zarr_field(self, field):
         """Read the traces specified by the field from the zarr object.
 
         Parameters
@@ -145,6 +135,25 @@ class MinianSegmentationExtractor(SegmentationExtractor):
         filtered_df = df[df["Frame Number"].isin(frame_numbers)] * 1e-3
 
         return filtered_df["Time Stamp (ms)"].to_numpy()
+
+    def get_motion_correction_data(self) -> np.ndarray:
+        """Read the xy shifts in the 'motion' field from the zarr object.
+
+        Parameters
+        ----------
+        field: str
+            The field to read from the zarr object.
+
+        Returns
+        -------
+        motion_correction: numpy.ndarray
+            The first column is the x shifts. The second column is the y shifts.
+        """
+        dataset = self._read_zarr_group(f"/motion.zarr")
+        # from zarr field motion.zarr/shift_dim we can verify that the two column refer respectively to
+        # ['height','width'] --> ['y','x']. Following best practice we swap the two columns
+        motion_correction = dataset["motion"][:, [1, 0]]
+        return motion_correction
 
     def get_image_size(self):
         dataset = self._read_zarr_group("/A.zarr")
@@ -207,6 +216,7 @@ class MinianSegmentationExtractor(SegmentationExtractor):
             maximum_projection=self._image_maximum_projection,
         )
 
+
 class MinianSegmentationInterface(BaseSegmentationExtractorInterface):
     """Data interface for MinianSegmentationExtractor."""
 
@@ -259,6 +269,3 @@ class MinianSegmentationInterface(BaseSegmentationExtractorInterface):
             plane_segmentation_name=plane_segmentation_name,
             iterator_options=iterator_options,
         )
-
-
-
