@@ -136,25 +136,6 @@ class MinianSegmentationExtractor(SegmentationExtractor):
 
         return filtered_df["Time Stamp (ms)"].to_numpy()
 
-    def get_motion_correction_data(self) -> np.ndarray:
-        """Read the xy shifts in the 'motion' field from the zarr object.
-
-        Parameters
-        ----------
-        field: str
-            The field to read from the zarr object.
-
-        Returns
-        -------
-        motion_correction: numpy.ndarray
-            The first column is the x shifts. The second column is the y shifts.
-        """
-        dataset = self._read_zarr_group(f"/motion.zarr")
-        # from zarr field motion.zarr/shift_dim we can verify that the two column refer respectively to
-        # ['height','width'] --> ['y','x']. Following best practice we swap the two columns
-        motion_correction = dataset["motion"][:, [1, 0]]
-        return motion_correction
-
     def get_image_size(self):
         dataset = self._read_zarr_group("/A.zarr")
         height = dataset["height"].shape[0]
