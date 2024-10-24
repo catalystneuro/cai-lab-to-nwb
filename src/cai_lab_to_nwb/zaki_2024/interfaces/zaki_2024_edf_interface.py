@@ -1,3 +1,4 @@
+from black import datetime
 from pydantic import FilePath
 from pathlib import Path
 
@@ -17,6 +18,15 @@ class Zaki2024EDFInterface(BaseDataInterface):
         super().__init__(file_path=file_path)
 
     def get_timestamps_reference_time(self):
+        """
+        Get datetime object of the first frame of the data in the .edf file.
+
+        Returns
+        ----------
+        timestamps_reference_time : datetime.datetime
+            datetime object of the first frame of the data in the .edf file.
+
+        """
         edf_reader = read_raw_edf(input_fname=self.file_path, verbose=self.verbose)
         return edf_reader.info["meas_date"]
 
