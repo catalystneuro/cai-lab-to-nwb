@@ -2,8 +2,36 @@ from typing import List
 
 import numpy as np
 from neuroconv.tools import get_module
+from pydantic.types import PathType
 from pynwb import NWBFile, TimeSeries
 from roiextractors.extraction_tools import DtypeType
+
+
+def load_motion_correction_data(folder_path: PathType) -> np.ndarray:
+    """Read the xy shifts in the 'motion' field from the zarr object.
+
+    Parameters
+    ----------
+    folder_path: PathType
+        Path to minian output.
+
+    Returns
+    -------
+    motion_correction: numpy.ndarray
+        The first column is the x shifts. The second column is the y shifts.
+    """
+    import zarr
+    import warnings
+
+    if "/motion.zarr" not in zarr.open(folder_path, mode="r"):
+        warnings.warn(f"Group '/motion.zarr' not found in the Zarr store.", UserWarning)
+        return None
+    else:
+        dataset = zarr.open(str(folder_path) + "/motion.zarr", "r")
+        # from zarr field motion.zarr/shift_dim we can verify that the two column refer respectively to
+        # ['height','width'] --> ['y','x']. Following best practice we swap the two columns
+        motion_correction = dataset["motion"][:, [1, 0]]
+        return motion_correction
 
 
 def add_motion_correction(
