@@ -20,7 +20,7 @@ from interfaces import (
 
 
 class Zaki2024NWBConverter(NWBConverter):
-    """Primary conversion class for my extracellular electrophysiology dataset."""
+    """Primary conversion class Cai Lab dataset."""
 
     data_interface_classes = dict(
         MiniscopeImaging=MiniscopeImagingInterface,
@@ -46,8 +46,8 @@ class Zaki2024NWBConverter(NWBConverter):
     def add_to_nwbfile(self, nwbfile: NWBFile, metadata, conversion_options: Optional[dict] = None) -> None:
         super().add_to_nwbfile(nwbfile=nwbfile, metadata=metadata, conversion_options=conversion_options)
 
-        # Add motion correction
         if "MinianSegmentation" in self.data_interface_objects:
+            # Add motion correction
             minian_interface = self.data_interface_objects["MinianSegmentation"]
             minian_folder_path = minian_interface.source_data["folder_path"]
             interface_name = "MiniscopeImaging"
@@ -65,6 +65,14 @@ class Zaki2024NWBConverter(NWBConverter):
                 motion_correction_series=motion_correction,
                 one_photon_series_name=one_photon_series_name,
             )
+
+            # TODO Add cell global_ids
+            # global_roi_ids = get_global_ids_from_csv()
+            # add_cell_registration(
+            #     nwbfile=nwbfile,
+            #     global_roi_ids=global_roi_ids,
+            #     plane_segmentation_name="PlaneSegmentation",
+            # )
 
     # TODO discuss time alignment with author
     # def temporally_align_data_interfaces(self):
