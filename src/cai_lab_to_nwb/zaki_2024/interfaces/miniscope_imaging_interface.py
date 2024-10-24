@@ -289,6 +289,7 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         nwbfile: NWBFile,
         metadata: Optional[dict] = None,
         photon_series_type: Literal["TwoPhotonSeries", "OnePhotonSeries"] = "OnePhotonSeries",
+        photon_series_index: int = 0,
         stub_test: bool = False,
         stub_frames: int = 100,
     ):
@@ -317,4 +318,5 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
             nwbfile=nwbfile,
             metadata=metadata,
             photon_series_type=photon_series_type,
+            photon_series_index=photon_series_index,
         )
