@@ -5,6 +5,8 @@ from neuroconv.basedatainterface import BaseDataInterface
 from pynwb import NWBFile, TimeSeries
 from pynwb.device import Device
 
+from mne.io import read_raw_edf
+
 
 class Zaki2024EDFInterface(BaseDataInterface):
 
@@ -13,6 +15,19 @@ class Zaki2024EDFInterface(BaseDataInterface):
         self.file_path = Path(file_path)
         self.verbose = verbose
         super().__init__(file_path=file_path)
+
+    def get_timestamps_reference_time(self):
+        """
+        Get datetime object of the first frame of the data in the .edf file.
+
+        Returns
+        ----------
+        timestamps_reference_time : datetime.datetime
+            datetime object of the first frame of the data in the .edf file.
+
+        """
+        edf_reader = read_raw_edf(input_fname=self.file_path, verbose=self.verbose)
+        return edf_reader.info["meas_date"]
 
     def add_to_nwbfile(self, nwbfile: NWBFile, **conversion_options) -> NWBFile:
 
@@ -40,7 +55,6 @@ class Zaki2024EDFInterface(BaseDataInterface):
                 "unit": "n.a.",
             },
         }
-        from mne.io import read_raw_edf
 
         edf_reader = read_raw_edf(input_fname=self.file_path, verbose=self.verbose)
         data, times = edf_reader.get_data(picks=list(channels_dict.keys()), return_times=True)
