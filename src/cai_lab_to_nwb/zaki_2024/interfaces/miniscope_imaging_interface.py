@@ -213,14 +213,24 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         with open(general_metadata_json) as f:
             general_metadata = json.load(f)
 
+        if "recordingStartTime" in general_metadata:
+            start_time_info = general_metadata["recordingStartTime"]
+        else:
+            start_time_info = general_metadata
+
+        required_keys = ["year", "month", "day", "hour", "minute", "second", "msec"]
+        for key in required_keys:
+            if key not in start_time_info:
+                raise KeyError(f"Missing required key '{key}' in the metadata")
+
         session_start_time = datetime.datetime(
-            year=general_metadata["recordingStartTime"]["year"],
-            month=general_metadata["recordingStartTime"]["month"],
-            day=general_metadata["recordingStartTime"]["day"],
-            hour=general_metadata["recordingStartTime"]["hour"],
-            minute=general_metadata["recordingStartTime"]["minute"],
-            second=general_metadata["recordingStartTime"]["second"],
-            microsecond=general_metadata["recordingStartTime"]["msec"] * 1000,  # Convert milliseconds to microseconds
+            year=start_time_info["year"],
+            month=start_time_info["month"],
+            day=start_time_info["day"],
+            hour=start_time_info["hour"],
+            minute=start_time_info["minute"],
+            second=start_time_info["second"],
+            microsecond=start_time_info["msec"] * 1000,  # Convert milliseconds to microseconds
         )
 
         return session_start_time
