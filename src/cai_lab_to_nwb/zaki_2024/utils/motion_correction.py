@@ -49,7 +49,7 @@ def add_motion_correction(
     xy_translation = TimeSeries(
         name="MotionCorrectionSeries" + name_suffix,
         description=f"The x, y shifts for the {one_photon_series_name} imaging data.",
-        data=motion_correction_series.astype(dtype=convert_to_dtype),
+        data=motion_correction_series.astype(dtype=convert_to_dtype, copy=False),
         unit="px",
         timestamps=one_photon_series.timestamps,
     )
