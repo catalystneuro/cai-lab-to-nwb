@@ -1,5 +1,7 @@
 """Primary script to run to convert an entire session for of data using the NWBConverter."""
 
+import time
+
 from pathlib import Path
 from typing import Union
 from datetime import datetime
@@ -29,8 +31,14 @@ def session_to_nwb(
     output_dir_path: Union[str, Path],
     subject_id: str,
     session_id: str,
+    date_str: str,
+    time_str: str,
     stub_test: bool = False,
+    verbose: bool = True,
 ):
+    print("Converting session {}".format(session_id))
+    if verbose:
+        start = time.time()
 
     data_dir_path = Path(data_dir_path)
     output_dir_path = Path(output_dir_path)
@@ -42,12 +50,6 @@ def session_to_nwb(
 
     source_data = dict()
     conversion_options = dict()
-
-    session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
-    df = pd.read_csv(session_times_file_path)
-    session_row = df[df["Session"] == task].iloc[0]
-    date_str = session_row["Date"]
-    time_str = session_row["Time"]
 
     experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions")
 
@@ -117,6 +119,16 @@ def session_to_nwb(
         metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options, overwrite=True
     )
 
+    if verbose:
+        stop_time = time.time()
+        conversion_time_seconds = stop_time - start
+        if conversion_time_seconds <= 60 * 3:
+            print(f"Conversion took {conversion_time_seconds:.2f} seconds")
+        elif conversion_time_seconds <= 60 * 60:
+            print(f"Conversion took {conversion_time_seconds / 60:.2f} minutes")
+        else:
+            print(f"Conversion took {conversion_time_seconds / 60 / 60:.2f} hours")
+
 
 if __name__ == "__main__":
 
@@ -127,11 +139,17 @@ if __name__ == "__main__":
     session_id = subject_id + "_" + task
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
     stub_test = True
-
+    session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
+    df = pd.read_csv(session_times_file_path)
+    session_row = df[df["Session"] == task].iloc[0]
+    date_str = session_row["Date"]
+    time_str = session_row["Time"]
     session_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
         stub_test=stub_test,
         subject_id=subject_id,
         session_id=session_id,
+        date_str=date_str,
+        time_str=time_str,
     )
