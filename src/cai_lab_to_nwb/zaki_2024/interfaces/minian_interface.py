@@ -65,7 +65,7 @@ class MinianSegmentationExtractor(SegmentationExtractor):
         zarr.open
             The zarr object specified by self.folder_path.
         """
-        if zarr_group not in zarr.open(self.folder_path, mode="r"):
+        if zarr_group not in zarr.open(str(self.folder_path)):
             warnings.warn(f"Group '{zarr_group}' not found in the Zarr store.", UserWarning)
             return None
         else:
