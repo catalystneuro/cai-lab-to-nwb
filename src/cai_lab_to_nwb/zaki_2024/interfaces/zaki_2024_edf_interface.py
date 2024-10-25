@@ -61,6 +61,7 @@ class Zaki2024EDFInterface(BaseDataInterface):
         edf_reader = read_raw_edf(input_fname=self.file_path, verbose=self.verbose)
         data, times = edf_reader.get_data(picks=list(channels_dict.keys()), return_times=True)
         data = data.astype("float32")
+        # TODO select the correct time range
         if stub_test:
             data = data[:, :stub_frames]
             times = times[:stub_frames]
