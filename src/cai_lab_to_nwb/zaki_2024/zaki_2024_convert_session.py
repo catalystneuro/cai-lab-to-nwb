@@ -64,7 +64,7 @@ def session_to_nwb(
     minian_folder_path = data_dir_path / "Ca_EEG_Calcium" / subject_id / session_id / "minian"
     if minian_folder_path.is_dir():
         source_data.update(dict(MinianSegmentation=dict(folder_path=minian_folder_path)))
-        # conversion_options.update(dict(MinianSegmentation=dict(stub_test=stub_test)))
+        conversion_options.update(dict(MinianSegmentation=dict(stub_test=stub_test)))
     else:
         print("No Minian data found at {}".format(minian_folder_path))
 
@@ -82,7 +82,6 @@ def session_to_nwb(
         source_data.update(
             dict(FreezingBehavior=dict(file_path=freezing_output_file_path, video_sampling_frequency=30.0))
         )
-        # conversion_options.update(dict(FreezingBehavior=dict(stub_test=stub_test)))
     else:
         print("No freezing output csv file found at {}".format(freezing_output_file_path))
 
@@ -93,7 +92,7 @@ def session_to_nwb(
     edf_file_path = data_dir_path / "Ca_EEG_EDF" / (subject_id + "_EDF") / (subject_id + reformatted_date_str + ".edf")
     if edf_file_path.is_file():
         source_data.update(dict(EDFSignals=dict(file_path=edf_file_path)))
-        # conversion_options.update(dict(EDFSignals=dict(stub_test=stub_test)))
+        conversion_options.update(dict(EDFSignals=dict(stub_test=stub_test)))
     else:
         print("No .edf file found at {}".format(edf_file_path))
 

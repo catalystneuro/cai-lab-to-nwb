@@ -29,7 +29,9 @@ class Zaki2024EDFInterface(BaseDataInterface):
         edf_reader = read_raw_edf(input_fname=self.file_path, verbose=self.verbose)
         return edf_reader.info["meas_date"]
 
-    def add_to_nwbfile(self, nwbfile: NWBFile, **conversion_options) -> NWBFile:
+    def add_to_nwbfile(
+        self, nwbfile: NWBFile, stub_test: bool = False, stub_frames: int = 100, **conversion_options
+    ) -> NWBFile:
 
         channels_dict = {
             "Temp": {
@@ -59,6 +61,9 @@ class Zaki2024EDFInterface(BaseDataInterface):
         edf_reader = read_raw_edf(input_fname=self.file_path, verbose=self.verbose)
         data, times = edf_reader.get_data(picks=list(channels_dict.keys()), return_times=True)
         data = data.astype("float32")
+        if stub_test:
+            data = data[:, :stub_frames]
+            times = times[:stub_frames]
         for channel_index, channel_name in enumerate(channels_dict.keys()):
             time_series_kwargs = channels_dict[channel_name].copy()
             time_series_kwargs.update(data=data[channel_index], timestamps=times)
