@@ -7,7 +7,7 @@ from pprint import pformat
 import traceback
 from tqdm import tqdm
 
-from zaki_2024_convert_session import session_to_nwb
+from zaki_2024_convert_conditioning_session import session_to_nwb
 
 
 def dataset_to_nwb(

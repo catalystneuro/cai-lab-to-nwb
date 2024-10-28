@@ -14,8 +14,6 @@ from typing import Optional
 from pynwb import NWBFile, TimeSeries
 from pynwb.ophys import MotionCorrection, CorrectedImageStack, OnePhotonSeries
 
-from explore_segmentation_data import extractor
-
 
 class MinianSegmentationExtractor(SegmentationExtractor):
     """A SegmentationExtractor for Minian.
@@ -306,7 +304,7 @@ class _MinianMotionCorrectedVideoExtractor(ImagingExtractor):
         return (self.frame_height, self.frame_width)
 
     def get_sampling_frequency(self):
-        return self._sampling_frequency
+        return None
 
     def get_dtype(self) -> DtypeType:
         return self._dtype
@@ -367,18 +365,22 @@ class MinianMotionCorrectionInterface(BaseDataInterface):
     associated_suffixes = (".mp4", ".zarr")
     info = "Interface for motion corrected imaging data produced by Minian software."
 
-    def __init__(self, folder_path: PathType, verbose: bool = True):
+    def __init__(self, folder_path: PathType, video_file_path: PathType, verbose: bool = True):
         """
         Interface for motion corrected imaging data produced by Minian software.
 
         Parameters
         ----------
         folder_path : PathType
-            Path to .zarr path (Minian output).
+            Path to .zarr store (Minian output).
+        video_file_path : PathType
+            Path to .mp4 video of motion corrected images.
         verbose : bool, default True
             Whether to print progress
         """
-        super().__init__(folder_path=folder_path, verbose=verbose)
+        super().__init__(folder_path=folder_path, video_file_path=video_file_path, verbose=verbose)
+        self.folder_path = folder_path
+        self.video_file_path = video_file_path
 
     def add_to_nwbfile(
         self,
@@ -395,9 +397,14 @@ class MinianMotionCorrectionInterface(BaseDataInterface):
         # ['height','width'] --> ['y','x']. Following best practice we swap the two columns
         xy_shifts = dataset["motion"][:, [1, 0]]
 
+        csv_file = self.folder_path / "timeStamps.csv"
+        df = pd.read_csv(csv_file)
+        frame_numbers = dataset["frame"]
+        filtered_df = df[df["Frame Number"].isin(frame_numbers)] * 1e-3
+        timestamps = filtered_df["Time Stamp (ms)"].to_numpy()
+
         # extract corrected image stack
-        motion_corrected_video_file_path = self.folder_path / "minian_mc.mp4"
-        extractor = _MinianMotionCorrectedVideoExtractor(file_path=str(motion_corrected_video_file_path))
+        extractor = _MinianMotionCorrectedVideoExtractor(file_path=str(self.video_file_path))
         end_frame = 100 if stub_test else None
         motion_corrected_data = extractor.get_video(end_frame=end_frame)
 
@@ -409,10 +416,6 @@ class MinianMotionCorrectionInterface(BaseDataInterface):
         ), f"The one photon series '{original_one_photon_series_name}' does not exist in the NWBFile."
 
         original_one_photon_series = nwbfile.acquisition[original_one_photon_series_name]
-
-        timestamps = original_one_photon_series.timestamps
-        assert timestamps is not None, "The timestamps for the original one photon series must be set."
-        assert len(xy_shifts) == len(timestamps), "The length of the xy shifts must match the length of the timestamps."
 
         xy_translation = TimeSeries(
             name="xy_translation",  # name must be 'xy_translation'
