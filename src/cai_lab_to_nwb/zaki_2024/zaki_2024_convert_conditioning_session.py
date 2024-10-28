@@ -104,10 +104,7 @@ def session_to_nwb(
     else:
         print("No .edf file found at {}".format(edf_file_path))
 
-    ophys_metadata_path = Path(__file__).parent / "zaki_2024_ophys_metadata.yaml"
-    ophys_metadata = load_dict_from_file(ophys_metadata_path)
-
-    converter = Zaki2024NWBConverter(source_data=source_data, ophys_metadata=ophys_metadata)
+    converter = Zaki2024NWBConverter(source_data=source_data)
 
     # Add datetime to conversion
     metadata = converter.get_metadata()

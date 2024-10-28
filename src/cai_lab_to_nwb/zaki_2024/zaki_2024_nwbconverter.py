@@ -30,27 +30,6 @@ class Zaki2024NWBConverter(NWBConverter):
         Video=VideoInterface,
     )
 
-    def __init__(
-        self,
-        source_data: Dict[str, dict],
-        verbose: bool = True,
-        ophys_metadata=Dict[str, dict],
-    ):
-        self.verbose = verbose
-        self._validate_source_data(source_data=source_data, verbose=self.verbose)
-        self.data_interface_objects = {
-            name: data_interface(**source_data[name])
-            for name, data_interface in self.data_interface_classes.items()
-            if name in source_data
-        }
-        self.ophys_metadata = ophys_metadata
-
-    def get_metadata(self) -> DeepDict:
-        metadata = super().get_metadata()
-        metadata["Ophys"]["OnePhotonSeries"] = self.ophys_metadata["Ophys"]["OnePhotonSeries"]
-        metadata["Ophys"]["ImagingPlane"] = self.ophys_metadata["Ophys"]["ImagingPlane"]
-        return metadata
-
 
 """
     # TODO decide which datastream set the session start time
