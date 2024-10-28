@@ -37,5 +37,5 @@ NWBFile:
     - Zaki, Yosif
 Subject:
   species: Mus musculus
-  age: TBD  # in ISO 8601, such as "P1W2D"
-  sex: TBD  # One of M, F, U, or O
+  age: P12W/P15W  # in ISO 8601, such as "P1W2D"
+  sex: U  # One of M, F, U, or O
