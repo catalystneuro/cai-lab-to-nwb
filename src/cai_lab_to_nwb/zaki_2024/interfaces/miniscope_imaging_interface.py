@@ -249,7 +249,10 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         device_metadata = metadata["Ophys"]["Device"][0]
         miniscope_config = deepcopy(self._miniscope_config)
         device_name = miniscope_config.pop("name")
-        device_metadata.update(name=device_name, **miniscope_config)
+        description = (
+            "The Miniscope is the head-mounted miniature microscope part of the " "UCLA Miniscope imaging platform."
+        )
+        device_metadata.update(name=device_name, description=description, **miniscope_config)
         # Add link to Device for ImagingPlane
         imaging_plane_metadata = metadata["Ophys"]["ImagingPlane"][0]
         imaging_plane_metadata.update(
