@@ -1,8 +1,4 @@
 Ophys:
-  Device:
-    - name: Miniscope
-      description: The V4 Miniscope is the head-mounted miniature microscope part of the UCLA Miniscope imaging platform.
-      manufacturer: UCLA Miniscope.
   OnePhotonSeries:
     - name: OnePhotonSeries
       description: Imaging data from Miniscope.
@@ -13,9 +9,9 @@ Ophys:
       description: Imaging plane for Miniscope imaging data.
       excitation_lambda: 496.0
       location: CA1
-      device: Miniscope
+      device: Microscope
       optical_channel:
-        - name: Green
+        - name: OpticalChannel
           description: Green channel of the microscope.
           emission_lambda: 513.0
       indicator: GCaMP6f

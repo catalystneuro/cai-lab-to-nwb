@@ -1,14 +1,11 @@
 """Primary NWBConverter class for this dataset."""
 
-from fontTools.misc.cython import returns
-from pynwb import NWBFile
-from typing import Optional
+from copy import deepcopy
 
 from neuroconv import NWBConverter
-
+from neuroconv.utils import DeepDict
 from neuroconv.datainterfaces import VideoInterface
-
-from utils import add_motion_correction, load_motion_correction_data
+from typing import Dict
 
 from interfaces import (
     MinianSegmentationInterface,
@@ -32,6 +29,27 @@ class Zaki2024NWBConverter(NWBConverter):
         FreezingBehavior=EzTrackFreezingBehaviorInterface,
         Video=VideoInterface,
     )
+
+    def __init__(
+        self,
+        source_data: Dict[str, dict],
+        verbose: bool = True,
+        ophys_metadata=Dict[str, dict],
+    ):
+        self.verbose = verbose
+        self._validate_source_data(source_data=source_data, verbose=self.verbose)
+        self.data_interface_objects = {
+            name: data_interface(**source_data[name])
+            for name, data_interface in self.data_interface_classes.items()
+            if name in source_data
+        }
+        self.ophys_metadata = ophys_metadata
+
+    def get_metadata(self) -> DeepDict:
+        metadata = super().get_metadata()
+        metadata["Ophys"]["OnePhotonSeries"] = self.ophys_metadata["Ophys"]["OnePhotonSeries"]
+        metadata["Ophys"]["ImagingPlane"] = self.ophys_metadata["Ophys"]["ImagingPlane"]
+        return metadata
 
 
 """
