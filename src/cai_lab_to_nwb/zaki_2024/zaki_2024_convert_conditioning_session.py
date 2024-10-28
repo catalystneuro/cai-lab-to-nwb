@@ -75,6 +75,8 @@ def session_to_nwb(
             dict(MinianMotionCorrection=dict(folder_path=minian_folder_path, video_file_path=motion_corrected_video))
         )
         conversion_options.update(dict(MinianMotionCorrection=dict(stub_test=stub_test)))
+    else:
+        print("No motion corrected data found at {}".format(motion_corrected_video))
 
     # Add Behavioral Video
     video_file_path = experiment_dir_path / session_id / (session_id + ".wmv")
