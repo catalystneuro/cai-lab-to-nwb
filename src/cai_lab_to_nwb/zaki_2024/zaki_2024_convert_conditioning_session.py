@@ -65,7 +65,7 @@ def session_to_nwb(
     if minian_folder_path.is_dir():
         source_data.update(dict(MinianSegmentation=dict(folder_path=minian_folder_path)))
         conversion_options.update(dict(MinianSegmentation=dict(stub_test=stub_test)))
-    else:
+    elif verbose:
         print("No Minian data found at {}".format(minian_folder_path))
 
     # Add Motion Correction
@@ -75,7 +75,7 @@ def session_to_nwb(
             dict(MinianMotionCorrection=dict(folder_path=minian_folder_path, video_file_path=motion_corrected_video))
         )
         conversion_options.update(dict(MinianMotionCorrection=dict(stub_test=stub_test)))
-    else:
+    elif verbose:
         print("No motion corrected data found at {}".format(motion_corrected_video))
 
     # Add Behavioral Video
@@ -83,7 +83,7 @@ def session_to_nwb(
     if video_file_path.is_file():
         source_data.update(dict(Video=dict(file_paths=[video_file_path])))
         conversion_options.update(dict(Video=dict(stub_test=stub_test)))
-    else:
+    elif verbose:
         print("No behavioral video found at {}".format(video_file_path))
 
     # Add Freezing Analysis output
@@ -92,7 +92,7 @@ def session_to_nwb(
         source_data.update(
             dict(FreezingBehavior=dict(file_path=freezing_output_file_path, video_sampling_frequency=30.0))
         )
-    else:
+    elif verbose:
         print("No freezing output csv file found at {}".format(freezing_output_file_path))
 
     # Add EEG, EMG, Temperature and Activity signals
@@ -103,7 +103,7 @@ def session_to_nwb(
     if edf_file_path.is_file():
         source_data.update(dict(EDFSignals=dict(file_path=edf_file_path)))
         conversion_options.update(dict(EDFSignals=dict(stub_test=stub_test)))
-    else:
+    elif verbose:
         print("No .edf file found at {}".format(edf_file_path))
 
     converter = Zaki2024NWBConverter(source_data=source_data)
