@@ -110,6 +110,17 @@ def session_to_nwb(
     elif verbose:
         print("No .edf file found at {}".format(edf_file_path))
 
+    # Add Sleep Classification output
+    sleep_classification_file_path = (
+        data_dir_path / "Ca_EEG_Sleep" / subject_id / "AlignedSleep" / (session_id + "_AlignedSleep.csv")
+    )
+    if sleep_classification_file_path.is_file():
+        source_data.update(
+            dict(SleepClassification=dict(file_path=sleep_classification_file_path, video_sampling_frequency=30.0))
+        )
+    elif verbose:
+        print("No sleep classification output csv file found at {}".format(sleep_classification_file_path))
+
     converter = Zaki2024NWBConverter(source_data=source_data)
 
     # Add datetime to conversion
