@@ -7,7 +7,7 @@ from pprint import pformat
 import traceback
 from tqdm import tqdm
 
-from zaki_2024_convert_conditioning_session import session_to_nwb
+from zaki_2024_convert_session import session_to_nwb
 
 
 def dataset_to_nwb(
@@ -101,8 +101,7 @@ def get_session_to_nwb_kwargs_per_session(
         session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
         if session_times_file_path.is_file():
             session_times_df = pd.read_csv(session_times_file_path)
-            tasks = [task for task in session_times_df["Session"] if "Offline" not in task]
-            for task in tasks:
+            for task in session_times_df["Session"]:
                 session_id = subject_id + "_" + task
                 session_row = session_times_df[session_times_df["Session"] == task].iloc[0]
                 date_str = session_row["Date"]
