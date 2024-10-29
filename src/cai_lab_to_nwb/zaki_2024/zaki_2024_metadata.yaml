@@ -37,5 +37,22 @@ NWBFile:
     - Zaki, Yosif
 Subject:
   species: Mus musculus
-  age: TBD  # in ISO 8601, such as "P1W2D"
-  sex: TBD  # One of M, F, U, or O
+  age: P12W/P15W  # in ISO 8601, such as "P1W2D"
+  sex: U  # One of M, F, U, or O
+Ophys:
+  OnePhotonSeries:
+    - name: OnePhotonSeries
+      description: Imaging data from Miniscope.
+      imaging_plane: ImagingPlane
+      unit: n.a.
+  ImagingPlane:
+    - name: ImagingPlane
+      description: Imaging plane for Miniscope imaging data.
+      excitation_lambda: 496.0
+      location: CA1
+      device: Microscope
+      optical_channel:
+        - name: OpticalChannel
+          description: Green channel of the microscope.
+          emission_lambda: 513.0
+      indicator: GCaMP6f
