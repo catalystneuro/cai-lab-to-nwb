@@ -16,6 +16,7 @@ def dataset_to_nwb(
     output_dir_path: Union[str, Path],
     max_workers: int = 1,
     verbose: bool = True,
+    stub_test: bool = False,
 ):
     """Convert the entire dataset to NWB.
 
@@ -41,6 +42,7 @@ def dataset_to_nwb(
         for session_to_nwb_kwargs in session_to_nwb_kwargs_per_session:
             session_to_nwb_kwargs["output_dir_path"] = output_dir_path
             session_to_nwb_kwargs["verbose"] = verbose
+            session_to_nwb_kwargs["stub_test"] = stub_test
             exception_file_path = data_dir_path / f"ERROR_<nwbfile_name>.txt"  # Add error file path here
             futures.append(
                 executor.submit(
@@ -111,7 +113,6 @@ def get_session_to_nwb_kwargs_per_session(
                         data_dir_path=data_dir_path,
                         subject_id=subject_id,
                         session_id=session_id,
-                        stub_test=True,
                         date_str=date_str,
                         time_str=time_str,
                     )
@@ -129,10 +130,11 @@ if __name__ == "__main__":
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
     max_workers = 1
     verbose = True
-
+    stub_test = True
     dataset_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
         max_workers=max_workers,
         verbose=verbose,
+        stub_test=stub_test,
     )
