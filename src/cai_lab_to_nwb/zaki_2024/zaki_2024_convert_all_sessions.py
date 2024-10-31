@@ -7,7 +7,7 @@ from pprint import pformat
 import traceback
 from tqdm import tqdm
 
-from zaki_2024_convert_conditioning_session import session_to_nwb
+from zaki_2024_convert_session import session_to_nwb
 
 
 def dataset_to_nwb(
@@ -16,6 +16,7 @@ def dataset_to_nwb(
     output_dir_path: Union[str, Path],
     max_workers: int = 1,
     verbose: bool = True,
+    stub_test: bool = False,
 ):
     """Convert the entire dataset to NWB.
 
@@ -41,6 +42,7 @@ def dataset_to_nwb(
         for session_to_nwb_kwargs in session_to_nwb_kwargs_per_session:
             session_to_nwb_kwargs["output_dir_path"] = output_dir_path
             session_to_nwb_kwargs["verbose"] = verbose
+            session_to_nwb_kwargs["stub_test"] = stub_test
             exception_file_path = data_dir_path / f"ERROR_<nwbfile_name>.txt"  # Add error file path here
             futures.append(
                 executor.submit(
@@ -101,8 +103,7 @@ def get_session_to_nwb_kwargs_per_session(
         session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
         if session_times_file_path.is_file():
             session_times_df = pd.read_csv(session_times_file_path)
-            tasks = [task for task in session_times_df["Session"] if "Offline" not in task]
-            for task in tasks:
+            for task in session_times_df["Session"]:
                 session_id = subject_id + "_" + task
                 session_row = session_times_df[session_times_df["Session"] == task].iloc[0]
                 date_str = session_row["Date"]
@@ -112,7 +113,6 @@ def get_session_to_nwb_kwargs_per_session(
                         data_dir_path=data_dir_path,
                         subject_id=subject_id,
                         session_id=session_id,
-                        stub_test=True,
                         date_str=date_str,
                         time_str=time_str,
                     )
@@ -130,10 +130,11 @@ if __name__ == "__main__":
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
     max_workers = 1
     verbose = True
-
+    stub_test = True
     dataset_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
         max_workers=max_workers,
         verbose=verbose,
+        stub_test=stub_test,
     )

@@ -51,10 +51,14 @@ def session_to_nwb(
     source_data = dict()
     conversion_options = dict()
 
-    experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions")
+    if "Offline" in session_id:
+        offline_day = session_id.split("Session")[0]
+        experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Offline") / offline_day
+    else:
+        experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
 
     # Add Imaging
-    folder_path = experiment_dir_path / session_id / date_str / time_str
+    folder_path = experiment_dir_path / date_str / time_str
     miniscope_folder_path = get_miniscope_folder_path(folder_path)
     if miniscope_folder_path is not None:
         source_data.update(dict(MiniscopeImaging=dict(folder_path=miniscope_folder_path)))
@@ -79,7 +83,7 @@ def session_to_nwb(
         print("No motion corrected data found at {}".format(motion_corrected_video))
 
     # Add Behavioral Video
-    video_file_path = experiment_dir_path / session_id / (session_id + ".wmv")
+    video_file_path = experiment_dir_path / (session_id + ".wmv")
     if video_file_path.is_file():
         source_data.update(dict(Video=dict(file_paths=[video_file_path])))
         conversion_options.update(dict(Video=dict(stub_test=stub_test)))
@@ -87,7 +91,7 @@ def session_to_nwb(
         print("No behavioral video found at {}".format(video_file_path))
 
     # Add Freezing Analysis output
-    freezing_output_file_path = experiment_dir_path / session_id / (session_id + "_FreezingOutput.csv")
+    freezing_output_file_path = experiment_dir_path / (session_id + "_FreezingOutput.csv")
     if freezing_output_file_path.is_file():
         source_data.update(
             dict(FreezingBehavior=dict(file_path=freezing_output_file_path, video_sampling_frequency=30.0))
@@ -105,6 +109,17 @@ def session_to_nwb(
         conversion_options.update(dict(EDFSignals=dict(stub_test=stub_test)))
     elif verbose:
         print("No .edf file found at {}".format(edf_file_path))
+
+    # Add Sleep Classification output
+    sleep_classification_file_path = (
+        data_dir_path / "Ca_EEG_Sleep" / subject_id / "AlignedSleep" / (session_id + "_AlignedSleep.csv")
+    )
+    if sleep_classification_file_path.is_file():
+        source_data.update(
+            dict(SleepClassification=dict(file_path=sleep_classification_file_path, video_sampling_frequency=30.0))
+        )
+    elif verbose:
+        print("No sleep classification output csv file found at {}".format(sleep_classification_file_path))
 
     converter = Zaki2024NWBConverter(source_data=source_data)
 
@@ -144,7 +159,7 @@ if __name__ == "__main__":
     # Parameters for conversion
     data_dir_path = Path("D:/")
     subject_id = "Ca_EEG3-4"
-    task = "NeutralExposure"
+    task = "OfflineDay1Session1"
     session_id = subject_id + "_" + task
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
     stub_test = True
