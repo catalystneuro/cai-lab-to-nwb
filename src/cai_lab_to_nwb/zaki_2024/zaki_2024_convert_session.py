@@ -171,7 +171,6 @@ def session_to_nwb(
         print(f"No freezing output csv file found at {freezing_output_file_path}")
 
     # Add EEG, EMG, Temperature and Activity signals
-    # TODO discuss how to slice this data
     datetime_obj = datetime.strptime(date_str, "%Y_%m_%d")
     reformatted_date_str = datetime_obj.strftime("_%m%d%y")
     edf_file_path = data_dir_path / "Ca_EEG_EDF" / (subject_id + "_EDF") / (subject_id + reformatted_date_str + ".edf")
