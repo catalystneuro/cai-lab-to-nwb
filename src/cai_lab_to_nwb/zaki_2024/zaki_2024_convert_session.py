@@ -4,15 +4,35 @@ import time
 
 from pathlib import Path
 from typing import Union
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import json
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
 from zaki_2024_nwbconverter import Zaki2024NWBConverter
+from interfaces.miniscope_imaging_interface import get_miniscope_timestamps, get_session_start_time
 
 
 def get_miniscope_folder_path(folder_path: Union[str, Path]):
+    """
+    Retrieve the path to the Miniscope folder within the given session folder based on metadata.
+
+    Parameters:
+    -----------
+    folder_path : Union[str, Path]
+        Path to the main session folder, which should contain a "metaData.json" file with information about the Miniscope.
+
+    Returns:
+    --------
+    Optional[Path]
+        Path to the Miniscope folder, formatted to replace any spaces in the Miniscope name with underscores. Returns `None` if the
+        specified folder is not a directory or if the metadata JSON is missing or misconfigured.
+
+    Raises:
+    -------
+    AssertionError
+        If the "metaData.json" file is not found in the given folder path.
+    """
     folder_path = Path(folder_path)
     if folder_path.is_dir():
         general_metadata_json = folder_path / "metaData.json"
@@ -24,6 +44,38 @@ def get_miniscope_folder_path(folder_path: Union[str, Path]):
     else:
         print(f"No Miniscope data found at {folder_path}")
         return None
+
+
+def get_edf_slicing_time_range(folder_path: Union[str, Path], miniscope_folder_path: Union[str, Path]):
+    """
+    Calculate the time range for EDF slicing based on session start time and Miniscope timestamps.
+
+    Parameters:
+    -----------
+    folder_path : Union[str, Path]
+        Path to the session folder, which contains metadata.json file produced by Miniscope output.
+
+    miniscope_folder_path : Union[str, Path]
+        Path to the folder containing Miniscope timeStamps.csv file.
+
+    Returns:
+    --------
+    Tuple[datetime, datetime]
+        A tuple containing the start and stop timestamps (as datetime objects) for the EDF slicing period. The start timestamp
+        corresponds to the session's start time adjusted by the first Miniscope timestamp, and the stop timestamp is the session's
+        start time adjusted by the last Miniscope timestamp.
+
+    """
+    folder_path = Path(folder_path)
+    if folder_path.is_dir() and miniscope_folder_path.is_dir():
+
+        session_start_time = get_session_start_time(folder_path=folder_path)
+        miniscope_timestamps = get_miniscope_timestamps(miniscope_folder_path=miniscope_folder_path)
+
+        start_datetime_timestamp = session_start_time + timedelta(seconds=miniscope_timestamps[0])
+        stop_datetime_timestamp = session_start_time + timedelta(seconds=miniscope_timestamps[-1])
+
+        return start_datetime_timestamp, stop_datetime_timestamp
 
 
 def session_to_nwb(
@@ -123,8 +175,21 @@ def session_to_nwb(
     datetime_obj = datetime.strptime(date_str, "%Y_%m_%d")
     reformatted_date_str = datetime_obj.strftime("_%m%d%y")
     edf_file_path = data_dir_path / "Ca_EEG_EDF" / (subject_id + "_EDF") / (subject_id + reformatted_date_str + ".edf")
+
     if edf_file_path.is_file() and include_eeg_emg_signals:
-        source_data.update(dict(EDFSignals=dict(file_path=edf_file_path)))
+
+        start_datetime_timestamp, stop_datetime_timestamp = get_edf_slicing_time_range(
+            folder_path=folder_path, miniscope_folder_path=miniscope_folder_path
+        )
+        source_data.update(
+            dict(
+                EDFSignals=dict(
+                    file_path=edf_file_path,
+                    start_datetime_timestamp=start_datetime_timestamp,
+                    stop_datetime_timestamp=stop_datetime_timestamp,
+                )
+            )
+        )
         conversion_options.update(dict(EDFSignals=dict(stub_test=stub_test)))
     elif verbose and not include_eeg_emg_signals:
         print(f"The EEG, EMG, Temperature and Activity signals will not be included for session {session_id}")
@@ -182,10 +247,10 @@ if __name__ == "__main__":
     # Parameters for conversion
     data_dir_path = Path("D:/")
     subject_id = "Ca_EEG3-4"
-    task = "NeutralExposure"
+    task = "OfflineDay1Session1"
     session_id = subject_id + "_" + task
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
-    stub_test = True
+    stub_test = False
     session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
     df = pd.read_csv(session_times_file_path)
     session_row = df[df["Session"] == task].iloc[0]
