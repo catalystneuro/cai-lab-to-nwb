@@ -1,33 +1,29 @@
-from pydantic import FilePath
 from pathlib import Path
-
 from neuroconv.basedatainterface import BaseDataInterface
 from pynwb import NWBFile, TimeSeries
 from pynwb.device import Device
-
 from mne.io import read_raw_edf
+from datetime import datetime, timedelta
+import numpy as np
 
 
 class Zaki2024EDFInterface(BaseDataInterface):
-
-    def __init__(self, file_path: FilePath, verbose: bool = False):
-
+    def __init__(
+        self,
+        file_path: Path,
+        start_datetime_timestamp: datetime = None,
+        stop_datetime_timestamp: datetime = None,
+        verbose: bool = False,
+    ):
         self.file_path = Path(file_path)
+        self.start_datetime_timestamp = start_datetime_timestamp
+        self.stop_datetime_timestamp = stop_datetime_timestamp
         self.verbose = verbose
-        super().__init__(file_path=file_path)
-
-    def get_timestamps_reference_time(self):
-        """
-        Get datetime object of the first frame of the data in the .edf file.
-
-        Returns
-        ----------
-        timestamps_reference_time : datetime.datetime
-            datetime object of the first frame of the data in the .edf file.
-
-        """
-        edf_reader = read_raw_edf(input_fname=self.file_path, verbose=self.verbose)
-        return edf_reader.info["meas_date"]
+        super().__init__(
+            file_path=file_path,
+            start_datetime_timestamp=start_datetime_timestamp,
+            stop_datetime_timestamp=stop_datetime_timestamp,
+        )
 
     def add_to_nwbfile(
         self, nwbfile: NWBFile, stub_test: bool = False, stub_frames: int = 100, **conversion_options
@@ -61,13 +57,28 @@ class Zaki2024EDFInterface(BaseDataInterface):
         edf_reader = read_raw_edf(input_fname=self.file_path, verbose=self.verbose)
         data, times = edf_reader.get_data(picks=list(channels_dict.keys()), return_times=True)
         data = data.astype("float32")
-        # TODO select the correct time range
+        if self.start_datetime_timestamp is not None:
+            # Get edf start_time in datetime format
+            edf_start_time = edf_reader.info["meas_date"]
+            # Convert relative edf timestamps to datetime timestamps
+            edf_start_time = edf_start_time.replace(tzinfo=None)
+            edf_datetime_timestamps = [edf_start_time + timedelta(seconds=t) for t in times]
+            # Find the indices of the timestamps within the time range
+            start_idx = np.searchsorted(edf_datetime_timestamps, self.start_datetime_timestamp, side="left")
+            end_idx = np.searchsorted(edf_datetime_timestamps, self.stop_datetime_timestamp, side="right")
+        else:
+            start_idx = 0
+            end_idx = -1
+
+        # Slice the data and timestamps within the time range
         if stub_test:
-            data = data[:, :stub_frames]
-            times = times[:stub_frames]
+            data = data[:, start_idx : start_idx + stub_frames]
+        else:
+            data = data[:, start_idx:end_idx]
+
         for channel_index, channel_name in enumerate(channels_dict.keys()):
             time_series_kwargs = channels_dict[channel_name].copy()
-            time_series_kwargs.update(data=data[channel_index], timestamps=times)
+            time_series_kwargs.update(data=data[channel_index], starting_time=0.0, rate=edf_reader.info["sfreq"])
             time_series = TimeSeries(**time_series_kwargs)
             nwbfile.add_acquisition(time_series)
 
