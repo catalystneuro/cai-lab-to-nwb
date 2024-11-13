@@ -1,44 +1,48 @@
 NWBFile:
   keywords:
     - hippocampus
-    - memory integration
+    - learning
     - memory-linking
     - ensemble
     - reactivation
-    - co-firing
+    - co-activity
     - offline periods
-    - sleep
-    - stress
-    - PTSD
+    - aversive
   related_publications:
-    - https://www.biorxiv.org/content/10.1101/2023.03.13.532469v2
+    - https://doi.org/10.1038/s41586-024-08168-4
   session_description:
-    A rich text description of the experiment. Can also just be the abstract of the publication.
+    In memory-linking behavioural experiments, mice were exposed to the neutral context for 10 min to explore. 
+    During aversive encoding, after a baseline period of 2 min, mice received three 2 s foot shocks of either amplitude 
+    0.25 mA (low-shock) or 1.5 mA (high-shock), with an intershock interval of 1 min. 
+    Then, 30 s after the final shock, the mice were removed and returned to the vivarium. 
+    On the next 3 days, the mice were tested in the previously experienced aversive and neutral contexts, 
+    as well as a completely novel context that they had not been exposed to previously, for 5 min each. 
+    The features of the neutral and novel contexts were counter-balanced and were made up of different olfactory, 
+    auditory, lighting and tactile cues. 
+    The aversive context was always the same with distinct cues from the neutral and novel contexts. 
+    In the low- versus high-shock experiments mice were tested in the aversive context first, 
+    followed by testing in the neutral and novel context counter-balanced; 
+    half of the mice received neutral recall and then novel-context exposure the next day, 
+    and the other half received novel-context exposure and then neutral recall.
+  experiment_description:
+    Simultaneous calcium imaging with Miniscopes and EEG/EMG experiment during retrospective memory-linking behavioral paradigm, 
+    to test whether ensemble co-reactivation is sleep-state specific
   institution: Icahn School of Medicine at Mount Sinai
   lab: Cai
   experimenter:
-    - Cai, Denise
-    - Morales-Rodriguez, Denisse
-    - Bacon, Madeline E.
-    - Ko, BumJin
-    - Francisco, Taylor R.
-    - LaBanca, Alexa R.
-    - Sompolpong, Patlapa
-    - Dong, Zhe
-    - Lamsifer, Sophia
-    - Chen, Hung-Tu
-    - Carrillo Segura, Simón
-    - Christenson Wick, Zoé
-    - Silva, Alcino J.
-    - Rajan, Kanaka
-    - van der Meer, Matthijs
-    - Fenton, André
-    - Shuman, Tristan
     - Zaki, Yosif
+  surgery:
+    Mice were anaesthetized with 1 to 2% isoflurane for surgical procedures and placed into a stereotaxic frame (David Kopf Instruments). 
+    Eye ointment was applied to prevent desiccation, and the mice were kept on a heated pad to prevent hypothermia. 
+    Surgery was performed using aseptic technique. After surgery, carprofen (5mg per kg) was administered every day for the following 3 days, 
+    and ampicillin (20mg per kg) was administered every day for the next 7days. 
+    For calcium imaging experiments, dexamethasone (0.2mg per kg) was also administered for the following 7days.
+  virus:
+    AAV1-Syn-GCaMP6f was injected into dorsal CA1 of the hippocampus on the right hemisphere (AP, −2 mm; ML, +1.5 mm; DV, −1.2 mm)
 Subject:
   species: Mus musculus
   age: P12W/P15W  # in ISO 8601, such as "P1W2D"
-  sex: U  # One of M, F, U, or O
+  sex: M
 Ophys:
   OnePhotonSeries:
     - name: OnePhotonSeries
