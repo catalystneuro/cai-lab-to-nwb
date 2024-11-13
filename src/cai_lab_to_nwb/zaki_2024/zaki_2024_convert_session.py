@@ -188,12 +188,18 @@ def session_to_nwb(
             dict(
                 EDFSignals=dict(
                     file_path=edf_file_path,
+                )
+            )
+        )
+        conversion_options.update(
+            dict(
+                EDFSignals=dict(
+                    stub_test=stub_test,
                     start_datetime_timestamp=start_datetime_timestamp,
                     stop_datetime_timestamp=stop_datetime_timestamp,
                 )
             )
         )
-        conversion_options.update(dict(EDFSignals=dict(stub_test=stub_test)))
     elif verbose and not include_eeg_emg_signals:
         print(f"The EEG, EMG, Temperature and Activity signals will not be included for session {session_id}")
     elif verbose and not edf_file_path.is_file():
