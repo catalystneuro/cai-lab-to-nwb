@@ -8,7 +8,7 @@ from typing import Optional, List
 from pynwb.epoch import TimeIntervals
 
 
-class Zaki2024ShockTimesInterface(BaseDataInterface):
+class Zaki2024ShockStimuliInterface(BaseDataInterface):
     """Adds annotated events of shock times."""
 
     keywords = ["behavior", "sleep stages"]
@@ -28,7 +28,7 @@ class Zaki2024ShockTimesInterface(BaseDataInterface):
         self,
         nwbfile: NWBFile,
         shock_amplitude: float,
-        shock_times: List = [120, 180, 240],
+        shock_times: List = [120.0, 180.0, 240.0],
         shock_duration: float = 2.0,
         metadata: Optional[dict] = None,
     ):

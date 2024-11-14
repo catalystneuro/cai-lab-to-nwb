@@ -147,6 +147,20 @@ def session_to_nwb(
     elif verbose and not sleep_classification_file_path.is_file():
         print(f"No sleep classification output csv file found at {sleep_classification_file_path}")
 
+    # Add Shock Stimuli times for FC sessions
+    if include_shock_times:
+        import re
+
+        subjects_df = pd.read_excel(data_dir_path / "Ca_EEG_Design.xlsx")
+        shock_amplitude = subjects_df["Amplitude"][subjects_df["Mouse"] == subject_id].to_numpy()[0]
+        shock_amplitude = float(re.findall(r"[-+]?\d*\.\d+|\d+", shock_amplitude)[0])
+        shock_times = [120.0, 180.0, 240.0]
+        shock_duration = 2.0
+        source_data.update(ShockStimuli=dict())
+        conversion_options.update(
+            ShockStimuli=dict(shock_times=shock_times, shock_amplitude=shock_amplitude, shock_duration=shock_duration)
+        )
+
     converter = Zaki2024NWBConverter(source_data=source_data)
 
     # Add datetime to conversion
@@ -185,10 +199,10 @@ if __name__ == "__main__":
     # Parameters for conversion
     data_dir_path = Path("D:/")
     subject_id = "Ca_EEG3-4"
-    task = "NeutralExposure"
+    task = "FC"
     session_id = subject_id + "_" + task
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
-    stub_test = True
+    stub_test = False
     session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
     df = pd.read_csv(session_times_file_path)
     session_row = df[df["Session"] == task].iloc[0]
