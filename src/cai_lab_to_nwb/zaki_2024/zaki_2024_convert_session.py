@@ -10,7 +10,7 @@ import json
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
 from zaki_2024_nwbconverter import Zaki2024NWBConverter
-from interfaces.miniscope_imaging_interface import get_miniscope_timestamps, get_session_start_time
+from interfaces.miniscope_imaging_interface import get_miniscope_timestamps, get_recording_start_time
 
 
 def get_miniscope_folder_path(folder_path: Union[str, Path]):
@@ -46,17 +46,17 @@ def get_miniscope_folder_path(folder_path: Union[str, Path]):
         return None
 
 
-def get_edf_slicing_time_range(folder_path: Union[str, Path], miniscope_folder_path: Union[str, Path]):
+def get_edf_slicing_time_range(miniscope_metadata_json: Union[str, Path], timestamps_file_path: Union[str, Path]):
     """
     Calculate the time range for EDF slicing based on session start time and Miniscope timestamps.
 
     Parameters:
     -----------
-    folder_path : Union[str, Path]
-        Path to the session folder, which contains metadata.json file produced by Miniscope output.
+    miniscope_metadata_json : Union[str, Path]
+        Path to the metadata.json file produced by Miniscope output.
 
-    miniscope_folder_path : Union[str, Path]
-        Path to the folder containing Miniscope timeStamps.csv file.
+    timestamps_file_path : Union[str, Path]
+        Path to the Miniscope timeStamps.csv file.
 
     Returns:
     --------
@@ -66,11 +66,12 @@ def get_edf_slicing_time_range(folder_path: Union[str, Path], miniscope_folder_p
         start time adjusted by the last Miniscope timestamp.
 
     """
-    folder_path = Path(folder_path)
-    if folder_path.is_dir() and miniscope_folder_path.is_dir():
+    miniscope_metadata_json = Path(miniscope_metadata_json)
+    timestamps_file_path = Path(timestamps_file_path)
+    if miniscope_metadata_json.is_file() and timestamps_file_path.is_file():
 
-        session_start_time = get_session_start_time(folder_path=folder_path)
-        miniscope_timestamps = get_miniscope_timestamps(miniscope_folder_path=miniscope_folder_path)
+        session_start_time = get_recording_start_time(file_path=miniscope_metadata_json)
+        miniscope_timestamps = get_miniscope_timestamps(file_path=timestamps_file_path)
 
         start_datetime_timestamp = session_start_time + timedelta(seconds=miniscope_timestamps[0])
         stop_datetime_timestamp = session_start_time + timedelta(seconds=miniscope_timestamps[-1])
@@ -176,20 +177,29 @@ def session_to_nwb(
     edf_file_path = data_dir_path / "Ca_EEG_EDF" / (subject_id + "_EDF") / (subject_id + reformatted_date_str + ".edf")
 
     if edf_file_path.is_file() and include_eeg_emg_signals:
-
+        miniscope_metadata_json = folder_path / "metaData.json"
+        assert miniscope_metadata_json.exists(), f"General metadata json not found in {folder_path}"
+        timestamps_file_path = miniscope_folder_path / "timeStamps.csv"
+        assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {miniscope_folder_path}"
         start_datetime_timestamp, stop_datetime_timestamp = get_edf_slicing_time_range(
-            folder_path=folder_path, miniscope_folder_path=miniscope_folder_path
+            miniscope_metadata_json=miniscope_metadata_json, timestamps_file_path=timestamps_file_path
         )
         source_data.update(
             dict(
                 EDFSignals=dict(
                     file_path=edf_file_path,
+                )
+            )
+        )
+        conversion_options.update(
+            dict(
+                EDFSignals=dict(
+                    stub_test=stub_test,
                     start_datetime_timestamp=start_datetime_timestamp,
                     stop_datetime_timestamp=stop_datetime_timestamp,
                 )
             )
         )
-        conversion_options.update(dict(EDFSignals=dict(stub_test=stub_test)))
     elif verbose and not include_eeg_emg_signals:
         print(f"The EEG, EMG, Temperature and Activity signals will not be included for session {session_id}")
     elif verbose and not edf_file_path.is_file():

@@ -18,14 +18,14 @@ from neuroconv.datainterfaces.ophys.baseimagingextractorinterface import BaseIma
 from neuroconv.utils import DeepDict, dict_deep_update
 
 
-def get_session_start_time(folder_path: Union[str, Path]):
+def get_recording_start_time(file_path: Union[str, Path]):
     """
-    Retrieve the session start time from metadata in the specified folder.
+    Retrieve the recording start time from metadata in the specified folder.
 
     Parameters:
     -----------
-    folder_path : Union[str, Path]
-        Path to the main session folder, expected to contain a "metaData.json" file with recording start time details.
+    file_path : Union[str, Path]
+        Path to the "metaData.json" file with recording start time details.
 
     Returns:
     --------
@@ -48,10 +48,9 @@ def get_session_start_time(folder_path: Union[str, Path]):
     - The "msec" field in the metadata is converted from milliseconds to microseconds for compatibility with the datetime
       microsecond field.
     """
-    general_metadata_json = folder_path / "metaData.json"
-    assert general_metadata_json.exists(), f"General metadata json not found in {folder_path}"
+
     ## Read metadata
-    with open(general_metadata_json) as f:
+    with open(file_path) as f:
         general_metadata = json.load(f)
 
     if "recordingStartTime" in general_metadata:
@@ -77,14 +76,14 @@ def get_session_start_time(folder_path: Union[str, Path]):
     return session_start_time
 
 
-def get_miniscope_timestamps(miniscope_folder_path: Union[str, Path]):
+def get_miniscope_timestamps(file_path: Union[str, Path]):
     """
     Retrieve the Miniscope timestamps from a CSV file and convert them to seconds.
 
     Parameters:
     -----------
-    miniscope_folder_path : Union[str, Path]
-        Path to the folder containing the Miniscope "timeStamps.csv" file, which includes timestamps in milliseconds.
+    file_path : Union[str, Path]
+        Path to the Miniscope "timeStamps.csv" file, which includes timestamps in milliseconds.
 
     Returns:
     --------
@@ -102,11 +101,10 @@ def get_miniscope_timestamps(miniscope_folder_path: Union[str, Path]):
     - The timestamps are converted from milliseconds to seconds for compatibility with other functions that expect time
       values in seconds.
     """
-    timestamps_file_path = miniscope_folder_path / "timeStamps.csv"
-    assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {miniscope_folder_path}"
+
     import pandas as pd
 
-    timetsamps_df = pd.read_csv(timestamps_file_path)
+    timetsamps_df = pd.read_csv(file_path)
     timestamps_milliseconds = timetsamps_df["Time Stamp (ms)"].values.astype(float)
     timestamps_seconds = timestamps_milliseconds / 1000.0
 
@@ -309,7 +307,9 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         metadata = dict_deep_update(metadata, default_metadata)
         metadata["Ophys"].pop("TwoPhotonSeries", None)
 
-        session_start_time = get_session_start_time(folder_path=self.session_folder)
+        general_metadata_json = self.session_folder / "metaData.json"
+        assert general_metadata_json.exists(), f"General metadata json not found in {self.session_folder}"
+        session_start_time = get_recording_start_time(file_path=general_metadata_json)
 
         metadata["NWBFile"].update(session_start_time=session_start_time)
 
@@ -334,7 +334,9 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         return metadata_schema
 
     def get_original_timestamps(self) -> np.ndarray:
-        timestamps_seconds = get_miniscope_timestamps(miniscope_folder_path=self.miniscope_folder)
+        timestamps_file_path = self.miniscope_folder / "timeStamps.csv"
+        assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {self.miniscope_folder}"
+        timestamps_seconds = get_miniscope_timestamps(file_path=timestamps_file_path)
         # Shift when the first timestamp is negative
         # TODO: Figure why, I copied from Miniscope. Need to shift also session_start_time
         if timestamps_seconds[0] < 0.0:
