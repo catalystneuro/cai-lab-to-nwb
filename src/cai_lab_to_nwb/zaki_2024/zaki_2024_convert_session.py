@@ -40,6 +40,7 @@ def session_to_nwb(
     include_sleep_classification: bool = True,
     include_behavioral_video: bool = True,
     include_eeg_emg_signals: bool = True,
+    include_shock_times: bool = False,
 ):
     print(f"Converting session {session_id}")
     if verbose:
@@ -63,6 +64,8 @@ def session_to_nwb(
         experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
         include_eeg_emg_signals = False
         include_sleep_classification = False
+        if "FC" in session_id:
+            include_shock_times = True
 
     # Add Imaging
     folder_path = experiment_dir_path / date_str / time_str
