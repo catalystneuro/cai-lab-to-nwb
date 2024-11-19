@@ -4,9 +4,7 @@ import time
 from natsort import natsorted
 from pathlib import Path
 from typing import Union
-from datetime import datetime, timedelta
-import pandas as pd
-import json
+import os
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
 from zaki_2024_nwbconverter import Zaki2024NWBConverter
@@ -48,6 +46,19 @@ def session_to_nwb(
         conversion_options.update(dict(MultiEDFSignals=dict(stub_test=stub_test)))
     else:
         print(f"No .edf file found in {edf_folder_path}")
+
+    # Add Cross session cell registration
+    main_folder = data_dir_path / f"/Ca_EEG_Calcium/{subject_id}/SpatialFootprints"
+    file_paths = []
+    for folder in os.listdir(main_folder):
+        folder_path = os.path.join(main_folder, folder)
+        if os.path.isdir(folder_path):  # Ensure it's a directory
+            filename = folder.split("_")[0] + f"_{subject_id}_" + folder.split("_")[-1]
+            csv_file = os.path.join(folder_path, f"{filename}.csv")
+            if os.path.isfile(csv_file):  # Check if the file exists
+                file_paths.append(csv_file)
+    source_data.update(dict(CellRegistration=dict(file_paths=file_paths)))
+    conversion_options.update(dict(CellRegistration=dict(stub_test=stub_test, subject_id=subject_id)))
 
     converter = Zaki2024NWBConverter(source_data=source_data)
 
