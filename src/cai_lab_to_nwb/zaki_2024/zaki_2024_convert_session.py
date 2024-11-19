@@ -93,6 +93,7 @@ def session_to_nwb(
     include_sleep_classification: bool = True,
     include_behavioral_video: bool = True,
     include_eeg_emg_signals: bool = True,
+    shock_stimulus: dict = None,
 ):
     print(f"Converting session {session_id}")
     if verbose:
@@ -218,6 +219,14 @@ def session_to_nwb(
     elif verbose and not sleep_classification_file_path.is_file():
         print(f"No sleep classification output csv file found at {sleep_classification_file_path}")
 
+    # Add Shock Stimuli times for FC sessions
+    if shock_stimulus is not None:
+
+        source_data.update(ShockStimuli=dict())
+        conversion_options.update(
+            ShockStimuli=shock_stimulus,
+        )
+
     converter = Zaki2024NWBConverter(source_data=source_data)
 
     # Add datetime to conversion
@@ -256,7 +265,7 @@ if __name__ == "__main__":
     # Parameters for conversion
     data_dir_path = Path("D:/")
     subject_id = "Ca_EEG3-4"
-    task = "OfflineDay1Session1"
+    task = "FC"
     session_id = subject_id + "_" + task
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
     stub_test = False
@@ -265,6 +274,7 @@ if __name__ == "__main__":
     session_row = df[df["Session"] == task].iloc[0]
     date_str = session_row["Date"]
     time_str = session_row["Time"]
+    shock_stimulus = dict(shock_times=[120.0, 180.0, 240.0], shock_amplitude=0.25, shock_duration=2.0)
     session_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
@@ -273,4 +283,5 @@ if __name__ == "__main__":
         session_id=session_id,
         date_str=date_str,
         time_str=time_str,
+        shock_stimulus=shock_stimulus,
     )
