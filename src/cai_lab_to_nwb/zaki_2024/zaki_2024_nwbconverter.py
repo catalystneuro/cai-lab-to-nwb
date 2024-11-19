@@ -15,6 +15,7 @@ from interfaces import (
     Zaki2024SleepClassificationInterface,
     MiniscopeImagingInterface,
     MinianMotionCorrectionInterface,
+    Zaki2024ShockStimuliInterface,
 )
 
 
@@ -30,6 +31,7 @@ class Zaki2024NWBConverter(NWBConverter):
         MultiEDFSignals=Zaki2024MultiEDFInterface,
         FreezingBehavior=EzTrackFreezingBehaviorInterface,
         Video=VideoInterface,
+        ShockStimuli=Zaki2024ShockStimuliInterface,
     )
 
 

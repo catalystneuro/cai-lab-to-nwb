@@ -95,6 +95,7 @@ def get_session_to_nwb_kwargs_per_session(
     # This can be a specific list with hard-coded sessions, a path expansion or any conversion specific logic that you might need
     #####
     import pandas as pd
+    import re
 
     subjects_df = pd.read_excel(data_dir_path / "Ca_EEG_Design.xlsx")
     subjects = subjects_df["Mouse"]
@@ -104,6 +105,14 @@ def get_session_to_nwb_kwargs_per_session(
         if session_times_file_path.is_file():
             session_times_df = pd.read_csv(session_times_file_path)
             for task in session_times_df["Session"]:
+                if task == "FC":
+                    shock_amplitude = subjects_df["Amplitude"][subjects_df["Mouse"] == subject_id].to_numpy()[0]
+                    shock_amplitude = float(re.findall(r"[-+]?\d*\.\d+|\d+", shock_amplitude)[0])
+                    shock_stimulus = dict(
+                        shock_times=[120.0, 180.0, 240.0], shock_amplitude=shock_amplitude, shock_duration=2.0
+                    )
+                else:
+                    shock_stimulus = None
                 session_id = subject_id + "_" + task
                 session_row = session_times_df[session_times_df["Session"] == task].iloc[0]
                 date_str = session_row["Date"]
@@ -115,6 +124,7 @@ def get_session_to_nwb_kwargs_per_session(
                         session_id=session_id,
                         date_str=date_str,
                         time_str=time_str,
+                        shock_stimulus=shock_stimulus,
                     )
                 )
         else:
