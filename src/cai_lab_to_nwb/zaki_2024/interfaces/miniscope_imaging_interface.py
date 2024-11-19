@@ -352,6 +352,7 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         photon_series_index: int = 0,
         stub_test: bool = False,
         stub_frames: int = 100,
+        always_write_timestamps: bool = True,
     ):
         from ndx_miniscope.utils import add_miniscope_device
 
@@ -379,4 +380,5 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
             metadata=metadata,
             photon_series_type=photon_series_type,
             photon_series_index=photon_series_index,
+            always_write_timestamps=always_write_timestamps,
         )
