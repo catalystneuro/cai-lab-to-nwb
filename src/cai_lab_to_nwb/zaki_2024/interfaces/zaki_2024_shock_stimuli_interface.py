@@ -28,8 +28,8 @@ class Zaki2024ShockStimuliInterface(BaseDataInterface):
         self,
         nwbfile: NWBFile,
         shock_amplitude: float,
-        shock_times: List = [120.0, 180.0, 240.0],
-        shock_duration: float = 2.0,
+        shock_times: list,
+        shock_duration: float,
         metadata: Optional[dict] = None,
     ):
 
@@ -47,4 +47,4 @@ class Zaki2024ShockStimuliInterface(BaseDataInterface):
                 start_time=start_time, stop_time=start_time + shock_duration, shock_amplitude=shock_amplitude
             )
 
-        nwbfile.add_time_intervals(shock_stimuli)
+        nwbfile.add_stimulus(shock_stimuli)
