@@ -1,8 +1,12 @@
 from typing import Union
 from pathlib import Path
-from neuroconv.basedatainterface import BaseDataInterface
+
 from pynwb import NWBFile, TimeSeries
 from pynwb.device import Device
+
+from neuroconv.basedatainterface import BaseDataInterface
+from neuroconv.utils import DeepDict
+
 from mne.io import read_raw_edf
 from datetime import datetime, timedelta
 import numpy as np
@@ -179,18 +183,23 @@ class Zaki2024MultiEDFInterface(BaseDataInterface):
                 "unit": "n.a.",
             },
         }
-        concatenated_data = []
+        concatenated_data = None
         concatenated_times = []
 
         # Loop over each EDF file and concatenate data and timestamps
         for file_path in self.file_paths:
             edf_reader = read_raw_edf(input_fname=file_path, verbose=self.verbose)
             data, times = edf_reader.get_data(picks=list(channels_dict.keys()), return_times=True)
+            data = data.astype(np.float32)
             # Slice the data and timestamps within the time range
             if stub_test:
                 concatenated_data = data[:, :stub_frames]
                 break
-            concatenated_data.append(data.astype("float32"))
+            # Concatenate along the time axis
+            if concatenated_data is None:
+                concatenated_data = data
+            else:
+                concatenated_data = np.concatenate((concatenated_data, data), axis=1)
             concatenated_times.extend(times)
 
         for channel_index, channel_name in enumerate(channels_dict.keys()):
