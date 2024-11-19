@@ -40,7 +40,7 @@ def session_to_nwb(
     include_sleep_classification: bool = True,
     include_behavioral_video: bool = True,
     include_eeg_emg_signals: bool = True,
-    include_shock_times: bool = False,
+    shock_stimulus: dict = None,
 ):
     print(f"Converting session {session_id}")
     if verbose:
@@ -64,8 +64,6 @@ def session_to_nwb(
         experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
         include_eeg_emg_signals = False
         include_sleep_classification = False
-        if "FC" in session_id:
-            include_shock_times = True
 
     # Add Imaging
     folder_path = experiment_dir_path / date_str / time_str
@@ -148,17 +146,11 @@ def session_to_nwb(
         print(f"No sleep classification output csv file found at {sleep_classification_file_path}")
 
     # Add Shock Stimuli times for FC sessions
-    if include_shock_times:
-        import re
+    if shock_stimulus is not None:
 
-        subjects_df = pd.read_excel(data_dir_path / "Ca_EEG_Design.xlsx")
-        shock_amplitude = subjects_df["Amplitude"][subjects_df["Mouse"] == subject_id].to_numpy()[0]
-        shock_amplitude = float(re.findall(r"[-+]?\d*\.\d+|\d+", shock_amplitude)[0])
-        shock_times = [120.0, 180.0, 240.0]
-        shock_duration = 2.0
         source_data.update(ShockStimuli=dict())
         conversion_options.update(
-            ShockStimuli=dict(shock_times=shock_times, shock_amplitude=shock_amplitude, shock_duration=shock_duration)
+            ShockStimuli=shock_stimulus,
         )
 
     converter = Zaki2024NWBConverter(source_data=source_data)
@@ -208,6 +200,7 @@ if __name__ == "__main__":
     session_row = df[df["Session"] == task].iloc[0]
     date_str = session_row["Date"]
     time_str = session_row["Time"]
+    shock_stimulus = dict(shock_times=[120.0, 180.0, 240.0], shock_amplitude=0.25, shock_duration=2.0)
     session_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
@@ -216,4 +209,5 @@ if __name__ == "__main__":
         session_id=session_id,
         date_str=date_str,
         time_str=time_str,
+        shock_stimulus=shock_stimulus,
     )
