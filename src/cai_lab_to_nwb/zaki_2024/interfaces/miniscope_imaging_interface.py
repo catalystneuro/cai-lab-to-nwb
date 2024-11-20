@@ -18,6 +18,39 @@ from neuroconv.datainterfaces.ophys.baseimagingextractorinterface import BaseIma
 from neuroconv.utils import DeepDict, dict_deep_update
 
 
+def get_miniscope_folder_path(folder_path: Union[str, Path]):
+    """
+    Retrieve the path to the Miniscope folder within the given session folder based on metadata.
+
+    Parameters:
+    -----------
+    folder_path : Union[str, Path]
+        Path to the main session folder, which should contain a "metaData.json" file with information about the Miniscope.
+
+    Returns:
+    --------
+    Optional[Path]
+        Path to the Miniscope folder, formatted to replace any spaces in the Miniscope name with underscores. Returns `None` if the
+        specified folder is not a directory or if the metadata JSON is missing or misconfigured.
+
+    Raises:
+    -------
+    AssertionError
+        If the "metaData.json" file is not found in the given folder path.
+    """
+    folder_path = Path(folder_path)
+    if folder_path.is_dir():
+        general_metadata_json = folder_path / "metaData.json"
+        assert general_metadata_json.exists(), f"General metadata json not found in {folder_path}"
+        with open(general_metadata_json) as f:
+            general_metadata = json.load(f)
+        miniscope_name = general_metadata["miniscopes"][0]
+        return folder_path / miniscope_name.replace(" ", "_")
+    else:
+        print(f"No Miniscope data found at {folder_path}")
+        return None
+
+
 def get_recording_start_time(file_path: Union[str, Path]):
     """
     Retrieve the recording start time from metadata in the specified folder.

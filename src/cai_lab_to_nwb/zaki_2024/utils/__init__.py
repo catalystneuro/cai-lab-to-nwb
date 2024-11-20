@@ -1,1 +1,1 @@
-from .cell_registration import add_cell_registration, get_global_ids_from_csv
+from .edf_slicing import get_session_slicing_time_range
