@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Union
 from datetime import timedelta
+
 from src.cai_lab_to_nwb.zaki_2024.interfaces.miniscope_imaging_interface import (
     get_miniscope_timestamps,
     get_recording_start_time,
@@ -38,3 +39,25 @@ def get_session_slicing_time_range(miniscope_metadata_json: Union[str, Path], ti
         stop_datetime_timestamp = session_start_time + timedelta(seconds=miniscope_timestamps[-1])
 
         return start_datetime_timestamp, stop_datetime_timestamp
+
+
+def get_session_run_time(txt_file_path: Union[str, Path]):
+    import re
+
+    try:
+        with open(txt_file_path, "r") as file:
+            text = file.read()
+    except FileNotFoundError:
+        print(f"File not found at {txt_file_path}")
+        exit()
+    # Extract the Run Time line
+    run_time_line = re.search(r"Run Time\s*:\s*([\d:.]+)", text)
+    if run_time_line:
+        run_time_str = run_time_line.group(1)
+
+        # Convert Run Time to seconds
+        h, m, s = map(float, run_time_str.split(":"))
+        duration = h * 3600 + m * 60 + s
+        return duration
+    else:
+        print("Run Time information not found.")

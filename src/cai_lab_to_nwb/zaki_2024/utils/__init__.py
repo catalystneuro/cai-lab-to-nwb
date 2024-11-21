@@ -1,1 +1,1 @@
-from .edf_slicing import get_session_slicing_time_range
+from .edf_slicing import get_session_slicing_time_range, get_session_run_time

@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Union
 import os
 import pandas as pd
+from datetime import datetime
 
 from pynwb import NWBFile
-from pynwb.epoch import TimeIntervals
-from neuroconv.utils import load_dict_from_file, dict_deep_update
+from neuroconv.utils import load_dict_from_file
 from neuroconv.tools.nwb_helpers import configure_and_write_nwbfile
 
-from utils import get_session_slicing_time_range
+from utils import get_session_slicing_time_range, get_session_run_time
 from interfaces.miniscope_imaging_interface import get_miniscope_folder_path
 from zaki_2024_nwbconverter import Zaki2024NWBConverter
 
@@ -108,20 +108,34 @@ def session_to_nwb(
             experiment_dir_path = (
                 data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
             )
-        folder_path = experiment_dir_path / date_str / time_str
-        miniscope_folder_path = get_miniscope_folder_path(folder_path)
-        miniscope_metadata_json = folder_path / "metaData.json"
-        assert miniscope_metadata_json.exists(), f"General metadata json not found in {folder_path}"
-        timestamps_file_path = miniscope_folder_path / "timeStamps.csv"
-        assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {miniscope_folder_path}"
-        start_datetime_timestamp, stop_datetime_timestamp = get_session_slicing_time_range(
-            miniscope_metadata_json=miniscope_metadata_json, timestamps_file_path=timestamps_file_path
-        )
-        start_time = start_datetime_timestamp - session_start_time.replace(tzinfo=None)
-        stop_time = stop_datetime_timestamp - session_start_time.replace(tzinfo=None)
-        nwbfile.add_epoch(
-            start_time=start_time.total_seconds(), stop_time=stop_time.total_seconds(), session_ids=session_id
-        )
+        # Some sessions may not have imaging data, so we extract the run time from the session notes (.txt file)
+        # and use the data string and time string to retrieve the start datetime of the session
+        try:
+            folder_path = experiment_dir_path / date_str / time_str
+            miniscope_folder_path = get_miniscope_folder_path(folder_path)
+            miniscope_metadata_json = folder_path / "metaData.json"
+            assert miniscope_metadata_json.exists(), f"General metadata json not found in {folder_path}"
+            timestamps_file_path = miniscope_folder_path / "timeStamps.csv"
+            assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {miniscope_folder_path}"
+
+            start_datetime_timestamp, stop_datetime_timestamp = get_session_slicing_time_range(
+                miniscope_metadata_json=miniscope_metadata_json, timestamps_file_path=timestamps_file_path
+            )
+
+            start_time = (start_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
+            stop_time = (stop_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
+
+        except:
+            datetime_str = date_str + " " + time_str
+            start_datetime_timestamp = datetime.strptime(datetime_str, "%Y_%m_%d %H_%M_%S")
+
+            txt_file_path = experiment_dir_path / f"{session_id}.txt"
+            session_run_time = get_session_run_time(txt_file_path=txt_file_path)
+
+            start_time = (start_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
+            stop_time = start_time + session_run_time
+
+        nwbfile.add_epoch(start_time=start_time, stop_time=stop_time, session_ids=session_id)
 
     converter = Zaki2024NWBConverter(source_data=source_data)
 
