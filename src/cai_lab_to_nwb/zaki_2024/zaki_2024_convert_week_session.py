@@ -19,8 +19,9 @@ def session_to_nwb(
     stub_test: bool = False,
     verbose: bool = True,
 ):
-    print(f"Converting week-long session")
+
     if verbose:
+        print(f"Converting week-long session")
         start = time.time()
 
     data_dir_path = Path(data_dir_path)
@@ -37,17 +38,16 @@ def session_to_nwb(
     # Add EEG, EMG, Temperature and Activity signals
     edf_folder_path = data_dir_path / "Ca_EEG_EDF" / (subject_id + "_EDF")
     edf_file_paths = natsorted(edf_folder_path.glob("*.edf"))
-    if len(edf_file_paths) > 0:
-        source_data.update(
-            dict(
-                MultiEDFSignals=dict(
-                    file_paths=edf_file_paths,
-                )
+    assert edf_file_paths, f"No .edf files found in {edf_folder_path}"
+
+    source_data.update(
+        dict(
+            MultiEDFSignals=dict(
+                file_paths=edf_file_paths,
             )
         )
-        conversion_options.update(dict(MultiEDFSignals=dict(stub_test=stub_test)))
-    else:
-        print(f"No .edf file found in {edf_folder_path}")
+    )
+    conversion_options.update(dict(MultiEDFSignals=dict(stub_test=stub_test)))
 
     converter = Zaki2024NWBConverter(source_data=source_data)
 
