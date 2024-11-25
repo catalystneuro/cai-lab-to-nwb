@@ -1,10 +1,7 @@
 """Primary NWBConverter class for this dataset."""
 
 from neuroconv import NWBConverter
-from pynwb import NWBFile
 from neuroconv.datainterfaces import VideoInterface
-from typing import Optional
-from pathlib import Path
 
 from interfaces import (
     MinianSegmentationInterface,
