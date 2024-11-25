@@ -10,6 +10,7 @@ from typing import Dict
 from interfaces import (
     MinianSegmentationInterface,
     Zaki2024EDFInterface,
+    Zaki2024MultiEDFInterface,
     EzTrackFreezingBehaviorInterface,
     Zaki2024SleepClassificationInterface,
     MiniscopeImagingInterface,
@@ -27,6 +28,7 @@ class Zaki2024NWBConverter(NWBConverter):
         MinianMotionCorrection=MinianMotionCorrectionInterface,
         SleepClassification=Zaki2024SleepClassificationInterface,
         EDFSignals=Zaki2024EDFInterface,
+        MultiEDFSignals=Zaki2024MultiEDFInterface,
         FreezingBehavior=EzTrackFreezingBehaviorInterface,
         Video=VideoInterface,
         ShockStimuli=Zaki2024ShockStimuliInterface,

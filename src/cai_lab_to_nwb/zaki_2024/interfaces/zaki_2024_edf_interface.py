@@ -1,7 +1,12 @@
+from typing import Union
 from pathlib import Path
-from neuroconv.basedatainterface import BaseDataInterface
+
 from pynwb import NWBFile, TimeSeries
 from pynwb.device import Device
+
+from neuroconv.basedatainterface import BaseDataInterface
+from neuroconv.utils import DeepDict
+
 from mne.io import read_raw_edf
 from datetime import datetime, timedelta
 import numpy as np
@@ -10,7 +15,7 @@ import numpy as np
 class Zaki2024EDFInterface(BaseDataInterface):
     def __init__(
         self,
-        file_path: Path,
+        file_path: Union[Path, str],
         verbose: bool = False,
     ):
         self.file_path = Path(file_path)
@@ -106,6 +111,101 @@ class Zaki2024EDFInterface(BaseDataInterface):
             time_series_kwargs = channels_dict[channel_name].copy()
             time_series_kwargs.update(
                 data=data[channel_index], starting_time=starting_time, rate=edf_reader.info["sfreq"]
+            )
+            time_series = TimeSeries(**time_series_kwargs)
+            nwbfile.add_acquisition(time_series)
+
+        # Add device
+        description = "Wireless telemetry probe used to record EEG, EMG, temperature, and activity data"
+        name = "HD-X02, Data Science International"
+        device = Device(name=name, description=description)
+        nwbfile.add_device(device)
+
+        return nwbfile
+
+
+class Zaki2024MultiEDFInterface(BaseDataInterface):
+    def __init__(
+        self,
+        file_paths: list[Path],
+        verbose: bool = False,
+    ):
+        self.file_paths = file_paths
+        self.verbose = verbose
+        super().__init__(file_paths=file_paths)
+
+    def add_to_nwbfile(
+        self,
+        nwbfile: NWBFile,
+        stub_test: bool = False,
+        stub_frames: int = 100,
+        **conversion_options,
+    ) -> NWBFile:
+        """
+        Adds data from EEG, EMG, temperature, and activity channels to an NWBFile.
+
+        Parameters
+        ----------
+        nwbfile : NWBFile
+            The NWBFile object to which data will be added.
+        stub_test : bool, optional
+            If True, loads only a subset of frames (controlled by `stub_frames` parameter)
+            to facilitate testing and faster execution. Default is False.
+        stub_frames : int, optional
+            The number of frames to load if `stub_test` is True. Default is 100.
+
+        Returns
+        -------
+        NWBFile
+            The NWBFile object with added data and metadata from the specified channels.
+        """
+        channels_dict = {
+            "Temp": {
+                "name": "TemperatureSignal",
+                "description": "Temperature signal recorder with HD-X02 wireless telemetry probe",
+                "unit": "celsius",
+            },
+            "EEG": {
+                "name": "EEGSignal",
+                "description": "EEG signal recorder with HD-X02 wireless telemetry probe",
+                "unit": "volts",
+            },
+            "EMG": {
+                "name": "EMGSignal",
+                "description": "EMG signal recorder with HD-X02 wireless telemetry probe",
+                "unit": "volts",
+            },
+            # TODO: Figure out if the units of activity are correct, the raw format marks Volts
+            # TODO: My own reading of the header indicates that the physical units is counts
+            "Activity": {
+                "name": "ActivitySignal",
+                "description": "Activity signal recorder with HD-X02 wireless telemetry probe. It refers to the motion of the probe relative to the receiver and it can be used as a proxy for locomotion.",
+                "unit": "n.a.",
+            },
+        }
+        concatenated_data = None
+        concatenated_times = []
+
+        # Loop over each EDF file and concatenate data and timestamps
+        for file_path in self.file_paths:
+            edf_reader = read_raw_edf(input_fname=file_path, verbose=self.verbose)
+            data, times = edf_reader.get_data(picks=list(channels_dict.keys()), return_times=True)
+            data = data.astype(np.float32)
+            # Slice the data and timestamps within the time range
+            if stub_test:
+                concatenated_data = data[:, :stub_frames]
+                break
+            # Concatenate along the time axis
+            if concatenated_data is None:
+                concatenated_data = data
+            else:
+                concatenated_data = np.concatenate((concatenated_data, data), axis=1)
+            concatenated_times.extend(times)
+
+        for channel_index, channel_name in enumerate(channels_dict.keys()):
+            time_series_kwargs = channels_dict[channel_name].copy()
+            time_series_kwargs.update(
+                data=concatenated_data[channel_index], starting_time=0.0, rate=edf_reader.info["sfreq"]
             )
             time_series = TimeSeries(**time_series_kwargs)
             nwbfile.add_acquisition(time_series)
