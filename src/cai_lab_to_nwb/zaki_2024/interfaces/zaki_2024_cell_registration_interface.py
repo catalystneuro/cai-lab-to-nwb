@@ -35,7 +35,16 @@ class Zaki2024CellRegistrationInterface(BaseDataInterface):
         metadata: Optional[dict] = None,
     ):
         processing_module = nwbfile.create_processing_module(
-            name="cell_registration", description="Processing module for cross session cell registration."
+            name="cell_registration",
+            description="Processing module for cross session cell registration. "
+            "Cells recorded across sessions were cross-registered using a previously published open-source "
+            "cross-registration algorithm, CellReg, using the spatial correlations of nearby cells to "
+            "determine whether highly correlated footprints close in space are likely to be the same cell across sessions."
+            "Each offline recording was cross-registered with all the encoding and recall sessions, "
+            "but not with the other offline sessions because cross-registering between all sessions would lead to too many conflicts and, "
+            "therefore, to no cells cross-registered across all sessions."
+            "Each table represents the output of the cross-registration between one offline sessions and all the encoding and recall sessions. "
+            "A table maps the global ROI ids (row of the table) to the ROI ids in each of cross-registered session's plane segmentation.",
         )
 
         for file_path in self.file_paths:
@@ -46,7 +55,7 @@ class Zaki2024CellRegistrationInterface(BaseDataInterface):
             columns = [
                 VectorData(
                     name=col,
-                    description=f"ROI indexes from segmentation of session {col} imaging data",
+                    description=f"ROI indexes of plane segmentation of session {col}",
                     data=data[col].tolist()[:100] if stub_test else data[col].tolist(),
                 )
                 for col in data.columns
@@ -54,7 +63,9 @@ class Zaki2024CellRegistrationInterface(BaseDataInterface):
 
             dynamic_table = DynamicTable(
                 name=name,
-                description=f"Table storing data from cross sessions cell registration: all conditioning sessions are registered with respect to {offline_session_name} ",
+                description="Table maps the global ROI ids (row of the table) to the ROI ids in each of cross-registered session's plane segmentation."
+                "The column names refer to the cross-registered session's ids"
+                "The values -9999 indicates no correspondence. ",
                 columns=columns,
             )
 
