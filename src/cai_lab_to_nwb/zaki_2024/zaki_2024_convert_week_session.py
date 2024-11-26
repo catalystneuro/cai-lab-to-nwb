@@ -4,7 +4,6 @@ import time
 from natsort import natsorted
 from pathlib import Path
 from typing import Union
-import os
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
 from zaki_2024_nwbconverter import Zaki2024NWBConverter
@@ -48,15 +47,16 @@ def session_to_nwb(
     conversion_options.update(dict(MultiEDFSignals=dict(stub_test=stub_test)))
 
     # Add Cross session cell registration
-    main_folder = data_dir_path / f"/Ca_EEG_Calcium/{subject_id}/SpatialFootprints"
+    main_folder = data_dir_path / f"Ca_EEG_Calcium/{subject_id}/SpatialFootprints"
     file_paths = []
-    for folder in os.listdir(main_folder):
-        folder_path = os.path.join(main_folder, folder)
-        if os.path.isdir(folder_path):  # Ensure it's a directory
-            filename = folder.split("_")[0] + f"_{subject_id}_" + folder.split("_")[-1]
-            csv_file = os.path.join(folder_path, f"{filename}.csv")
-            if os.path.isfile(csv_file):  # Check if the file exists
+
+    for folder in main_folder.iterdir():
+        if folder.is_dir():  # Ensure it's a directory
+            filename = folder.name.split("_")[0] + f"_{subject_id}_" + folder.name.split("_")[-1]
+            csv_file = folder / f"{filename}.csv"
+            if csv_file.is_file():  # Check if the file exists
                 file_paths.append(csv_file)
+
     source_data.update(dict(CellRegistration=dict(file_paths=file_paths)))
     conversion_options.update(dict(CellRegistration=dict(stub_test=stub_test, subject_id=subject_id)))
 
