@@ -4,3 +4,4 @@ from .minian_interface import MinianSegmentationInterface, MinianMotionCorrectio
 from .zaki_2024_sleep_classification_interface import Zaki2024SleepClassificationInterface
 from .miniscope_imaging_interface import MiniscopeImagingInterface
 from .zaki_2024_shock_stimuli_interface import Zaki2024ShockStimuliInterface
+from .zaki_2024_cell_registration_interface import Zaki2024CellRegistrationInterface
