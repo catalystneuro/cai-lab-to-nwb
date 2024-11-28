@@ -111,8 +111,6 @@ def session_to_nwb(
             experiment_dir_path = (
                 data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
             )
-        # Some sessions may not have imaging data, so we extract the run time from the session notes (.txt file)
-        # and use the data string and time string to retrieve the start datetime of the session
         try:
             folder_path = experiment_dir_path / date_str / time_str
             miniscope_folder_path = get_miniscope_folder_path(folder_path)
@@ -128,6 +126,8 @@ def session_to_nwb(
             start_time = (start_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
             stop_time = (stop_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
 
+        # Some sessions may not have imaging data, so we extract the run time from the session notes (.txt file)
+        # and use the data string and time string to retrieve the start datetime of the session
         except:
             datetime_str = date_str + " " + time_str
             start_datetime_timestamp = datetime.strptime(datetime_str, "%Y_%m_%d %H_%M_%S")
