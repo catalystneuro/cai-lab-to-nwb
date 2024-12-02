@@ -5,7 +5,6 @@ import time
 from pathlib import Path
 from typing import Union
 from datetime import datetime, timedelta
-import pandas as pd
 
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
@@ -15,7 +14,6 @@ from interfaces.miniscope_imaging_interface import get_miniscope_folder_path
 
 
 def session_to_nwb(
-    data_dir_path: Union[str, Path],
     output_dir_path: Union[str, Path],
     subject_id: str,
     session_id: str,
@@ -36,7 +34,6 @@ def session_to_nwb(
     if verbose:
         start = time.time()
 
-    data_dir_path = Path(data_dir_path)
     output_dir_path = Path(output_dir_path)
     if stub_test:
         output_dir_path = output_dir_path / "nwb_stub"
