@@ -3,11 +3,17 @@
 import time
 from natsort import natsorted
 from pathlib import Path
-import warnings
 from typing import Union
 import re
-from neuroconv.utils import load_dict_from_file, dict_deep_update
+import pandas as pd
+from datetime import datetime
+from mne.io import read_raw_edf
 
+from neuroconv.utils import load_dict_from_file, dict_deep_update
+from neuroconv.tools.nwb_helpers import configure_and_write_nwbfile
+
+from utils import get_session_slicing_time_range, get_session_run_time
+from interfaces.miniscope_imaging_interface import get_miniscope_folder_path
 from zaki_2024_nwbconverter import Zaki2024NWBConverter
 
 
@@ -18,7 +24,6 @@ def session_to_nwb(
     stub_test: bool = False,
     verbose: bool = True,
 ):
-
     if verbose:
         print(f"Converting week-long session")
         start = time.time()
@@ -66,16 +71,8 @@ def session_to_nwb(
     conversion_options.update(dict(CellRegistration=dict(stub_test=stub_test, subject_id=subject_id)))
 
     converter = Zaki2024NWBConverter(source_data=source_data)
-
     # Add datetime to conversion
     metadata = converter.get_metadata()
-
-    from mne.io import read_raw_edf
-
-    edf_reader = read_raw_edf(input_fname=edf_file_paths[0], verbose=verbose)
-    session_start_time = edf_reader.info["meas_date"]
-    metadata["NWBFile"]["session_start_time"] = session_start_time
-
     # Update default metadata with the editable in the corresponding yaml file
     editable_metadata_path = Path(__file__).parent / "zaki_2024_metadata.yaml"
     editable_metadata = load_dict_from_file(editable_metadata_path)
@@ -83,10 +80,64 @@ def session_to_nwb(
 
     metadata["Subject"]["subject_id"] = subject_id
 
+    edf_reader = read_raw_edf(input_fname=edf_file_paths[0], verbose=verbose)
+    session_start_time = edf_reader.info["meas_date"]
+
+    metadata["NWBFile"]["session_start_time"] = session_start_time
+
+    nwbfile = converter.create_nwbfile(metadata=metadata, conversion_options=conversion_options)
+
+    # Add epochs table to store time range of conditioning and offline sessions
+    sessions_summary_file = data_dir_path / f"Ca_EEG_Experiment/{subject_id}/{subject_id}_SessionTimes.csv"
+    sessions_summary_df = pd.read_csv(sessions_summary_file)
+
+    # Add columns to TimeIntervals
+    nwbfile.add_epoch_column(name="session_ids", description="ID of the session")
+
+    for task, date_str, time_str in zip(
+        sessions_summary_df["Session"], sessions_summary_df["Date"], sessions_summary_df["Time"]
+    ):
+        session_id = subject_id + "_" + task
+        if "Offline" in session_id:
+            offline_day = session_id.split("Session")[0]
+            experiment_dir_path = (
+                data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Offline") / offline_day
+            )
+        else:
+            experiment_dir_path = (
+                data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
+            )
+        try:
+            folder_path = experiment_dir_path / date_str / time_str
+            miniscope_folder_path = get_miniscope_folder_path(folder_path)
+            miniscope_metadata_json = folder_path / "metaData.json"
+            assert miniscope_metadata_json.exists(), f"General metadata json not found in {folder_path}"
+            timestamps_file_path = miniscope_folder_path / "timeStamps.csv"
+            assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {miniscope_folder_path}"
+
+            start_datetime_timestamp, stop_datetime_timestamp = get_session_slicing_time_range(
+                miniscope_metadata_json=miniscope_metadata_json, timestamps_file_path=timestamps_file_path
+            )
+
+            start_time = (start_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
+            stop_time = (stop_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
+
+        # Some sessions may not have imaging data, so we extract the run time from the session notes (.txt file)
+        # and use the data string and time string to retrieve the start datetime of the session
+        except:
+            datetime_str = date_str + " " + time_str
+            start_datetime_timestamp = datetime.strptime(datetime_str, "%Y_%m_%d %H_%M_%S")
+
+            txt_file_path = experiment_dir_path / f"{session_id}.txt"
+            session_run_time = get_session_run_time(txt_file_path=txt_file_path)
+
+            start_time = (start_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
+            stop_time = start_time + session_run_time
+
+        nwbfile.add_epoch(start_time=start_time, stop_time=stop_time, session_ids=session_id)
+
     # Run conversion
-    converter.run_conversion(
-        metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options, overwrite=True
-    )
+    configure_and_write_nwbfile(nwbfile=nwbfile, backend="hdf5", output_filepath=nwbfile_path)
 
     if verbose:
         stop_time = time.time()

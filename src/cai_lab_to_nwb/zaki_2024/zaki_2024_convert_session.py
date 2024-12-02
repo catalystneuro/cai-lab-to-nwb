@@ -4,79 +4,14 @@ import time
 
 from pathlib import Path
 from typing import Union
-from datetime import datetime, timedelta
+from datetime import datetime
 import pandas as pd
-import json
+
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
 from zaki_2024_nwbconverter import Zaki2024NWBConverter
-from interfaces.miniscope_imaging_interface import get_miniscope_timestamps, get_recording_start_time
-
-
-def get_miniscope_folder_path(folder_path: Union[str, Path]):
-    """
-    Retrieve the path to the Miniscope folder within the given session folder based on metadata.
-
-    Parameters:
-    -----------
-    folder_path : Union[str, Path]
-        Path to the main session folder, which should contain a "metaData.json" file with information about the Miniscope.
-
-    Returns:
-    --------
-    Optional[Path]
-        Path to the Miniscope folder, formatted to replace any spaces in the Miniscope name with underscores. Returns `None` if the
-        specified folder is not a directory or if the metadata JSON is missing or misconfigured.
-
-    Raises:
-    -------
-    AssertionError
-        If the "metaData.json" file is not found in the given folder path.
-    """
-    folder_path = Path(folder_path)
-    if folder_path.is_dir():
-        general_metadata_json = folder_path / "metaData.json"
-        assert general_metadata_json.exists(), f"General metadata json not found in {folder_path}"
-        with open(general_metadata_json) as f:
-            general_metadata = json.load(f)
-        miniscope_name = general_metadata["miniscopes"][0]
-        return folder_path / miniscope_name.replace(" ", "_")
-    else:
-        print(f"No Miniscope data found at {folder_path}")
-        return None
-
-
-def get_edf_slicing_time_range(miniscope_metadata_json: Union[str, Path], timestamps_file_path: Union[str, Path]):
-    """
-    Calculate the time range for EDF slicing based on session start time and Miniscope timestamps.
-
-    Parameters:
-    -----------
-    miniscope_metadata_json : Union[str, Path]
-        Path to the metadata.json file produced by Miniscope output.
-
-    timestamps_file_path : Union[str, Path]
-        Path to the Miniscope timeStamps.csv file.
-
-    Returns:
-    --------
-    Tuple[datetime, datetime]
-        A tuple containing the start and stop timestamps (as datetime objects) for the EDF slicing period. The start timestamp
-        corresponds to the session's start time adjusted by the first Miniscope timestamp, and the stop timestamp is the session's
-        start time adjusted by the last Miniscope timestamp.
-
-    """
-    miniscope_metadata_json = Path(miniscope_metadata_json)
-    timestamps_file_path = Path(timestamps_file_path)
-    if miniscope_metadata_json.is_file() and timestamps_file_path.is_file():
-
-        session_start_time = get_recording_start_time(file_path=miniscope_metadata_json)
-        miniscope_timestamps = get_miniscope_timestamps(file_path=timestamps_file_path)
-
-        start_datetime_timestamp = session_start_time + timedelta(seconds=miniscope_timestamps[0])
-        stop_datetime_timestamp = session_start_time + timedelta(seconds=miniscope_timestamps[-1])
-
-        return start_datetime_timestamp, stop_datetime_timestamp
+from utils import get_session_slicing_time_range
+from interfaces.miniscope_imaging_interface import get_miniscope_folder_path
 
 
 def session_to_nwb(
@@ -182,7 +117,7 @@ def session_to_nwb(
         assert miniscope_metadata_json.exists(), f"General metadata json not found in {folder_path}"
         timestamps_file_path = miniscope_folder_path / "timeStamps.csv"
         assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {miniscope_folder_path}"
-        start_datetime_timestamp, stop_datetime_timestamp = get_edf_slicing_time_range(
+        start_datetime_timestamp, stop_datetime_timestamp = get_session_slicing_time_range(
             miniscope_metadata_json=miniscope_metadata_json, timestamps_file_path=timestamps_file_path
         )
         source_data.update(
