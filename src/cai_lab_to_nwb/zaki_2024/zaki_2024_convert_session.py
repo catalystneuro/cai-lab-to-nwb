@@ -47,6 +47,7 @@ def session_to_nwb(
     # Add Miniscope data
     miniscope_folder_path = None
     if imaging_folder_path:
+        imaging_folder_path = Path(imaging_folder_path)
         miniscope_folder_path = get_miniscope_folder_path(imaging_folder_path)
         assert miniscope_folder_path.is_dir(), f"{miniscope_folder_path} does not exist"
 
@@ -55,6 +56,7 @@ def session_to_nwb(
 
     # Add Segmentation and Motion Correction
     if minian_folder_path:
+        minian_folder_path = Path(minian_folder_path)
         assert minian_folder_path.is_dir(), f"{minian_folder_path} does not exist"
         source_data.update(dict(MinianSegmentation=dict(folder_path=minian_folder_path)))
         conversion_options.update(dict(MinianSegmentation=dict(stub_test=stub_test)))
@@ -72,12 +74,14 @@ def session_to_nwb(
 
     # Add Behavioral Video
     if video_file_path:
+        video_file_path = Path(video_file_path)
         assert video_file_path.is_file(), f"{video_file_path} does not exist"
         source_data.update(dict(Video=dict(file_paths=[video_file_path])))
         conversion_options.update(dict(Video=dict(stub_test=stub_test)))
 
     # Add Freezing Analysis output
     if freezing_output_file_path:
+        freezing_output_file_path = Path(freezing_output_file_path)
         assert freezing_output_file_path.is_file(), f"{freezing_output_file_path} does not exist"
         source_data.update(
             dict(FreezingBehavior=dict(file_path=freezing_output_file_path, video_sampling_frequency=30.0))
@@ -86,6 +90,7 @@ def session_to_nwb(
     # Add EEG, EMG, Temperature and Activity signals
 
     if edf_file_path:
+        edf_file_path = Path(edf_file_path)
         assert edf_file_path.is_file(), f"{edf_file_path} does not exist"
         if imaging_folder_path.is_dir() and miniscope_folder_path.is_dir():
             miniscope_metadata_json = imaging_folder_path / "metaData.json"
@@ -124,6 +129,7 @@ def session_to_nwb(
 
     # Add Sleep Classification output
     if sleep_classification_file_path:
+        sleep_classification_file_path = Path(sleep_classification_file_path)
         assert sleep_classification_file_path.is_file(), f"{sleep_classification_file_path} does not exist"
         source_data.update(
             dict(SleepClassification=dict(file_path=sleep_classification_file_path, video_sampling_frequency=30.0))
@@ -172,64 +178,16 @@ def session_to_nwb(
 
 if __name__ == "__main__":
 
-    # Parameters for conversion
-    data_dir_path = Path("D:/")
-    subject_id = "Ca_EEG2-1"
-    task = "OfflineDay2Session1"
-    session_id = subject_id + "_" + task
-    output_dir_path = Path("D:/cai_lab_conversion_nwb/")
+    subject_id = "Ca_EEG3-4"
+    session_type = "OfflineDay2Session1"
+    session_id = subject_id + "_" + session_type
     stub_test = False
-    # session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
-    # df = pd.read_csv(session_times_file_path)
-    # session_row = df[df["Session"] == task].iloc[0]
-    date_str = "2021_10_14"  # session_row["Date"]
-    time_str = "09_24_27"  # session_row["Time"]
-
-    session_to_nwb_kwargs_per_session = dict(
-        data_dir_path=data_dir_path,
-        output_dir_path=output_dir_path,
-        subject_id=subject_id,
-        session_id=session_id,
-        date_str=date_str,
-        time_str=time_str,
+    yaml_file_path = Path(__file__).parent / "utils/session_to_nwb_kwargs.yaml"
+    conversion_parameter_dict = load_dict_from_file(yaml_file_path)
+    session_to_nwb_kwargs_per_session = conversion_parameter_dict[subject_id][session_id]
+    session_to_nwb_kwargs_per_session.update(
         stub_test=stub_test,
     )
-
-    if "Offline" in session_id:
-        offline_day = session_id.split("Session")[0]
-        experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Offline") / offline_day
-        datetime_obj = datetime.strptime(date_str, "%Y_%m_%d")
-        reformatted_date_str = datetime_obj.strftime("_%m%d%y")
-        edf_file_path = (
-            data_dir_path / "Ca_EEG_EDF" / (subject_id + "_EDF") / (subject_id + reformatted_date_str + ".edf")
-        )
-        sleep_classification_file_path = (
-            data_dir_path / "Ca_EEG_Sleep" / subject_id / "AlignedSleep" / (session_id + "_AlignedSleep.csv")
-        )
-        session_to_nwb_kwargs_per_session.update(
-            edf_file_path=edf_file_path,
-            sleep_classification_file_path=sleep_classification_file_path,
-        )
-    else:
-        experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
-
-        video_file_path = experiment_dir_path / (session_id + ".wmv")
-        freezing_output_file_path = experiment_dir_path / (session_id + "_FreezingOutput.csv")
-        session_to_nwb_kwargs_per_session.update(
-            video_file_path=video_file_path,
-            freezing_output_file_path=freezing_output_file_path,
-        )
-        if "FC" in session_id:
-            shock_stimulus = dict(shock_times=[120.0, 180.0, 240.0], shock_amplitude=1.5, shock_duration=2.0)
-            session_to_nwb_kwargs_per_session.update(
-                shock_stimulus=shock_stimulus,
-            )
-
-    # imaging_folder_path = experiment_dir_path / time_str
-    imaging_folder_path = experiment_dir_path / date_str / time_str
-    minian_folder_path = data_dir_path / "Ca_EEG_Calcium" / subject_id / session_id / "minian"
-    session_to_nwb_kwargs_per_session.update(
-        imaging_folder_path=imaging_folder_path,
-        minian_folder_path=minian_folder_path,
-    )
     session_to_nwb(**session_to_nwb_kwargs_per_session)
+
+    # Alternatively one can get each path separately using the functions in utils and update the session_to_nwb_kwargs_per_session dictionary
