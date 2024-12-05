@@ -12,7 +12,14 @@ from mne.io import read_raw_edf
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 from neuroconv.tools.nwb_helpers import configure_and_write_nwbfile
 
-from utils import get_session_slicing_time_range, get_session_run_time
+from utils import (
+    get_session_slicing_time_range,
+    get_session_run_time,
+    get_session_times_df,
+    get_imaging_folder_path,
+    get_experiment_dir_path,
+    get_date_str_from_experiment_dir_path,
+)
 from interfaces.miniscope_imaging_interface import get_miniscope_folder_path
 from zaki_2024_nwbconverter import Zaki2024NWBConverter
 
@@ -88,27 +95,28 @@ def session_to_nwb(
     nwbfile = converter.create_nwbfile(metadata=metadata, conversion_options=conversion_options)
 
     # Add epochs table to store time range of conditioning and offline sessions
-    sessions_summary_file = data_dir_path / f"Ca_EEG_Experiment/{subject_id}/{subject_id}_SessionTimes.csv"
-    sessions_summary_df = pd.read_csv(sessions_summary_file)
+    session_times_df = get_session_times_df(subject_id=subject_id, data_dir_path=data_dir_path)
 
     # Add columns to TimeIntervals
     nwbfile.add_epoch_column(name="session_ids", description="ID of the session")
 
     for task, date_str, time_str in zip(
-        sessions_summary_df["Session"], sessions_summary_df["Date"], sessions_summary_df["Time"]
+        session_times_df["Session"], session_times_df["Date"], session_times_df["Time"]
     ):
         session_id = subject_id + "_" + task
-        if "Offline" in session_id:
-            offline_day = session_id.split("Session")[0]
-            experiment_dir_path = (
-                data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Offline") / offline_day
-            )
-        else:
-            experiment_dir_path = (
-                data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
-            )
+        experiment_dir_path = get_experiment_dir_path(
+            subject_id=subject_id, session_id=session_id, data_dir_path=data_dir_path
+        )
+        if date_str is None:
+            date_str = get_date_str_from_experiment_dir_path(experiment_dir_path=experiment_dir_path)
         try:
-            folder_path = experiment_dir_path / date_str / time_str
+            folder_path = get_imaging_folder_path(
+                subject_id=subject_id,
+                session_id=session_id,
+                data_dir_path=data_dir_path,
+                time_str=time_str,
+                date_str=date_str,
+            )
             miniscope_folder_path = get_miniscope_folder_path(folder_path)
             miniscope_metadata_json = folder_path / "metaData.json"
             assert miniscope_metadata_json.exists(), f"General metadata json not found in {folder_path}"
@@ -155,7 +163,7 @@ if __name__ == "__main__":
     # Parameters for conversion
     data_dir_path = Path("D:/")
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
-    subject_id = "Ca_EEG3-4"
+    subject_id = "Ca_EEG2-1"
     stub_test = False
     session_to_nwb(
         data_dir_path=data_dir_path,

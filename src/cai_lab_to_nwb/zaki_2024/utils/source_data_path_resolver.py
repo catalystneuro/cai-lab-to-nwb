@@ -141,7 +141,7 @@ def get_edf_file_path(subject_id: str, date_str: str, data_dir_path: Union[str, 
             data_dir_path / "Ca_EEG_EDF" / (subject_id + "_EDF") / (subject_id + reformatted_date_str + ".edf")
         )
         if not edf_file_path.is_file():
-            warnings.warn(f"{edf_file_path} not found. The EDF data stream will not be added.")
+            warnings.warn(f"{edf_file_path} not found.")
             return None
         return edf_file_path
     except ValueError:
@@ -172,9 +172,7 @@ def get_sleep_classification_file_path(
         data_dir_path / "Ca_EEG_Sleep" / subject_id / "AlignedSleep" / (session_id + "_AlignedSleep.csv")
     )
     if not sleep_classification_file_path.is_file():
-        warnings.warn(
-            f"{sleep_classification_file_path} not found. The sleep classification data stream will not be added."
-        )
+        warnings.warn(f"{sleep_classification_file_path} not found.")
         return None
     return sleep_classification_file_path
 
@@ -201,7 +199,7 @@ def get_video_file_path(subject_id: str, session_id: str, data_dir_path: Union[s
     experiment_dir_path = get_experiment_dir_path(subject_id, session_id, data_dir_path)
     video_file_path = Path(experiment_dir_path) / (session_id + ".wmv")
     if not video_file_path.is_file():
-        warnings.warn(f"{video_file_path} not found. The video data stream will not be added.")
+        warnings.warn(f"{video_file_path} not found.")
         return None
     return video_file_path
 
@@ -230,7 +228,7 @@ def get_freezing_output_file_path(
     experiment_dir_path = get_experiment_dir_path(subject_id, session_id, data_dir_path)
     freezing_output_file_path = Path(experiment_dir_path) / (session_id + "_FreezingOutput.csv")
     if not freezing_output_file_path.is_file():
-        warnings.warn(f"{freezing_output_file_path} not found. The freezing output data stream will not be added.")
+        warnings.warn(f"{freezing_output_file_path} not found.")
         return None
     return freezing_output_file_path
 
@@ -261,12 +259,12 @@ def get_imaging_folder_path(
     """
 
     experiment_dir_path = get_experiment_dir_path(subject_id, session_id, data_dir_path)
-    if date_str is not None:
+    try:
         imaging_folder_path = Path(experiment_dir_path) / date_str / time_str
-    else:
+    except:
         imaging_folder_path = Path(experiment_dir_path) / time_str
     if not imaging_folder_path.is_dir():
-        warnings.warn(f"{imaging_folder_path} not found. The freezing output data stream will not be added.")
+        warnings.warn(f"{imaging_folder_path} not found.")
         return None
     return imaging_folder_path
 
@@ -292,6 +290,6 @@ def get_miniscope_folder_path(subject_id: str, session_id: str, data_dir_path: U
 
     minian_folder_path = data_dir_path / "Ca_EEG_Calcium" / subject_id / session_id / "minian"
     if not minian_folder_path.is_dir():
-        warnings.warn(f"{minian_folder_path} not found. The miniscope folder will not be added.")
+        warnings.warn(f"{minian_folder_path} not found.")
         return None
     return minian_folder_path
