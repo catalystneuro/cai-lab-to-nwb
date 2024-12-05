@@ -147,3 +147,6 @@ dmypy.json
 
 # NWB files
 **.nwb
+
+# other files
+src/cai_lab_to_nwb/zaki_2024/utils/session_to_nwb_kwargs.yaml
