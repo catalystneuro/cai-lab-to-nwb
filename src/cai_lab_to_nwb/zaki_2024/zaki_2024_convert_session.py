@@ -182,11 +182,13 @@ if __name__ == "__main__":
     session_type = "OfflineDay2Session1"
     session_id = subject_id + "_" + session_type
     stub_test = False
-    yaml_file_path = Path(__file__).parent / "utils/session_to_nwb_kwargs.yaml"
+    verbose = True
+    yaml_file_path = Path(__file__).parent / "utils/conversion_parameters.yaml"
     conversion_parameter_dict = load_dict_from_file(yaml_file_path)
     session_to_nwb_kwargs_per_session = conversion_parameter_dict[subject_id][session_id]
     session_to_nwb_kwargs_per_session.update(
         stub_test=stub_test,
+        verbose=verbose,
     )
     session_to_nwb(**session_to_nwb_kwargs_per_session)
 

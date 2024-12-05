@@ -10,4 +10,4 @@ from .source_data_path_resolver import (
     get_miniscope_folder_path,
     get_freezing_output_file_path,
 )
-from .update_session_to_nwb_kwargs_yaml import update_session_to_nwb_kwargs_yaml
+from .define_conversion_parameters import update_conversion_parameters_yaml

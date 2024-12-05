@@ -4,7 +4,7 @@ import yaml
 from .source_data_path_resolver import *
 
 
-def update_session_to_nwb_kwargs_yaml(
+def update_conversion_parameters_yaml(
     subject_id: str,
     data_dir_path: Union[str, Path],
     output_dir_path: Union[str, Path],
@@ -31,7 +31,7 @@ def update_session_to_nwb_kwargs_yaml(
     --------
     None
     """
-    yaml_file_path = Path(__file__).parent / "session_to_nwb_kwargs.yaml"
+    yaml_file_path = Path(__file__).parent / "conversion_parameters.yaml"
     subjects_df = pd.read_excel(experiment_design_file_path)
     session_times_df = get_session_times_df(
         subject_id=subject_id, data_dir_path=data_dir_path, session_types=session_types
@@ -104,7 +104,7 @@ def update_session_to_nwb_kwargs_yaml(
 
 
 if __name__ == "__main__":
-    update_session_to_nwb_kwargs_yaml(
+    update_conversion_parameters_yaml(
         subject_id="Ca_EEG3-4",
         data_dir_path=Path("D:/"),
         output_dir_path=Path("D:/cai_lab_conversion_nwb/"),
