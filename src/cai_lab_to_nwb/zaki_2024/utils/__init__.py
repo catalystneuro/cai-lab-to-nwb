@@ -11,3 +11,4 @@ from .source_data_path_resolver import (
     get_freezing_output_file_path,
 )
 from .define_conversion_parameters import update_conversion_parameters_yaml
+from .generate_session_description import generate_session_description
