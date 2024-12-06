@@ -1,7 +1,7 @@
 import re
 import yaml
 
-from .source_data_path_resolver import *
+from source_data_path_resolver import *
 
 
 def update_conversion_parameters_yaml(
@@ -45,20 +45,16 @@ def update_conversion_parameters_yaml(
         if "Offline" in session_id:
             if date_str is None:
                 date_str = get_date_str_from_experiment_dir_path(experiment_dir_path=experiment_dir_path)
-            edf_file_path = str(
-                get_edf_file_path(subject_id, date_str, data_dir_path)
-            )  # convert to str to save it correctly in the yaml
-            sleep_classification_file_path = str(
-                get_sleep_classification_file_path(subject_id, session_id, data_dir_path)
-            )
+            edf_file_path = get_edf_file_path(subject_id, date_str, data_dir_path)
+            sleep_classification_file_path = get_sleep_classification_file_path(subject_id, session_id, data_dir_path)
             video_file_path = None
             freezing_output_file_path = None
             shock_stimulus = None
         else:
             edf_file_path = None
             sleep_classification_file_path = None
-            video_file_path = str(get_video_file_path(subject_id, session_id, data_dir_path))
-            freezing_output_file_path = str(get_freezing_output_file_path(subject_id, session_id, data_dir_path))
+            video_file_path = get_video_file_path(subject_id, session_id, data_dir_path)
+            freezing_output_file_path = get_freezing_output_file_path(subject_id, session_id, data_dir_path)
             if session_type == "FC":
                 shock_amplitude = subjects_df["Amplitude"][subjects_df["Mouse"] == subject_id].to_numpy()[0]
                 shock_amplitude = float(re.findall(r"[-+]?\d*\.\d+|\d+", shock_amplitude)[0])
@@ -67,8 +63,8 @@ def update_conversion_parameters_yaml(
                 )
             else:
                 shock_stimulus = None
-        imaging_folder_path = str(get_imaging_folder_path(subject_id, session_id, data_dir_path, time_str, date_str))
-        minian_folder_path = str(get_miniscope_folder_path(subject_id, session_id, data_dir_path))
+        imaging_folder_path = get_imaging_folder_path(subject_id, session_id, data_dir_path, time_str, date_str)
+        minian_folder_path = get_miniscope_folder_path(subject_id, session_id, data_dir_path)
         session_to_nwb_kwargs_per_session = {
             session_id: {
                 "output_dir_path": str(output_dir_path),
@@ -77,12 +73,14 @@ def update_conversion_parameters_yaml(
                 "date_str": date_str,
                 "time_str": time_str,
                 "experiment_dir_path": str(experiment_dir_path),
-                "imaging_folder_path": imaging_folder_path,
-                "minian_folder_path": minian_folder_path,
-                "video_file_path": video_file_path,
-                "freezing_output_file_path": freezing_output_file_path,
-                "edf_file_path": edf_file_path,
-                "sleep_classification_file_path": sleep_classification_file_path,
+                "imaging_folder_path": str(imaging_folder_path) if imaging_folder_path else None,
+                "minian_folder_path": str(minian_folder_path) if minian_folder_path else None,
+                "video_file_path": str(video_file_path) if video_file_path else None,
+                "freezing_output_file_path": str(freezing_output_file_path) if freezing_output_file_path else None,
+                "edf_file_path": str(edf_file_path) if edf_file_path else None,
+                "sleep_classification_file_path": (
+                    str(sleep_classification_file_path) if sleep_classification_file_path else None
+                ),
                 "shock_stimulus": shock_stimulus,
             }
         }
@@ -105,7 +103,7 @@ def update_conversion_parameters_yaml(
 
 if __name__ == "__main__":
     update_conversion_parameters_yaml(
-        subject_id="Ca_EEG3-4",
+        subject_id="Ca_EEG2-1",
         data_dir_path=Path("D:/"),
         output_dir_path=Path("D:/cai_lab_conversion_nwb/"),
         experiment_design_file_path=Path("D:/Ca_EEG_Design.xlsx"),
