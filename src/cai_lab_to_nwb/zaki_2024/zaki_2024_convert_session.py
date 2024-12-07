@@ -31,8 +31,9 @@ def session_to_nwb(
     sleep_classification_file_path: Union[str, Path] = None,
     shock_stimulus: dict = None,
 ):
-    print(f"Converting session {session_id}")
+
     if verbose:
+        print(f"Converting session {session_id}")
         start = time.time()
 
     output_dir_path = Path(output_dir_path)
@@ -87,9 +88,9 @@ def session_to_nwb(
         source_data.update(
             dict(FreezingBehavior=dict(file_path=freezing_output_file_path, video_sampling_frequency=30.0))
         )
+        conversion_options.update(dict(FreezingBehavior=dict(stub_test=stub_test)))
 
     # Add EEG, EMG, Temperature and Activity signals
-
     if edf_file_path:
         edf_file_path = Path(edf_file_path)
         assert edf_file_path.is_file(), f"{edf_file_path} does not exist"
@@ -144,7 +145,7 @@ def session_to_nwb(
             ShockStimuli=shock_stimulus,
         )
 
-    converter = Zaki2024NWBConverter(source_data=source_data)
+    converter = Zaki2024NWBConverter(source_data=source_data, verbose=verbose)
 
     # Add datetime to conversion
     metadata = converter.get_metadata()
@@ -184,9 +185,9 @@ def session_to_nwb(
 if __name__ == "__main__":
 
     subject_id = "Ca_EEG2-1"
-    session_type = "NeutralExposure"  #
+    session_type = "FC"  #
     session_id = subject_id + "_" + session_type
-    stub_test = False
+    stub_test = True
     verbose = True
     yaml_file_path = Path(__file__).parent / "utils/conversion_parameters.yaml"
     conversion_parameter_dict = load_dict_from_file(yaml_file_path)
