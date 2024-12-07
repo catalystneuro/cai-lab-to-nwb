@@ -122,8 +122,8 @@ if __name__ == "__main__":
     data_dir_path = Path("D:/")
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
     max_workers = 1
-    verbose = True
-    stub_test = True
+    verbose = False
+    stub_test = False
     dataset_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,

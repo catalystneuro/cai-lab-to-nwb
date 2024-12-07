@@ -166,10 +166,6 @@ class MinianSegmentationExtractor(SegmentationExtractor):
         """
         return list()
 
-    def get_roi_ids(self) -> list:
-        dataset = self._read_zarr_group("/A.zarr")
-        return list(dataset["unit_id"])
-
     def get_traces_dict(self) -> dict:
         """Get traces as a dictionary with key as the name of the ROiResponseSeries.
 
