@@ -386,7 +386,7 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
 
         from neuroconv.tools.roiextractors import add_photon_series_to_nwbfile
 
-        miniscope_timestamps = self.get_original_timestamps()
+        miniscope_timestamps = self.get_timestamps()
         imaging_extractor = self.imaging_extractor
 
         if stub_test:
