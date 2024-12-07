@@ -60,3 +60,13 @@ class Zaki2024NWBConverter(NWBConverter):
             if imaging_timestamps[0] < 0.0:
                 time_shift = abs(imaging_timestamps[0])
                 imaging_interface.set_aligned_timestamps(imaging_timestamps + time_shift)
+
+                if "MinianSegmentation" in self.data_interface_objects:
+                    segmentation_interface = self.data_interface_objects["MinianSegmentation"]
+                    segmentation_timestamps = segmentation_interface.get_original_timestamps()
+                    segmentation_interface.set_aligned_timestamps(segmentation_timestamps + time_shift)
+
+                # if "MinianMotionCorrection" in self.data_interface_objects:
+                #     motion_correction_interface = self.data_interface_objects["MinianMotionCorrection"]
+                #     motion_correction_timestamps = motion_correction_interface.get_original_timestamps()
+                #     motion_correction_interface.set_aligned_timestamps(segmentation_timestamps + time_shift)
