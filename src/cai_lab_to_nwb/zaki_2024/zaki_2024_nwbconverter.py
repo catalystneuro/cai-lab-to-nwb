@@ -79,3 +79,6 @@ class Zaki2024NWBConverter(NWBConverter):
                     sleep_classification_interface.set_aligned_interval_times(
                         start_times=start_times, stop_times=stop_times
                     )
+                if "EDFSignals" in self.data_interface_objects:
+                    edf_signals_interface = self.data_interface_objects["EDFSignals"]
+                    edf_signals_interface.set_aligned_starting_time(time_shift)

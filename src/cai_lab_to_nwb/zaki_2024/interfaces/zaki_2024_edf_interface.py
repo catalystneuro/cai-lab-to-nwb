@@ -5,7 +5,6 @@ from pynwb import NWBFile, TimeSeries
 from pynwb.device import Device
 
 from neuroconv.basedatainterface import BaseDataInterface
-from neuroconv.utils import DeepDict
 
 from mne.io import read_raw_edf
 from datetime import datetime, timedelta
@@ -19,8 +18,12 @@ class Zaki2024EDFInterface(BaseDataInterface):
         verbose: bool = False,
     ):
         self.file_path = Path(file_path)
+        self._starting_time = None
         self.verbose = verbose
         super().__init__(file_path=file_path)
+
+    def set_aligned_starting_time(self, aligned_starting_time: float):
+        self._starting_time = aligned_starting_time
 
     def add_to_nwbfile(
         self,
@@ -49,8 +52,6 @@ class Zaki2024EDFInterface(BaseDataInterface):
         stop_datetime_timestamp : datetime, optional
             The ending timestamp for slicing the data. If specified, data will be included
             only up to this time. Default is None, which includes data until the end.
-        **conversion_options
-            Additional options for data conversion (not currently used directly in this function).
 
         Returns
         -------
@@ -73,8 +74,6 @@ class Zaki2024EDFInterface(BaseDataInterface):
                 "description": "EMG signal recorder with HD-X02 wireless telemetry probe",
                 "unit": "volts",
             },
-            # TODO: Figure out if the units of activity are correct, the raw format marks Volts
-            # TODO: My own reading of the header indicates that the physical units is counts
             "Activity": {
                 "name": "ActivitySignal",
                 "description": "Activity signal recorder with HD-X02 wireless telemetry probe. It refers to the motion of the probe relative to the receiver and it can be used as a proxy for locomotion.",
@@ -107,6 +106,8 @@ class Zaki2024EDFInterface(BaseDataInterface):
         else:
             data = data[:, start_idx:end_idx]
 
+        starting_time = self._starting_time if self._starting_time is not None else starting_time
+
         for channel_index, channel_name in enumerate(channels_dict.keys()):
             time_series_kwargs = channels_dict[channel_name].copy()
             time_series_kwargs.update(
@@ -132,7 +133,11 @@ class Zaki2024MultiEDFInterface(BaseDataInterface):
     ):
         self.file_paths = file_paths
         self.verbose = verbose
+        self._starting_time = 0.0
         super().__init__(file_paths=file_paths)
+
+    def set_aligned_starting_time(self, aligned_starting_time: float):
+        self._starting_time = aligned_starting_time
 
     def add_to_nwbfile(
         self,
@@ -205,7 +210,7 @@ class Zaki2024MultiEDFInterface(BaseDataInterface):
         for channel_index, channel_name in enumerate(channels_dict.keys()):
             time_series_kwargs = channels_dict[channel_name].copy()
             time_series_kwargs.update(
-                data=concatenated_data[channel_index], starting_time=0.0, rate=edf_reader.info["sfreq"]
+                data=concatenated_data[channel_index], starting_time=self._starting_time, rate=edf_reader.info["sfreq"]
             )
             time_series = TimeSeries(**time_series_kwargs)
             nwbfile.add_acquisition(time_series)
