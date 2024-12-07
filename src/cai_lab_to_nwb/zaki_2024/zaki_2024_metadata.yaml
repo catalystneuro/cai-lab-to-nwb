@@ -58,6 +58,10 @@ NWBFile:
     AAV1-Syn-GCaMP6f was injected into dorsal CA1 of the hippocampus on the right hemisphere (AP, −2 mm; ML, +1.5 mm; DV, −1.2 mm)
 Subject:
   species: Mus musculus
+  description: Adult C57BL/6J wild-type mice from Jackson Laboratories were used. 
+    Mice ordered from Jackson arrived group-housed in cages of 4 mice/cage and were singly housed for the experiment. 
+    Mice were ordered to arrive at 8-9 weeks of age and underwent behavioral testing about 4-6 weeks after the arrival date. 
+    All experimental procedures were approved by the Icahn School of Medicine at Mount Sinai’s IACUC.
   age: P12W/P18W
   sex: M
   strain: C57BL/6J
