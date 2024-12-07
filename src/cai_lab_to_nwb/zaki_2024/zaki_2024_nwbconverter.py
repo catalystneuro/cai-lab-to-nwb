@@ -82,3 +82,20 @@ class Zaki2024NWBConverter(NWBConverter):
                 if "EDFSignals" in self.data_interface_objects:
                     edf_signals_interface = self.data_interface_objects["EDFSignals"]
                     edf_signals_interface.set_aligned_starting_time(time_shift)
+
+                if "FreezingBehavior" in self.data_interface_objects:
+                    freezing_behavior_interface = self.data_interface_objects["FreezingBehavior"]
+                    start_times, stop_times = freezing_behavior_interface.get_interval_times()
+                    start_times += time_shift
+                    stop_times += time_shift
+                    freezing_behavior_interface.set_aligned_interval_times(
+                        start_times=start_times, stop_times=stop_times
+                    )
+                    starting_time = freezing_behavior_interface.get_starting_time()
+                    freezing_behavior_interface.set_aligned_starting_time(starting_time + time_shift)
+
+                if "Video" in self.data_interface_objects:
+                    video_interface = self.data_interface_objects["Video"]
+                    video_timestamps = video_interface.get_original_timestamps()
+                    aligned_video_timestamps = video_timestamps + time_shift
+                    video_interface.set_aligned_timestamps(aligned_video_timestamps)
