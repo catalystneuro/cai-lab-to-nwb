@@ -1,7 +1,10 @@
 """Primary NWBConverter class for this dataset."""
 
+from datetime import timedelta
+
 from neuroconv import NWBConverter
 from neuroconv.datainterfaces import VideoInterface
+from neuroconv.utils.dict import DeepDict
 
 from interfaces import (
     MinianSegmentationInterface,
@@ -31,3 +34,29 @@ class Zaki2024NWBConverter(NWBConverter):
         ShockStimuli=Zaki2024ShockStimuliInterface,
         CellRegistration=Zaki2024CellRegistrationInterface,
     )
+
+    def get_metadata(self) -> DeepDict:
+        metadata = super().get_metadata()
+
+        if "MiniscopeImaging" in self.data_interface_objects:
+            imaging_interface = self.data_interface_objects["MiniscopeImaging"]
+            imaging_timestamps = imaging_interface.get_original_timestamps()
+            # If the first timestamp in the imaging data is negative, adjust the session start time
+            # to ensure all timestamps are positive. This is done by shifting the session start time
+            # backward by the absolute value of the negative timestamp.
+            if imaging_timestamps[0] < 0.0:
+                time_shift = timedelta(seconds=abs(imaging_timestamps[0]))
+                session_start_time = imaging_interface.get_metadata()["NWBFile"]["session_start_time"]
+                metadata["NWBFile"].update(session_start_time=session_start_time - time_shift)
+        return metadata
+
+    def temporally_align_data_interfaces(self):
+        if "MiniscopeImaging" in self.data_interface_objects:
+            imaging_interface = self.data_interface_objects["MiniscopeImaging"]
+            imaging_timestamps = imaging_interface.get_original_timestamps()
+            # Align the starting times of all data interfaces when the imaging data's first timestamp is negative.
+            # This is done by calculating a time shift based on the absolute value of the first negative timestamp.
+            # The time shift is applied to all relevant data interfaces to ensure temporal alignment.
+            if imaging_timestamps[0] < 0.0:
+                time_shift = abs(imaging_timestamps[0])
+                imaging_interface.set_aligned_timestamps(imaging_timestamps + time_shift)
