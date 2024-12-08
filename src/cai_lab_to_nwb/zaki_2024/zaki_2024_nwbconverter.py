@@ -68,7 +68,7 @@ class Zaki2024NWBConverter(NWBConverter):
                 # if "MinianMotionCorrection" in self.data_interface_objects:
                 #     motion_correction_interface = self.data_interface_objects["MinianMotionCorrection"]
                 #     motion_correction_timestamps = motion_correction_interface.get_original_timestamps()
-                #     motion_correction_interface.set_aligned_timestamps(segmentation_timestamps + time_shift)
+                #     motion_correction_interface.set_aligned_timestamps(motion_correction_timestamps + time_shift)
 
                 if "SleepClassification" in self.data_interface_objects:
                     sleep_classification_interface = self.data_interface_objects["SleepClassification"]
