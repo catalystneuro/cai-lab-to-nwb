@@ -154,7 +154,7 @@ class MinianSegmentationExtractor(SegmentationExtractor):
         accepted_list: list
             List of accepted ROI ids.
         """
-        return list(range(self.get_num_rois()))
+        return self.get_roi_ids()
 
     def get_rejected_list(self) -> list:
         """Get a list of rejected ROI ids.
@@ -165,10 +165,6 @@ class MinianSegmentationExtractor(SegmentationExtractor):
             List of rejected ROI ids.
         """
         return list()
-
-    def get_roi_ids(self) -> list:
-        dataset = self._read_zarr_group("/A.zarr")
-        return list(dataset["unit_id"])
 
     def get_traces_dict(self) -> dict:
         """Get traces as a dictionary with key as the name of the ROiResponseSeries.
@@ -312,6 +308,28 @@ class _MinianMotionCorrectedVideoExtractor(ImagingExtractor):
     def get_channel_names(self) -> list[str]:
         return ["OpticalChannel"]
 
+    def get_original_timestamps(self, stub_test: bool = False) -> list[np.ndarray]:
+        """
+        Retrieve the original unaltered timestamps for the data in this interface.
+
+        This function should retrieve the data on-demand by re-initializing the IO.
+
+        Returns
+        -------
+        timestamps : numpy.ndarray
+            The timestamps for the data stream.
+        stub_test : bool, default: False
+            This method scans through each video; a process which can take some time to complete.
+
+            To limit that scan to a small number of frames, set `stub_test=True`.
+        """
+        max_frames = 100 if stub_test else None
+        with self._video_capture(file_path=str(self.file_path)) as video:
+            # fps = video.get_video_fps()  # There is some debate about whether the OpenCV timestamp
+            # method is simply returning range(length) / fps 100% of the time for any given format
+            timestamps = video.get_video_timestamps(max_frames=max_frames)
+        return timestamps
+
     def get_video(
         self, start_frame: Optional[int] = None, end_frame: Optional[int] = None, channel: int = 0
     ) -> np.ndarray:
@@ -440,7 +458,7 @@ class MinianMotionCorrectionInterface(BaseDataInterface):
             xy_translation=xy_translation,
         )
 
-        ophys = get_module(nwbfile, "ophys")
+        ophys = get_module(nwbfile, name="ophys", description="Data processed with MiniAn software")
         if "MotionCorrection" not in ophys.data_interfaces:
             motion_correction = MotionCorrection(name="MotionCorrection")
             ophys.add(motion_correction)

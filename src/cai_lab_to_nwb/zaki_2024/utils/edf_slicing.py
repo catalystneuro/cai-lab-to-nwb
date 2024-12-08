@@ -42,6 +42,36 @@ def get_session_slicing_time_range(miniscope_metadata_json: Union[str, Path], ti
 
 
 def get_session_run_time(txt_file_path: Union[str, Path]):
+    """
+    Reads a text file, extracts the "Run Time" information, and converts it to seconds.
+
+    Parameters:
+    ----------
+    txt_file_path : Union[str, Path]
+        The file path to the text file containing the "Run Time" information.
+
+    Returns:
+    -------
+    float
+        The run time in seconds.
+
+    Raises:
+    ------
+    FileNotFoundError
+        If the file specified by `txt_file_path` does not exist.
+    ValueError
+        If the "Run Time" information is not found or improperly formatted in the file.
+
+    Notes:
+    -----
+    - The "Run Time" line in the file should follow the format: `Run Time : HH:MM:SS`.
+    - If the "Run Time" information is missing, an error message is printed, and no value is returned.
+
+    Example:
+    -------
+    If the text file contains the line `Run Time : 01:30:45`, the function will return `5445.0` (seconds).
+
+    """
     import re
 
     try:
