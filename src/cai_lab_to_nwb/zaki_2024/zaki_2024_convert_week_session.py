@@ -144,6 +144,13 @@ def session_to_nwb(
 
         nwbfile.add_epoch(start_time=start_time, stop_time=stop_time, session_ids=session_id)
 
+    session_description = (
+        "Week long of continuous recording with HD-X02 wireless telemetry probe of EEG, EMG, Temperature and Activity signals. "
+        "Conditioning and Offline sessions, as described in the experiment_description, were performed during the week. "
+        "The output of cell registration across conditioning and offline sessions are reported in this nwb file. "
+    )
+    metadata["NWBFile"]["session_description"] = session_description
+
     # Run conversion
     configure_and_write_nwbfile(nwbfile=nwbfile, backend="hdf5", output_filepath=nwbfile_path)
 
@@ -163,7 +170,7 @@ if __name__ == "__main__":
     # Parameters for conversion
     data_dir_path = Path("D:/")
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
-    subject_id = "Ca_EEG2-1"
+    subject_id = "Ca_EEG3-4"
     stub_test = False
     session_to_nwb(
         data_dir_path=data_dir_path,
