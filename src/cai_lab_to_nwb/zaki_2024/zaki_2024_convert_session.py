@@ -1,46 +1,41 @@
 """Primary script to run to convert an entire session for of data using the NWBConverter."""
 
 import time
-
+import pytz
 from pathlib import Path
 from typing import Union
-from datetime import datetime
-import pandas as pd
-import json
+from datetime import datetime, timedelta
+
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
 from zaki_2024_nwbconverter import Zaki2024NWBConverter
-
-
-def get_miniscope_folder_path(folder_path: Union[str, Path]):
-    folder_path = Path(folder_path)
-    if folder_path.is_dir():
-        general_metadata_json = folder_path / "metaData.json"
-        assert general_metadata_json.exists(), f"General metadata json not found in {folder_path}"
-        with open(general_metadata_json) as f:
-            general_metadata = json.load(f)
-        miniscope_name = general_metadata["miniscopes"][0]
-        return folder_path / miniscope_name.replace(" ", "_")
-    else:
-        print("No Miniscope data found at {}".format(folder_path))
-        return None
+from utils import get_session_slicing_time_range, get_session_run_time
+from interfaces.miniscope_imaging_interface import get_miniscope_folder_path
 
 
 def session_to_nwb(
-    data_dir_path: Union[str, Path],
     output_dir_path: Union[str, Path],
     subject_id: str,
     session_id: str,
     date_str: str,
     time_str: str,
+    session_description: str,
     stub_test: bool = False,
-    verbose: bool = True,
+    verbose: bool = False,
+    experiment_dir_path: Union[str, Path] = None,
+    imaging_folder_path: Union[str, Path] = None,
+    minian_folder_path: Union[str, Path] = None,
+    video_file_path: Union[str, Path] = None,
+    freezing_output_file_path: Union[str, Path] = None,
+    edf_file_path: Union[str, Path] = None,
+    sleep_classification_file_path: Union[str, Path] = None,
+    shock_stimulus: dict = None,
 ):
-    print("Converting session {}".format(session_id))
+
     if verbose:
+        print(f"Converting session {session_id}")
         start = time.time()
 
-    data_dir_path = Path(data_dir_path)
     output_dir_path = Path(output_dir_path)
     if stub_test:
         output_dir_path = output_dir_path / "nwb_stub"
@@ -51,77 +46,106 @@ def session_to_nwb(
     source_data = dict()
     conversion_options = dict()
 
-    if "Offline" in session_id:
-        offline_day = session_id.split("Session")[0]
-        experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Offline") / offline_day
-    else:
-        experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
+    # Add Miniscope data
+    miniscope_folder_path = None
+    if imaging_folder_path:
+        imaging_folder_path = Path(imaging_folder_path)
+        miniscope_folder_path = get_miniscope_folder_path(imaging_folder_path)
+        assert miniscope_folder_path.is_dir(), f"{miniscope_folder_path} does not exist"
 
-    # Add Imaging
-    folder_path = experiment_dir_path / date_str / time_str
-    miniscope_folder_path = get_miniscope_folder_path(folder_path)
-    if miniscope_folder_path is not None:
         source_data.update(dict(MiniscopeImaging=dict(folder_path=miniscope_folder_path)))
         conversion_options.update(dict(MiniscopeImaging=dict(stub_test=stub_test)))
 
-    # Add Segmentation
-    minian_folder_path = data_dir_path / "Ca_EEG_Calcium" / subject_id / session_id / "minian"
-    if minian_folder_path.is_dir():
+    # Add Segmentation and Motion Correction
+    if minian_folder_path:
+        minian_folder_path = Path(minian_folder_path)
+        assert minian_folder_path.is_dir(), f"{minian_folder_path} does not exist"
         source_data.update(dict(MinianSegmentation=dict(folder_path=minian_folder_path)))
         conversion_options.update(dict(MinianSegmentation=dict(stub_test=stub_test)))
-    elif verbose:
-        print("No Minian data found at {}".format(minian_folder_path))
 
-    # Add Motion Correction
-    motion_corrected_video = minian_folder_path / "minian_mc.mp4"
-    if motion_corrected_video.is_file():
-        source_data.update(
-            dict(MinianMotionCorrection=dict(folder_path=minian_folder_path, video_file_path=motion_corrected_video))
-        )
-        conversion_options.update(dict(MinianMotionCorrection=dict(stub_test=stub_test)))
-    elif verbose:
-        print("No motion corrected data found at {}".format(motion_corrected_video))
+        # motion_corrected_video = minian_folder_path / "minian_mc.mp4"
+        # if motion_corrected_video.is_file():
+        #     source_data.update(
+        #         dict(
+        #             MinianMotionCorrection=dict(folder_path=minian_folder_path, video_file_path=motion_corrected_video)
+        #         )
+        #     )
+        #     conversion_options.update(dict(MinianMotionCorrection=dict(stub_test=stub_test)))
+        # elif verbose and not motion_corrected_video.is_file():
+        #     print(f"No motion corrected data found at {motion_corrected_video}")
 
     # Add Behavioral Video
-    video_file_path = experiment_dir_path / (session_id + ".wmv")
-    if video_file_path.is_file():
+    if video_file_path:
+        video_file_path = Path(video_file_path)
+        assert video_file_path.is_file(), f"{video_file_path} does not exist"
         source_data.update(dict(Video=dict(file_paths=[video_file_path])))
         conversion_options.update(dict(Video=dict(stub_test=stub_test)))
-    elif verbose:
-        print("No behavioral video found at {}".format(video_file_path))
 
     # Add Freezing Analysis output
-    freezing_output_file_path = experiment_dir_path / (session_id + "_FreezingOutput.csv")
-    if freezing_output_file_path.is_file():
+    if freezing_output_file_path:
+        freezing_output_file_path = Path(freezing_output_file_path)
+        assert freezing_output_file_path.is_file(), f"{freezing_output_file_path} does not exist"
         source_data.update(
             dict(FreezingBehavior=dict(file_path=freezing_output_file_path, video_sampling_frequency=30.0))
         )
-    elif verbose:
-        print("No freezing output csv file found at {}".format(freezing_output_file_path))
+        conversion_options.update(dict(FreezingBehavior=dict(stub_test=stub_test)))
 
     # Add EEG, EMG, Temperature and Activity signals
-    # TODO discuss how to slice this data
-    datetime_obj = datetime.strptime(date_str, "%Y_%m_%d")
-    reformatted_date_str = datetime_obj.strftime("_%m%d%y")
-    edf_file_path = data_dir_path / "Ca_EEG_EDF" / (subject_id + "_EDF") / (subject_id + reformatted_date_str + ".edf")
-    if edf_file_path.is_file():
-        source_data.update(dict(EDFSignals=dict(file_path=edf_file_path)))
-        conversion_options.update(dict(EDFSignals=dict(stub_test=stub_test)))
-    elif verbose:
-        print("No .edf file found at {}".format(edf_file_path))
+    if edf_file_path:
+        edf_file_path = Path(edf_file_path)
+        assert edf_file_path.is_file(), f"{edf_file_path} does not exist"
+        if imaging_folder_path.is_dir() and miniscope_folder_path.is_dir():
+            miniscope_metadata_json = imaging_folder_path / "metaData.json"
+            assert miniscope_metadata_json.exists(), f"General metadata json not found in {imaging_folder_path}"
+            timestamps_file_path = miniscope_folder_path / "timeStamps.csv"
+            assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {miniscope_folder_path}"
+            start_datetime_timestamp, stop_datetime_timestamp = get_session_slicing_time_range(
+                miniscope_metadata_json=miniscope_metadata_json, timestamps_file_path=timestamps_file_path
+            )
+        else:
+            datetime_str = date_str + " " + time_str
+            start_datetime_timestamp = datetime.strptime(datetime_str, "%Y_%m_%d %H_%M_%S")
+
+            txt_file_path = experiment_dir_path / f"{session_id}.txt"
+            assert txt_file_path.is_file(), f"{txt_file_path} does not exist"
+
+            session_run_time = get_session_run_time(txt_file_path=txt_file_path)
+            stop_datetime_timestamp = start_datetime_timestamp + timedelta(seconds=session_run_time)
+
+        source_data.update(
+            dict(
+                EDFSignals=dict(
+                    file_path=edf_file_path,
+                )
+            )
+        )
+        conversion_options.update(
+            dict(
+                EDFSignals=dict(
+                    stub_test=stub_test,
+                    start_datetime_timestamp=start_datetime_timestamp,
+                    stop_datetime_timestamp=stop_datetime_timestamp,
+                )
+            )
+        )
 
     # Add Sleep Classification output
-    sleep_classification_file_path = (
-        data_dir_path / "Ca_EEG_Sleep" / subject_id / "AlignedSleep" / (session_id + "_AlignedSleep.csv")
-    )
-    if sleep_classification_file_path.is_file():
+    if sleep_classification_file_path:
+        sleep_classification_file_path = Path(sleep_classification_file_path)
+        assert sleep_classification_file_path.is_file(), f"{sleep_classification_file_path} does not exist"
         source_data.update(
-            dict(SleepClassification=dict(file_path=sleep_classification_file_path, video_sampling_frequency=30.0))
+            dict(SleepClassification=dict(file_path=sleep_classification_file_path, sampling_frequency=15.0))
         )
-    elif verbose:
-        print("No sleep classification output csv file found at {}".format(sleep_classification_file_path))
 
-    converter = Zaki2024NWBConverter(source_data=source_data)
+    # Add Shock Stimuli times for FC sessions
+    if shock_stimulus is not None:
+
+        source_data.update(ShockStimuli=dict())
+        conversion_options.update(
+            ShockStimuli=shock_stimulus,
+        )
+
+    converter = Zaki2024NWBConverter(source_data=source_data, verbose=verbose)
 
     # Add datetime to conversion
     metadata = converter.get_metadata()
@@ -131,12 +155,16 @@ def session_to_nwb(
         session_start_time = datetime.strptime(datetime_str, "%Y_%m_%d %H_%M_%S")
         metadata["NWBFile"]["session_start_time"] = session_start_time
 
+    eastern = pytz.timezone("US/Eastern")
+    metadata["NWBFile"]["session_start_time"] = eastern.localize(metadata["NWBFile"]["session_start_time"])
+
     # Update default metadata with the editable in the corresponding yaml file
     editable_metadata_path = Path(__file__).parent / "zaki_2024_metadata.yaml"
     editable_metadata = load_dict_from_file(editable_metadata_path)
     metadata = dict_deep_update(metadata, editable_metadata)
 
     metadata["Subject"]["subject_id"] = subject_id
+    metadata["NWBFile"]["session_description"] = session_description
 
     # Run conversion
     converter.run_conversion(
@@ -156,24 +184,18 @@ def session_to_nwb(
 
 if __name__ == "__main__":
 
-    # Parameters for conversion
-    data_dir_path = Path("D:/")
-    subject_id = "Ca_EEG3-4"
-    task = "OfflineDay1Session1"
-    session_id = subject_id + "_" + task
-    output_dir_path = Path("D:/cai_lab_conversion_nwb/")
+    subject_id = "Ca_EEG2-1"
+    session_type = "FC"  #
+    session_id = subject_id + "_" + session_type
     stub_test = True
-    session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
-    df = pd.read_csv(session_times_file_path)
-    session_row = df[df["Session"] == task].iloc[0]
-    date_str = session_row["Date"]
-    time_str = session_row["Time"]
-    session_to_nwb(
-        data_dir_path=data_dir_path,
-        output_dir_path=output_dir_path,
+    verbose = True
+    yaml_file_path = Path(__file__).parent / "utils/conversion_parameters.yaml"
+    conversion_parameter_dict = load_dict_from_file(yaml_file_path)
+    session_to_nwb_kwargs_per_session = conversion_parameter_dict[subject_id][session_id]
+    session_to_nwb_kwargs_per_session.update(
         stub_test=stub_test,
-        subject_id=subject_id,
-        session_id=session_id,
-        date_str=date_str,
-        time_str=time_str,
+        verbose=verbose,
     )
+    session_to_nwb(**session_to_nwb_kwargs_per_session)
+
+    # Alternatively one can get each path separately using the functions in utils and update the session_to_nwb_kwargs_per_session dictionary

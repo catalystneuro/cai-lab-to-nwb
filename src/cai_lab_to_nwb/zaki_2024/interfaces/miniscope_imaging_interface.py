@@ -6,6 +6,7 @@ import json
 import datetime
 
 from copy import deepcopy
+from typing import Union
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -15,6 +16,132 @@ from pynwb import NWBFile
 
 from neuroconv.datainterfaces.ophys.baseimagingextractorinterface import BaseImagingExtractorInterface
 from neuroconv.utils import DeepDict, dict_deep_update
+
+
+def get_miniscope_folder_path(folder_path: Union[str, Path]):
+    """
+    Retrieve the path to the Miniscope folder within the given session folder based on metadata.
+
+    Parameters:
+    -----------
+    folder_path : Union[str, Path]
+        Path to the main session folder, which should contain a "metaData.json" file with information about the Miniscope.
+
+    Returns:
+    --------
+    Optional[Path]
+        Path to the Miniscope folder, formatted to replace any spaces in the Miniscope name with underscores. Returns `None` if the
+        specified folder is not a directory or if the metadata JSON is missing or misconfigured.
+
+    Raises:
+    -------
+    AssertionError
+        If the "metaData.json" file is not found in the given folder path.
+    """
+    folder_path = Path(folder_path)
+    if folder_path.is_dir():
+        general_metadata_json = folder_path / "metaData.json"
+        assert general_metadata_json.exists(), f"General metadata json not found in {folder_path}"
+        with open(general_metadata_json) as f:
+            general_metadata = json.load(f)
+        miniscope_name = general_metadata["miniscopes"][0]
+        return folder_path / miniscope_name.replace(" ", "_")
+    else:
+        print(f"No Miniscope data found at {folder_path}")
+        return None
+
+
+def get_recording_start_time(file_path: Union[str, Path]):
+    """
+    Retrieve the recording start time from metadata in the specified folder.
+
+    Parameters:
+    -----------
+    file_path : Union[str, Path]
+        Path to the "metaData.json" file with recording start time details.
+
+    Returns:
+    --------
+    datetime.datetime
+        A datetime object representing the session start time, based on the metadata's year, month, day, hour, minute,
+        second, and millisecond fields.
+
+    Raises:
+    -------
+    AssertionError
+        If the "metaData.json" file is not found in the specified folder path.
+    KeyError
+        If any of the required time fields ("year", "month", "day", "hour", "minute", "second", "msec") are missing
+        from the metadata.
+
+    Notes:
+    ------
+    - The function expects a "recordingStartTime" key in the metadata JSON, which contains start time details.
+      If not present, the top-level JSON object is assumed to contain the time information.
+    - The "msec" field in the metadata is converted from milliseconds to microseconds for compatibility with the datetime
+      microsecond field.
+    """
+
+    ## Read metadata
+    with open(file_path) as f:
+        general_metadata = json.load(f)
+
+    if "recordingStartTime" in general_metadata:
+        start_time_info = general_metadata["recordingStartTime"]
+    else:
+        start_time_info = general_metadata
+
+    required_keys = ["year", "month", "day", "hour", "minute", "second", "msec"]
+    for key in required_keys:
+        if key not in start_time_info:
+            raise KeyError(f"Missing required key '{key}' in the metadata")
+
+    session_start_time = datetime.datetime(
+        year=start_time_info["year"],
+        month=start_time_info["month"],
+        day=start_time_info["day"],
+        hour=start_time_info["hour"],
+        minute=start_time_info["minute"],
+        second=start_time_info["second"],
+        microsecond=start_time_info["msec"] * 1000,  # Convert milliseconds to microseconds
+    )
+
+    return session_start_time
+
+
+def get_miniscope_timestamps(file_path: Union[str, Path]):
+    """
+    Retrieve the Miniscope timestamps from a CSV file and convert them to seconds.
+
+    Parameters:
+    -----------
+    file_path : Union[str, Path]
+        Path to the Miniscope "timeStamps.csv" file, which includes timestamps in milliseconds.
+
+    Returns:
+    --------
+    np.ndarray
+        A NumPy array containing the Miniscope timestamps in seconds, converted from the original milliseconds.
+
+    Raises:
+    -------
+    AssertionError
+        If the "timeStamps.csv" file is not found in the specified Miniscope folder path.
+
+    Notes:
+    ------
+    - This function expects the timestamps CSV file to have a column named "Time Stamp (ms)" with values in milliseconds.
+    - The timestamps are converted from milliseconds to seconds for compatibility with other functions that expect time
+      values in seconds.
+    """
+
+    import pandas as pd
+
+    timetsamps_df = pd.read_csv(file_path)
+    timestamps_milliseconds = timetsamps_df["Time Stamp (ms)"].values.astype(float)
+    timestamps_seconds = timestamps_milliseconds / 1000.0
+
+    return np.asarray(timestamps_seconds)
 
 
 class MiniscopeImagingExtractor(MultiImagingExtractor):
@@ -205,36 +332,6 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
 
         self.photon_series_type = "OnePhotonSeries"
 
-    def _get_session_start_time(self):
-        general_metadata_json = self.session_folder / "metaData.json"
-        assert general_metadata_json.exists(), f"General metadata json not found in {self.session_folder}"
-
-        ## Read metadata
-        with open(general_metadata_json) as f:
-            general_metadata = json.load(f)
-
-        if "recordingStartTime" in general_metadata:
-            start_time_info = general_metadata["recordingStartTime"]
-        else:
-            start_time_info = general_metadata
-
-        required_keys = ["year", "month", "day", "hour", "minute", "second", "msec"]
-        for key in required_keys:
-            if key not in start_time_info:
-                raise KeyError(f"Missing required key '{key}' in the metadata")
-
-        session_start_time = datetime.datetime(
-            year=start_time_info["year"],
-            month=start_time_info["month"],
-            day=start_time_info["day"],
-            hour=start_time_info["hour"],
-            minute=start_time_info["minute"],
-            second=start_time_info["second"],
-            microsecond=start_time_info["msec"] * 1000,  # Convert milliseconds to microseconds
-        )
-
-        return session_start_time
-
     def get_metadata(self) -> DeepDict:
         from neuroconv.tools.roiextractors import get_nwb_imaging_metadata
 
@@ -243,7 +340,10 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         metadata = dict_deep_update(metadata, default_metadata)
         metadata["Ophys"].pop("TwoPhotonSeries", None)
 
-        session_start_time = self._get_session_start_time()
+        general_metadata_json = self.session_folder / "metaData.json"
+        assert general_metadata_json.exists(), f"General metadata json not found in {self.session_folder}"
+        session_start_time = get_recording_start_time(file_path=general_metadata_json)
+
         metadata["NWBFile"].update(session_start_time=session_start_time)
 
         device_metadata = metadata["Ophys"]["Device"][0]
@@ -267,22 +367,10 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         return metadata_schema
 
     def get_original_timestamps(self) -> np.ndarray:
-
         timestamps_file_path = self.miniscope_folder / "timeStamps.csv"
         assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {self.miniscope_folder}"
-
-        import pandas as pd
-
-        timetsamps_df = pd.read_csv(timestamps_file_path)
-        timestamps_milliseconds = timetsamps_df["Time Stamp (ms)"].values.astype(float)
-        timestamps_seconds = timestamps_milliseconds / 1000.0
-
-        # Shift when the first timestamp is negative
-        # TODO: Figure why, I copied from miniscope
-        if timestamps_seconds[0] < 0.0:
-            timestamps_seconds += abs(timestamps_seconds[0])
-
-        return np.asarray(timestamps_seconds)
+        timestamps_seconds = get_miniscope_timestamps(file_path=timestamps_file_path)
+        return timestamps_seconds
 
     def add_to_nwbfile(
         self,
@@ -292,12 +380,13 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         photon_series_index: int = 0,
         stub_test: bool = False,
         stub_frames: int = 100,
+        always_write_timestamps: bool = True,
     ):
         from ndx_miniscope.utils import add_miniscope_device
 
         from neuroconv.tools.roiextractors import add_photon_series_to_nwbfile
 
-        miniscope_timestamps = self.get_original_timestamps()
+        miniscope_timestamps = self.get_timestamps()
         imaging_extractor = self.imaging_extractor
 
         if stub_test:
@@ -308,7 +397,7 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         imaging_extractor.set_times(times=miniscope_timestamps)
 
         device_metadata = metadata["Ophys"]["Device"][0]
-        # Cast to string because miniscope extension requires so
+        # Cast to string because Miniscope extension requires so
         device_metadata["gain"] = str(device_metadata["gain"])
         device_metadata.pop("ewl")
         add_miniscope_device(nwbfile=nwbfile, device_metadata=device_metadata)
@@ -319,4 +408,5 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
             metadata=metadata,
             photon_series_type=photon_series_type,
             photon_series_index=photon_series_index,
+            always_write_timestamps=always_write_timestamps,
         )

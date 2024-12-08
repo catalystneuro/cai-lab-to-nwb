@@ -7,6 +7,8 @@ from pprint import pformat
 import traceback
 from tqdm import tqdm
 
+from neuroconv.utils import load_dict_from_file
+
 from zaki_2024_convert_session import session_to_nwb
 
 
@@ -95,30 +97,21 @@ def get_session_to_nwb_kwargs_per_session(
     # This can be a specific list with hard-coded sessions, a path expansion or any conversion specific logic that you might need
     #####
     import pandas as pd
+    import re
 
     subjects_df = pd.read_excel(data_dir_path / "Ca_EEG_Design.xlsx")
     subjects = subjects_df["Mouse"]
     session_to_nwb_kwargs_per_session = []
     for subject_id in subjects:
-        session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
-        if session_times_file_path.is_file():
-            session_times_df = pd.read_csv(session_times_file_path)
-            for task in session_times_df["Session"]:
-                session_id = subject_id + "_" + task
-                session_row = session_times_df[session_times_df["Session"] == task].iloc[0]
-                date_str = session_row["Date"]
-                time_str = session_row["Time"]
-                session_to_nwb_kwargs_per_session.append(
-                    dict(
-                        data_dir_path=data_dir_path,
-                        subject_id=subject_id,
-                        session_id=session_id,
-                        date_str=date_str,
-                        time_str=time_str,
-                    )
-                )
+        yaml_file_path = Path(__file__).parent / "utils/conversion_parameters.yaml"
+        conversion_parameter_dict = load_dict_from_file(yaml_file_path)
+        if subject_id in conversion_parameter_dict:
+            for session_id in conversion_parameter_dict[subject_id].keys():
+                session_to_nwb_kwargs_per_session.append(conversion_parameter_dict[subject_id][session_id])
         else:
-            print("Subject {} not found".format(subject_id))
+            print(
+                f"Conversion parameters for subject {subject_id} were not defined. Please run utils/define_conversion_parameters.py for subject {subject_id}."
+            )
 
     return session_to_nwb_kwargs_per_session
 
@@ -129,8 +122,8 @@ if __name__ == "__main__":
     data_dir_path = Path("D:/")
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
     max_workers = 1
-    verbose = True
-    stub_test = True
+    verbose = False
+    stub_test = False
     dataset_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
