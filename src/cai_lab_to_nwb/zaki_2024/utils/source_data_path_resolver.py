@@ -5,7 +5,7 @@ from datetime import datetime
 import warnings
 
 
-def get_session_times_df(subject_id: str, data_dir_path: Union[str, Path], session_types: list = ()) -> pd.DataFrame:
+def get_session_times_df(subject_id: str, data_dir_path: Union[str, Path], session_ids: list = ()) -> pd.DataFrame:
     """
     Retrieve a DataFrame containing session times for a given subject.
 
@@ -15,7 +15,7 @@ def get_session_times_df(subject_id: str, data_dir_path: Union[str, Path], sessi
         The ID of the subject.
     data_dir_path : Union[str, Path]
         Path to the base data directory.
-    session_types : list, optional
+    session_ids : list, optional
         List of session types to filter. Defaults to an empty list.
 
     Returns:
@@ -30,11 +30,11 @@ def get_session_times_df(subject_id: str, data_dir_path: Union[str, Path], sessi
     """
 
     if "Ca_EEG3-" in subject_id:
-        session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
+        session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / f"{subject_id}_SessionTimes.csv"
         assert session_times_file_path.is_file(), f"{session_times_file_path} does not exist"
         session_times_df = pd.read_csv(session_times_file_path)
-        if session_types:
-            session_times_df = session_times_df[session_times_df["Session"].isin(session_types)]
+        if session_ids:
+            session_times_df = session_times_df[session_times_df["Session"].isin(session_ids)]
         return session_times_df
 
     elif "Ca_EEG2-" in subject_id:
@@ -45,8 +45,8 @@ def get_session_times_df(subject_id: str, data_dir_path: Union[str, Path], sessi
         session_times = session_times_df_original.iloc[1, 1:].tolist()  # Exclude first column
         # Create the DataFrame
         session_times_df = pd.DataFrame({"Session": session_names, "Time": session_times, "Date": None})
-        if session_types:
-            session_times_df = session_times_df[session_times_df["Session"].isin(session_types)]
+        if session_ids:
+            session_times_df = session_times_df[session_times_df["Session"].isin(session_ids)]
         return session_times_df
 
     elif "Ca_EEG_Pilot" in subject_id:
@@ -82,9 +82,13 @@ def get_experiment_dir_path(subject_id: str, session_id: str, data_dir_path: Uni
 
     if "Offline" in session_id:
         offline_day = session_id.split("Session")[0]
-        experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Offline") / offline_day
+        experiment_dir_path = (
+            data_dir_path / "Ca_EEG_Experiment" / subject_id / f"{subject_id}_Offline" / f"{subject_id}_{offline_day}"
+        )
     else:
-        experiment_dir_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_Sessions") / session_id
+        experiment_dir_path = (
+            data_dir_path / "Ca_EEG_Experiment" / subject_id / f"{subject_id}_Sessions" / f"{subject_id}_{session_id}"
+        )
     assert experiment_dir_path.is_dir(), f"{experiment_dir_path} does not exist"
     return experiment_dir_path
 
@@ -136,10 +140,8 @@ def get_edf_file_path(subject_id: str, date_str: str, data_dir_path: Union[str, 
 
     try:
         datetime_obj = datetime.strptime(date_str, "%Y_%m_%d")
-        reformatted_date_str = datetime_obj.strftime("_%m%d%y")
-        edf_file_path = (
-            data_dir_path / "Ca_EEG_EDF" / (subject_id + "_EDF") / (subject_id + reformatted_date_str + ".edf")
-        )
+        reformatted_date_str = datetime_obj.strftime("%m%d%y")
+        edf_file_path = data_dir_path / "Ca_EEG_EDF" / f"{subject_id}_EDF" / f"{subject_id}_{reformatted_date_str}.edf"
         if not edf_file_path.is_file():
             warnings.warn(f"{edf_file_path} not found.")
             return None
@@ -169,7 +171,7 @@ def get_sleep_classification_file_path(
         Path to the sleep classification file, or None if not found.
     """
     sleep_classification_file_path = (
-        data_dir_path / "Ca_EEG_Sleep" / subject_id / "AlignedSleep" / (session_id + "_AlignedSleep.csv")
+        data_dir_path / "Ca_EEG_Sleep" / subject_id / "AlignedSleep" / f"{subject_id}_{session_id}_AlignedSleep.csv"
     )
     if not sleep_classification_file_path.is_file():
         warnings.warn(f"{sleep_classification_file_path} not found.")
@@ -185,7 +187,7 @@ def get_video_file_path(subject_id: str, session_id: str, data_dir_path: Union[s
     -----------
     subject_id : str
         The ID of the subject.
-    session_id : str
+    session_id_old : str
         The ID of the session.
     data_dir_path : Union[str, Path]
         Path to the base data directory.
@@ -197,7 +199,7 @@ def get_video_file_path(subject_id: str, session_id: str, data_dir_path: Union[s
     """
 
     experiment_dir_path = get_experiment_dir_path(subject_id, session_id, data_dir_path)
-    video_file_path = Path(experiment_dir_path) / (session_id + ".wmv")
+    video_file_path = Path(experiment_dir_path) / f"{subject_id}_{session_id}.wmv"
     if not video_file_path.is_file():
         warnings.warn(f"{video_file_path} not found.")
         return None
@@ -226,7 +228,7 @@ def get_freezing_output_file_path(
     """
 
     experiment_dir_path = get_experiment_dir_path(subject_id, session_id, data_dir_path)
-    freezing_output_file_path = Path(experiment_dir_path) / (session_id + "_FreezingOutput.csv")
+    freezing_output_file_path = Path(experiment_dir_path) / f"{subject_id}_{session_id}_FreezingOutput.csv"
     if not freezing_output_file_path.is_file():
         warnings.warn(f"{freezing_output_file_path} not found.")
         return None
@@ -288,7 +290,7 @@ def get_miniscope_folder_path(subject_id: str, session_id: str, data_dir_path: U
         Path to the miniscope folder, or None if not found.
     """
 
-    minian_folder_path = data_dir_path / "Ca_EEG_Calcium" / subject_id / session_id / "minian"
+    minian_folder_path = data_dir_path / "Ca_EEG_Calcium" / subject_id / f"{subject_id}_{session_id}" / "minian"
     if not minian_folder_path.is_dir():
         warnings.warn(f"{minian_folder_path} not found.")
         return None

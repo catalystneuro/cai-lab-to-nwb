@@ -4,7 +4,7 @@ import pandas as pd
 import re
 
 
-def generate_session_description(experiment_design_file_path: Union[Path, str], subject_id: str, session_type: str):
+def generate_session_description(experiment_design_file_path: Union[Path, str], subject_id: str, session_id: str):
     subjects_df = pd.read_excel(experiment_design_file_path)
     subject_df = subjects_df[subjects_df["Mouse"] == subject_id]
     shock_amplitude = subject_df["Amplitude"].to_numpy()[0]
@@ -24,17 +24,17 @@ def generate_session_description(experiment_design_file_path: Union[Path, str], 
         "Recall3": f"Third Recall session: mouse was placed in {subject_df["Test_3"].to_numpy()[0]} context for 5 min. Context: {Contexts[subject_df["Test_3_ctx"].to_numpy()[0]]}",
         "Offline": f"After Neutral Exposure and Fear Conditioning sessions, mice were taken out of the testing chambers and immediately placed in their homecage (scope was not removed).The homecage was placed in a dark grey storage bin with a webcam on top of the bin, taped to a wooden plank, looking down into the homecage. Mouse behavior and calcium were recorded for an hour.",
     }
-    if "Offline" in session_type:
-        session_type = "Offline"
+    if "Offline" in session_id:
+        session_id = "Offline"
 
-    return session_descriptions[session_type]
+    return session_descriptions[session_id]
 
 
 if __name__ == "__main__":
     experiment_design_file_path = Path("D:/Ca_EEG_Design.xlsx")
     subject_id = "Ca_EEG3-4"
-    session_type = "NeutralExposure"
+    session_id = "NeutralExposure"
     session_description = generate_session_description(
-        experiment_design_file_path=experiment_design_file_path, subject_id=subject_id, session_type=session_type
+        experiment_design_file_path=experiment_design_file_path, subject_id=subject_id, session_id=session_id
     )
     print(session_description)
