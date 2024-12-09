@@ -85,6 +85,7 @@ def session_to_nwb(
     metadata = dict_deep_update(metadata, editable_metadata)
 
     metadata["Subject"]["subject_id"] = subject_id
+    metadata["NWBFile"]["session_id"] = "Week"
 
     edf_reader = read_raw_edf(input_fname=edf_file_paths[0], verbose=verbose)
     session_start_time = edf_reader.info["meas_date"]

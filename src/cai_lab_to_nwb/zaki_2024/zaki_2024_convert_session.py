@@ -166,6 +166,7 @@ def session_to_nwb(
 
     metadata["Subject"]["subject_id"] = subject_id
     metadata["NWBFile"]["session_description"] = session_description
+    metadata["NWBFile"]["session_id"] = session_id
 
     # Run conversion
     converter.run_conversion(
@@ -187,7 +188,7 @@ if __name__ == "__main__":
 
     subject_id = "Ca_EEG3-4"
     session_id = "NeutralExposure"
-    stub_test = False
+    stub_test = True
     verbose = True
     overwrite = True
     yaml_file_path = Path(__file__).parent / "utils/conversion_parameters.yaml"
