@@ -53,7 +53,7 @@ def update_conversion_parameters_yaml(
             sleep_classification_file_path = None
             video_file_path = get_video_file_path(subject_id, session_id, data_dir_path)
             freezing_output_file_path = get_freezing_output_file_path(subject_id, session_id, data_dir_path)
-            if session_id == "FC" or session_id == "Recall1":
+            if session_id == "FC":
                 shock_amplitude = subjects_df["Amplitude"][subjects_df["Mouse"] == subject_id].to_numpy()[0]
                 shock_amplitude = float(re.findall(r"[-+]?\d*\.\d+|\d+", shock_amplitude)[0])
                 shock_stimulus = dict(
