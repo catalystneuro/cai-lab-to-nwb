@@ -1,28 +1,10 @@
 # cai-lab-to-nwb
 NWB conversion scripts for Cai lab data to the [Neurodata Without Borders](https://nwb-overview.readthedocs.io/) data format.
 
-
-## Installation
-## Basic installation
-
-You can install the latest release of the package with pip:
-
-```
-pip install cai-lab-to-nwb
-```
-
-We recommend that you install the package inside a [virtual environment](https://docs.python.org/3/tutorial/venv.html). A simple way of doing this is to use a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) from the `conda` package manager ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)). Detailed instructions on how to use conda environments can be found in their [documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
-
-### Running a specific conversion
-Once you have installed the package with pip, you can run any of the conversion scripts in a notebook or a python file:
-
-https://github.com/catalystneuro/cai-lab-to-nwb//tree/main/src/embargo_2024/embargo_2024_convert_session.py
-
-
-
-
 ## Installation from Github
-Another option is to install the package directly from Github. This option has the advantage that the source code can be modifed if you need to amend some of the code we originally provided to adapt to future experimental differences. To install the conversion from GitHub you will need to use `git` ([installation instructions](https://github.com/git-guides/install-git)). We also recommend the installation of `conda` ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)) as it contains all the required machinery in a single and simple instal
+We recommend installing this package directly from Github. This option has the advantage that the source code can be modifed if you need to amend some of the code we originally provided to adapt to future experimental differences.
+To install the conversion from GitHub you will need to use `git` ([installation instructions](https://github.com/git-guides/install-git)). We also recommend the installation of `conda` ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)) as it contains
+all the required machinery in a single and simple install.
 
 From a terminal (note that conda should install one in your system) you can do the following:
 
@@ -46,50 +28,101 @@ pip install -e .
 Note:
 both of the methods above install the repository in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs).
 
-### Running a specific conversion
-To run a specific conversion, you might need to install first some conversion specific dependencies that are located in each conversion directory:
-```
-pip install -r src/cai_lab_to_nwb/embargo_2024/embargo_2024_requirements.txt
-```
+### Installing conversion specific dependencies
 
-You can run a specific conversion with the following command:
+To install *all* the conversion specific dependencies you can run the following command:
+
 ```
-python src/cai_lab_to_nwb/embargo_2024/embargo_2024_convert_session.py
+pip install -r frozen_dependencies.txt
 ```
 
 ## Repository structure
 Each conversion is organized in a directory of its own in the `src` directory:
 
-    cai-lab-to-nwb/
-    ├── LICENSE
-    ├── make_env.yml
-    ├── pyproject.toml
-    ├── README.md
-    ├── requirements.txt
-    ├── setup.py
-    └── src
-        ├── cai_lab_to_nwb
-        │   ├── conversion_directory_1
-        │   └── embargo_2024
-        │       ├── embargo_2024_behaviorinterface.py
-        │       ├── embargo_2024_convert_session.py
-        │       ├── embargo_2024_metadata.yml
-        │       ├── embargo_2024_nwbconverter.py
-        │       ├── embargo_2024_requirements.txt
-        │       ├── embargo_2024_notes.md
+```
+cai-lab-to-nwb/
+├── LICENSE
+├── make_env.yml
+├── pyproject.toml
+├── README.md
+├── dandi_upload.md
+├── requirements.txt
+├── setup.py
+└── src
+    └── cai_lab_to_nwb
+        ├── another_conversion
+        └── zaki_2024
+            ├── interfaces
+            │   ├── __init__.py
+            │   ├── eztrack_interface.py
+            │   ├── minian_interface.py
+            │   ├── miniscope_imaging_interface.py
+            │   ├── zaki_2024_cell_registration_interface.py
+            │   ├── zaki_2024_edf_interface.py
+            │   ├── zaki_2024_shock_stimuli_interface.py
+            │   └── zaki_2024_sleep_classification_interface.py
+            ├── notes
+            │   ├── zaki_2024_notes.md
+            │   └── ... .png
+            ├── tutorials
+            │   ├── zaki_2024_tutorial.md
+            │   └── ... .png
+            ├── utils
+            │   ├── __init__.py
+            │   ├── conversion_parameters.yaml
+            │   ├── define_conversion_parameters.py
+            │   ├── edf_slicing.py
+            │   ├── generate_session_description.py
+            │   └── source_data_path_resolver.py
+            ├── __init__.py
+            ├── zaki_2024_convert_all_sessions.py
+            ├── zaki_2024_convert_session.py
+            ├── zaki_2024_convert_week_session.py
+            ├── zaki_2024_metadata.yaml
+            ├── zaki_2024_nwbconverter.py
+            ├── zaki_2024_requirements.txt
+            └── zaki_2024_run_conversion.ipynb
+```
 
-        │       └── __init__.py
-        │   ├── conversion_directory_b
+ For example, for the conversion `zaki_2024` you can find a directory located in `src/cai-lab-to-nwb/zaki_2024`. Inside each conversion directory you can find the following files:
 
-        └── __init__.py
-
- For example, for the conversion `embargo_2024` you can find a directory located in `src/cai-lab-to-nwb/embargo_2024`. Inside each conversion directory you can find the following files:
-
-* `embargo_2024_convert_sesion.py`: this script defines the function to convert one full session of the conversion.
-* `embargo_2024_requirements.txt`: dependencies specific to this conversion.
-* `embargo_2024_metadata.yml`: metadata in yaml format for this specific conversion.
-* `embargo_2024_behaviorinterface.py`: the behavior interface. Usually ad-hoc for each conversion.
-* `embargo_2024_nwbconverter.py`: the place where the `NWBConverter` class is defined.
-* `embargo_2024_notes.md`: notes and comments concerning this specific conversion.
+* `zaki_2024_convert_sesion.py`: this script defines the function to convert one full session of the conversion.
+* `zaki_2024_requirements.txt`: dependencies specific to this conversion.
+* `zaki_2024_nwbconverter.py`: the place where the `NWBConverter` class is defined.
+* `notes/zaki_2024_notes.md`: notes and comments concerning this specific conversion.
+* `interfaces/`: directory containing the interface classes for this specific conversion.
+* `tutorials/`: directory containing tutorials for this specific conversion.
+* `utils/`: directory containing utility functions for this specific conversion.
 
 The directory might contain other files that are necessary for the conversion but those are the central ones.
+
+### Notes on the conversion
+
+The conversion notes is located in `src/cai_lab_to_nwb/zaki_2024/notes/zaki_2024_notes.md`.
+This file contains information about the expected file structure and the conversion process.
+
+### Running a specific conversion
+
+Once you have installed the package with pip, you can run any of the conversion scripts in a notebook or a python file.
+
+You can run a specific conversion with the following command:
+```
+python src/cai_lab_to_nwb/zaki_2024/zaki_2024_convert_session.py
+```
+
+## NWB tutorials
+
+The `tutorials` directory contains Jupyter notebooks that demonstrate how to use the NWB files generated by the conversion scripts.
+The notebooks are located in the `src/cai_lab_to_nwb/zaki_2024/tutorials` directory.
+
+You might need to install `jupyter` before running the notebooks:
+
+```
+pip install jupyter
+cd src/cai_lab_to_nwb/zaki_2024/tutorials
+jupyter lab
+```
+
+## Upload to the DANDI Archive
+
+Detailed instructions on how to upload the data to the DANDI archive can be found [here](dandi.md).
