@@ -7,6 +7,11 @@ Ca_EEG2-1:
     imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_FC\10_11_24
     minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG2-1\Ca_EEG2-1_FC\minian
     output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: 'Fear Conditioning session: after a baseline period of 2
+      min, mouse received three 2s foot shocks of 1.5, with an intershock interval
+      of 1 min. Then, 30 s after the final shock, the mice were removed and returned
+      to the vivarium. Context: overhead external light, external fan at medium level,
+      box fan on, even grid floor, acetic acid 1pct scent'
     session_id: Ca_EEG2-1_FC
     shock_stimulus:
       shock_amplitude: 1.5
