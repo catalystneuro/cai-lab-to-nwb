@@ -61,7 +61,7 @@ Subject:
   description: Adult C57BL/6J wild-type mice from Jackson Laboratories were used. 
     Mice ordered from Jackson arrived group-housed in cages of 4 mice/cage and were singly housed for the experiment. 
     Mice were ordered to arrive at 8-9 weeks of age and underwent behavioral testing about 4-6 weeks after the arrival date. 
-    All experimental procedures were approved by the Icahn School of Medicine at Mount Sinai’s IACUC.
+    All experimental procedures were approved by the Icahn School of Medicine at Mount Sinai's IACUC.
   age: P12W/P18W
   sex: M
   strain: C57BL/6J
@@ -79,7 +79,7 @@ Ophys:
       location: CA1
       device: Microscope
       optical_channel:
-        - name: OpticalChannel
+        - name: GreenChannel
           description: Green channel of the microscope.
           emission_lambda: 513.0
       indicator: GCaMP6f
