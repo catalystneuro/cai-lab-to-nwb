@@ -37,6 +37,7 @@ What data is available per protocol day:
   * Offline
     - Calcium imaging and Segmentation
     - EEG and EMG
+    - Sleep classification
 
 ### Recall
 * Day 4: 
