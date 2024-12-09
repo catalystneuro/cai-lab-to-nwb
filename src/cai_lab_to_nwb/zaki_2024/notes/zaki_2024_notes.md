@@ -1,46 +1,29 @@
 # Notes concerning the Zaki 2024 conversion
 
-
-
-
-## General Information
-The lab page
+## General Information 
+The lab page:
 https://www.denisecailab.com/
 
-Med associated (a software that they used):
+The lab code:
+https://github.com/denisecailab/RetrospectiveMemoryLinkingAnalysis_2024
 
-https://med-associates.com/product-category/software-all/software-software/
-
-
-## Questions and To-do:
-* Why sometimes the exposure has more than one attempt? Can you describe more about this?
-* Where is the information of the context? that is, they say that they distinguish them by oddor and other features of the context, where is this.
-* In the Miniscope data, there are folders with `failed_to_fix` and `bad_frames`. Can you tell me more about those things?
-* What are the raw files like `Ca_EEG2-1_Recall3.raw`?
-* How to synch the edf with the video (the freeze data is synch to the video)
-* According to Alessandra notes, the behavior videos are synch to the miniscope data. I remember a pulse, can you confirm this? Basically, how to synch the miniscope data with the video? Usually they are part of the same system in miniscope, was it the case here?  
-* What happens in day two? Are offline days 1 and 2 (which is actually three) different?
-* Is the freezing output on the segmentation folder the same that the one in the corresponding imaging folder? It seems that they are for some files, confirm this.
-* For the sleep data, the labels in the paper are : NREM, REM, WAKE (Extended Figure 9 F) but in the data we only found labels: 
-        `sleep_states = ['quiet wake', 'rem', 'sws', 'wake']`
-
-Relationship?
-
-What version of miniscope they used? do they know how it changes the configuration, the data? THEY ARE USING V4.
-
-
-
+The paper:
+https://doi.org/10.1038/s41586-024-08168-4
 
 ## Experiment Protocol
+A description of the experiment from the methods section of the paper [Offline ensemble co-reactivation links memories across days](https://doi.org/10.1038/s41586-024-08168-4):
 
-![experimental protocol](./assets/protocol.png)
+> For calcium imaging experiments with simultaneous EEG and EMG recordings, mice lived in a custom-made homecage where offline recordings could take place. These homecages (Maze Engineers) were custom designed to accommodate mice wearing a Miniscope chronically for the duration of the experiment (about 2 weeks total). The water spout and food hopper were side-mounted and there was a slit along the top of the homecage so that the Miniscope coaxial cable could freely move. This homecage was placed on top of a receiver that would wirelessly receive EEG, EMG, temperature, and locomotion telemetry data continuously throughout the experiment (HD-X02, Data Science International). Mice had a Miniscope attached on the first day and allowed to wear it for an hour in their homecage to acclimate to its weight, after which it was removed. On the second day, the Miniscope was attached and remained on for the duration of the experiment, for a total of 2 weeks. The Miniscope was connected to a lightweight coaxial cable (Cooner Wire) which connected to a low-torque passive commutator (Neurotek) to allow the mice to freely move around the homecage with minimal rotational force. After exposure to the neutral context during encoding, mice were immediately returned to their homecage in the vivarium and the first calcium imaging recording began. The Miniscope DAQ was connected to an Arduino with a schedule set up to send a 10-minute long TTL pulse to record for 10 minutes, with a 20-minute break in between, repeated 24 times. Thus, we sampled 4 hours worth of calcium imaging data across 12 hours. The telemetry probe recorded continuously for the duration of the experiment while the mouse was in its homecage in the vivarium.
+> 
+![experimental protocol](protocol.png)
 
 What data is available per protocol day:
 
 ### Encoding
 * Day 1:
-  * Neutral:
+  * Neutral
     - Video of behavior
+    - Freezing analysis output
     - Calcium imaging and Segmentation
   * Offline
     - Calcium imaging and Segmentation
@@ -48,43 +31,33 @@ What data is available per protocol day:
 * Day 3:
   * Aversive - Fear Conditioning (FC):
     - Video of behavior
+    - Freezing analysis output
     - Calcium imaging and Segmentation
+    - Shock stimulus times
   * Offline
     - Calcium imaging and Segmentation
     - EEG and EMG
 
 ### Recall
 * Day 4: 
-  * Video of behavior
-  * Calcium imaging and Segmentation
-* Day 5: 5 minutes of video:
-  * Video of behavior
+  * Recall1
+    - Video of behavior
+    - Freezing analysis output
+    - Calcium imaging and Segmentation
+* Day 5: 
+  * Recall2
+    - Video of behavior
+    - Freezing analysis output
+    - Calcium imaging and Segmentation
 * Day 6: 5 minutes of video
-  * Video of behavior
+    - Video of behavior
+    - Freezing analysis output
+    - Calcium imaging and Segmentation
 
+## File structure 
+File structure expected to run `define_conversion_parameters` form `utils/define_conversion_parameters.py`
 
-A description of what I believe is the experiments we are converting the data for is given in the methods section of the paper:
-
-> For calcium imaging experiments with simultaneous EEG and EMG recordings, mice lived in a custom-made homecage where offline recordings could take place. These homecages (Maze Engineers) were custom designed to accommodate mice wearing a Miniscope chronically for the duration of the experiment (about 2 weeks total). The water spout and food hopper were side-mounted and there was a slit along the top of the homecage so that the Miniscope coaxial cable could freely move. This homecage was placed on top of a receiver that would wirelessly receive EEG, EMG, temperature, and locomotion telemetry data continuously throughout the experiment (HD-X02, Data Science International). Mice had a Miniscope attached on the first day and allowed to wear it for an hour in their homecage to acclimate to its weight, after which it was removed. On the second day, the Miniscope was attached and remained on for the duration of the experiment, for a total of 2 weeks. The Miniscope was connected to a lightweight coaxial cable (Cooner Wire) which connected to a low-torque passive commutator (Neurotek) to allow the mice to freely move around the homecage with minimal rotational force. After exposure to the neutral context during encoding, mice were immediately returned to their homecage in the vivarium and the first calcium imaging recording began. The Miniscope DAQ was connected to an Arduino with a schedule set up to send a 10-minute long TTL pulse to record for 10 minutes, with a 20-minute break in between, repeated 24 times. Thus, we sampled 4 hours worth of calcium imaging data across 12 hours. The telemetry probe recorded continuously for the duration of the experiment while the mouse was in its homecage in the vivarium.
-
-
-### Surgery 
-
-This is the surgery performed on the experiments that we are converting the data for:
-
-> For calcium imaging experiments with EEG/EMG implants, mice underwent three serial procedures spaced ~two weeks apart. During the first surgery, mice had 300nL of AAV1-Syn-GCaMP6f injected into dorsal CA1 as described above, but had the incision sutured after the surgery. Two weeks later during a second surgery, mice had their overlying cortex aspirated and a GRIN lens implanted above the injection site, as above. During this surgery, a wireless telemetry probe (HD-X02, Data Science International) was also implanted with EEG and EMG wires. Two EMG wires were implanted into the left trapezius muscle. One EEG wire was implanted between skull and dura mater above dorsal hippocampus on the contralateral hemisphere to the GRIN lens (left hemisphere; AP -2mm, ML -1.5mm), and a reference EEG wire was implanted between skull and dura on the right hemisphere overlying prefrontal cortex (AP + 1.75mm, ML -0.5mm). Cyanoacrylate and dental cement fixed the GRIN lens, anchor screw, and EEG wires in place. The telemetry probes were implanted during the second surgery rather than the first to minimize the time that the mice needed to live with the implant (because the mice sometimes reject the implant after long periods). During the third procedure, the mice were returned to implant the baseplate, as described above.
-
-### Subject
-
-
-Adult C57BL/6J wild-type mice from Jackson Laboratories were used in all experiments except for inhibitory tagging experiments (Extended Figures 5,6). In those experiments, Gad2-cre mice from Jackson Laboratories (or bred in-house from Jackson Laboratories) were used. Mice ordered from Jackson arrived group-housed in cages of 4 mice/cage and were singly housed for the experiment. For behavioral experiments where mice did not undergo surgery, mice were ordered to arrive at 12 weeks of age and underwent behavioral testing 1-2 weeks from then. For experiments where mice underwent surgery, mice were ordered to arrive at 8-9 weeks of age and underwent behavioral testing about 4-6 weeks after the arrival date. For experiments where mice underwent PSAM virus injections, mice were included in the experiment if there was expression of GFP+ cell bodies in both the dorsal and ventral hippocampus. All experimental procedures were approved by the Icahn School of Medicine at Mount Sinai’s IACUC.
-
-
-
-
-## File structure
-
-The top level of the data that they shared with us is divided by **modalities** and inside the modalities we have data for two subjects. 
+The top level of the data is divided by **modalities** and inside the modalities we have data for each subject. 
 
 ```
 ├── Ca_EEG_Calcium  (this contains the segmentation data )
@@ -101,13 +74,9 @@ The top level of the data that they shared with us is divided by **modalities** 
     └── Ca_EEG3-4
 ```
 
-### CA_EEG_Calcium
+### Ca_EEG_Calcium
 
-The structure is the same for both subjects.
-
-They contain the minian data, a freezing output csv and the cell registration that contains csv files for each folder.
-
-
+Contain the minian data, a freezing output csv and the cell registration that contains csv files for each folder.
 
 ```
 ├── Ca_EEG2-1
@@ -207,20 +176,6 @@ They contain the minian data, a freezing output csv and the cell registration th
 
 ```
 
-The cell freezing output behavior csv looks like this:
-
-TODO:
-```
-
-```
-
-The cell registration csv looks like this:
-
-TODO:
-```
-```
-
-
 ### CA_EEG_Experiment
 
 The structure is:
@@ -241,11 +196,11 @@ The structure is:
 
 ```
 
+For subject Ca_EEG3-4, the experiment folder contains a file named `Ca_EEG3-4_SessionTimes.csv` that looks like this:
 
-Contains a file named `Session_Timestamps.csv` that looks like this:
+For subject Ca_EEG2-1, the experiment folder contains a file named `Session_Timestamps.csv` that looks like this:
 
-
-The offline data looks different from the sessions data. The sessions are the context and they look like this:
+The offline data are different from the conditioning sessions data. The conditioning sessions are structured as:
 
 ```
 ├── Ca_EEG2-1_FC
@@ -358,8 +313,6 @@ The offline data looks different from the sessions data. The sessions are the co
 
 ```
 
-As we can see the recall 2 and 3 have video but no imaging and segmentation data. The first day of recall, the fear conditioning and the neutral exposure have video, calcium imaging and segmentation data. For some reasons sometimes the neutral exposure has more than one attempt.
-
 The offline days are structured like this:
 
 ```
@@ -438,11 +391,9 @@ And each of them is a date followed by a timestamp that has the miniscope data a
 
 ```
 
-Inside the behavior tracking in the raw data for offline data there is a pose.csv, what is it?
-
 ### Ca_EEG_Sleep 
 
-The sleep looks like this
+The sleep classification folder looks like this:
 
 ```
 ├── Ca_EEG2-1
@@ -584,6 +535,22 @@ These files are full day recordings. Their filename contains a timestamps with a
     └── summary_files
 
 ```
+
+## Conversion output
+
+A schematic representation NWB file structure for the conditioning sessions ("NeutralExposure", "FC", "Recall1", "Recall2", "Recall3"):
+
+![Alt text](cai-conversion-ouput-conditioning-session-nwb.png)
+
+A schematic representation NWB file structure for the offline sessions:
+
+![Alt text](cai-conversion-ouput-offline-session-nwb.png)
+
+A schematic representation NWB file structure for the week-long session:
+
+![Alt text](cai-conversion-ouput-week-session-nwb.png)
+
+
 ## EDF (EEG and MEG)
 
 The EDF format specification:
@@ -591,17 +558,10 @@ https://doi.org/10.1016/S1388-2457(03)00123-8
 
 The pickle files related to the edf data can be ignored.
 
-* How comes that pyedflib is not able to read the EDF files? The EDFs are produce with the HD-X02 device and is unclear to the authors.
-
-
 ### Device:
 HD-X02, Data Science International. The sheet is [here](https://www.datasci.com/docs/default-source/implantable-telemetry/hd-x02_s02.pdf)
 
-
 ### Exploration with MNE
-
-The chann
-
 
 ```python
 
@@ -624,161 +584,27 @@ Here is a description of the channel after the discussion with Joe Zaki on 2024-
 A visual representation of the setup can be found here:
 https://www.datasci.com/telemetry
 
-
-#### Data Extraction
-The paper mentions two wires for the EEG and MEG but that's because one is the reference.
-
-To extract the data the following methods are available:
-
-https://mne.tools/stable/auto_tutorials/raw/10_raw_overview.html#summary-of-ways-to-extract-data-from-raw-objects
+## Miniscope Imaging data
+The Miniscope imaging data are contained in the miniscope folder and saved as .avi files (that will be concatenated during the conversion process).
+In the miniscope folder, there's also the "timeStamps.csv" file where the timestamps of the concatenated imaging data are saved.
+This file is not only used to store the timestamps of the OnePhotonSeries in the nwb file, 
+but it is also used to determine the run time of the experimental sessions when building the epoch table in the "week-long" session nwb file.
 
 ```python
+timestamps_file_path = miniscope_folder_path / "timeStamps.csv"
+assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {miniscope_folder_path}"
 
-raw_data_numpy = raw[:]
-data, times = raw_data_numpy
+start_datetime_timestamp, stop_datetime_timestamp = get_session_slicing_time_range(
+    miniscope_metadata_json=miniscope_metadata_json, timestamps_file_path=timestamps_file_path
+)
 
-data = raw.get_data()
-
-
-More specific channel info can be found:
-
-```python
-info["chs"]
-[{'cal': 1.0,
-  'logno': 1,
-  'scanno': 1,
-  'range': 1.0,
-  'unit_mul': 0 (FIFF_UNITM_NONE),
-  'ch_name': 'Activity',
-  'unit': 107 (FIFF_UNIT_V),
-  'coord_frame': 4 (FIFFV_COORD_HEAD),
-  'coil_type': 1 (FIFFV_COIL_EEG),
-  'kind': 2 (FIFFV_EEG_CH),
-  'loc': array([nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan])},
- {'cal': 1.0,
-  'logno': 2,
-  'scanno': 2,
-  'range': 1.0,
-  'unit_mul': 0 (FIFF_UNITM_NONE),
-  'ch_name': 'BattVolt',
-  'unit': 107 (FIFF_UNIT_V),
-  'coord_frame': 4 (FIFFV_COORD_HEAD),
-  'coil_type': 1 (FIFFV_COIL_EEG),
-  'kind': 2 (FIFFV_EEG_CH),
-  'loc': array([nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan])},
- {'cal': 1.0,
-  'logno': 3,
-  'scanno': 3,
-  'range': 1.0,
-  'unit_mul': 0 (FIFF_UNITM_NONE),
-  'ch_name': 'EEG',
-  'unit': 107 (FIFF_UNIT_V),
-  'coord_frame': 4 (FIFFV_COORD_HEAD),
-  'coil_type': 1 (FIFFV_COIL_EEG),
-  'kind': 2 (FIFFV_EEG_CH),
-  'loc': array([nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan])},
- {'cal': 1.0,
-  'logno': 4,
-  'scanno': 4,
-  'range': 1.0,
-  'unit_mul': 0 (FIFF_UNITM_NONE),
-  'ch_name': 'EMG',
-  'unit': 107 (FIFF_UNIT_V),
-  'coord_frame': 4 (FIFFV_COORD_HEAD),
-  'coil_type': 1 (FIFFV_COIL_EEG),
-  'kind': 2 (FIFFV_EEG_CH),
-  'loc': array([nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan])},
- {'cal': 1.0,
-  'logno': 5,
-  'scanno': 5,
-  'range': 1.0,
-  'unit_mul': 0 (FIFF_UNITM_NONE),
-  'ch_name': 'OnTime',
-  'unit': 107 (FIFF_UNIT_V),
-  'coord_frame': 4 (FIFFV_COORD_HEAD),
-  'coil_type': 1 (FIFFV_COIL_EEG),
-  'kind': 2 (FIFFV_EEG_CH),
-  'loc': array([nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan])},
- {'cal': 1.0,
-  'logno': 6,
-  'scanno': 6,
-  'range': 1.0,
-  'unit_mul': 0 (FIFF_UNITM_NONE),
-  'ch_name': 'SignalStr',
-  'unit': 107 (FIFF_UNIT_V),
-  'coord_frame': 4 (FIFFV_COORD_HEAD),
-  'coil_type': 1 (FIFFV_COIL_EEG),
-  'kind': 2 (FIFFV_EEG_CH),
-  'loc': array([nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan])},
- {'cal': 1.0,
-  'logno': 7,
-  'scanno': 7,
-  'range': 1.0,
-  'unit_mul': 0 (FIFF_UNITM_NONE),
-  'ch_name': 'Temp',
-  'unit': 107 (FIFF_UNIT_V),
-  'coord_frame': 4 (FIFFV_COORD_HEAD),
-  'coil_type': 1 (FIFFV_COIL_EEG),
-  'kind': 2 (FIFFV_EEG_CH),
-  'loc': array([nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan])}]
-
+start_time = (start_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
+stop_time = (stop_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()
 ```
 
-
-
-
-## Miniscope
-
-Talks about the topic:
-https://sites.google.com/metacell.us/miniscope-workshop-2021
-
-Usual DAQ software for Miniscope is GPIOx3.
-
-The expected structure of the file according to the Miniscope wiki is described here:
-
-http://miniscope.org/index.php/Data_Acquisition_Software
-
-But that does not match the structure of the files discussed above.
-
-Also, check out here:
-https://github.com/catalystneuro/roiextractors/issues/356
-
-**The difference in folder organization is a version number**
-
-V4 just enumerates them in the same folder.
-This is because this is more general to add arbitrary behavioral cameras (you don't need the behavior)
-
-Right 
-
-Other changes
-
-AMU: Inertia Motion 
-
-
-`pose.csv` files are related to deep lab cut estimation of the pose of the animal. This is a feature on the latest version of minian that is currently not used in this conversion.
-
-* What is `headOrientation.csv` inside a miniscope folder? this is another feature of miniscope that they are not using in Zaki conversion. 
-
-
-This is the metadata file in the same directory that the minian videos:
-```json
-{
-    "compression": "FFV1",
-    "deviceDirectory": "C:/Users/CaiLab/Documents//Joe/Ca_EEG2/Ca_EEG2-1/2021_10_14/10_11_24/Miniscope",
-    "deviceID": 0,
-    "deviceName": "Miniscope",
-    "deviceType": "Miniscope_V4_BNO",
-    "ewl": 70,
-    "frameRate": "30FPS",
-    "framesPerFile": 1000,
-    "gain": 3.5,
-    "led0": 12
-}
-```
-
-Something concerning is that the 30FPS does not correspond to the videos. The metadata says 30 FPS but the videos are 60 FPS.
-
-And this is the one in the parent folder. Both are called `metaData.json`
+The `metaData.json` file is essential for:
+- defining the precise session start time. The function `get_recording_start_time` (in the `miniscope_imaging_interface.py`) works with both of the following `metaData.json` files.
+- selecting the source data folder for miniscope data. The function `get_miniscope_folder_path` (in the `miniscope_imaging_interface.py`) works with both of the following `metaData.json` files.
 
 ```json
 {
@@ -801,8 +627,6 @@ And this is the one in the parent folder. Both are called `metaData.json`
     "year": 2021
 }
 ```
-
-One big question is why the json in examples that we have in gin is different, the most important issue is that the session start time has its own key on the gin data but not here:
 
 ```json
 {
@@ -830,17 +654,8 @@ One big question is why the json in examples that we have in gin is different, t
 }
 ```
 
-Find out why is this different.
 
-Also, 
-
-## Cross Registration
-
-
-> Cells recorded across sessions within a mouse were cross-registered using a previously published open-source cross-registration algorithm, CellReg, using the spatial correlations of nearby cells to determine whether highly correlated footprints close in space are likely to be the same cell across sessions. For calcium imaging experiments with EEG/EMG, each offline recording was cross-registered with all the encoding and recall sessions, but not with the other offline sessions because cross-registering between all sessions would lead to too many conflicts and thus, to no cells cross-registered across all sessions.
-
-
-## Segmentation
+## Minian Segmentation
 
 Paper:
 https://elifesciences.org/articles/70661
@@ -919,15 +734,27 @@ Output structure (example):
 - S: Deconvolved spikes for each cell. Should have dimensions (“frame”, “unit_id”) and same shape as C  --> `roi_response_deconvolved`
 - max_proj: the maximum projection --> `summary_image`
 
+## Cross Registration
+
+
+> Cells recorded across sessions within a mouse were cross-registered using a previously published open-source cross-registration algorithm, CellReg, using the spatial correlations of nearby cells to determine whether highly correlated footprints close in space are likely to be the same cell across sessions. For calcium imaging experiments with EEG/EMG, each offline recording was cross-registered with all the encoding and recall sessions, but not with the other offline sessions because cross-registering between all sessions would lead to too many conflicts and thus, to no cells cross-registered across all sessions.
+
+The output of the registration algorithm is configured as a series of tables (.csv).
+Each table represents the output of the cross-registration between one offline sessions and all the encoding and recall sessions.
+A table maps the global ROI ids (row of the table) to the ROI ids in each of cross-registered session's plane segmentation. 
+The column names refer to the cross-registered session's ids
+The values -9999 indicates no correspondence.
+
+![cell_reg_ouput.png](cell_reg_ouput.png)
 
 ## Freezing Behavior and Video
 
-This data was extracted from the the ezTrack package:
+This data was extracted from the ezTrack package:
 This is how the data looks like:
 
-![freeze_data](./assets/freeze_data_frame.png)
+![freeze_data](freeze_data_frame.png)
 
-MotionCutoff, FreezeThreshd, MinFreezeDuration are the same for the whole dataframe. The seem to be the parameters of the algorithm.
+MotionCutoff, FreezeThreshd, MinFreezeDuration are the parameters of the algorithm.
 
 Freeze Threshold: 
 MotionCuttoff: minimal pixel change so "it is moving" 
@@ -937,13 +764,8 @@ MinFreezeDuration:
 
 Description of the columns:
 * Frame: Of the video
-* Motion: This s a float, an int? what it indicates? Aggregated pixel change from frame to frame as a measure of the motion. Higher means more change so more motion. 
-* Freezing: This is a boolean, 100 is freezing, 0 is not not
-
-According to Alessandra notes the behavioral videos are synch to the miniscope data. 
-We have some tracking in other experiments. They don't have behavior tracking. 
-
-
+* Motion: Aggregated pixel change from frame to frame as a measure of the motion. Higher means more change so more motion. 
+* Freezing: This is a boolean, 100 is freezing, 0 is not
 
 ###  ezTrack
 
@@ -957,7 +779,7 @@ https://youtu.be/BKgh-XcZhIM?t=1905
 
 2) The freezing behavior analysis that is done for this specific conversion.
 
-## Sleep
+## Sleep Classification
 
 The data looks like this:
 
@@ -977,19 +799,5 @@ The possible sleep states are:
 * sws (slow wave sleep)
 * rem
 
-* The aligned sleep data has a column called frame but the corresponding ophys data is many videos? Again, how are they aligned? is the frame aggregated? In this case they are aligned to an idealized clock. They interpolated from the video timestamps that used the perfect sampling rate. Check this with the authors when we are working with synchronization.
-
-
-## Some synch information
-How does the miniscope system synchs, here in this video are some notes:
-
-https://youtu.be/BKgh-XcZhIM?t=731
-
-
-More about synch can be found in the video to align with behavior on this timestamp
-https://youtu.be/BKgh-XcZhIM?t=1338
-
-
-## Figures to reproduce in the example notebook:
-1) ![img.png](assets/motion_freezing_across_session.png)
-2) ![img.png](assets/spatial_temporal_comp_segmentation.png)
+**Time alignment from methods**: 
+> each frame of calcium activity was aligned with the sleep state the mouse was in at that time. To do this, the computer time of each calcium frame was compared with the sleep states detected around the same time. If the calcium frame occurred during one of the 6 s sleep timeframes, that calcium frame was designated that sleep state; otherwise, if there were no sleep data during that time (due to data being dropped or low quality), it was designated no state and was excluded from sleep-state-specific analyses to account for any dropped frames in the telemetry data.
