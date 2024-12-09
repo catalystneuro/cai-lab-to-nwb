@@ -1,6 +1,8 @@
 """Primary class for converting experiment-specific behavior."""
 
 import numpy as np
+import pandas as pd
+
 from pynwb import TimeSeries
 from pynwb.epoch import TimeIntervals
 from pynwb.file import NWBFile
@@ -8,7 +10,7 @@ from pynwb.file import NWBFile
 from neuroconv.basedatainterface import BaseDataInterface
 from neuroconv.utils import DeepDict
 from pydantic import FilePath
-from typing import Optional
+from typing import Optional, List
 
 
 class EzTrackFreezingBehaviorInterface(BaseDataInterface):
@@ -22,6 +24,9 @@ class EzTrackFreezingBehaviorInterface(BaseDataInterface):
         self.file_path = file_path
         self.verbose = verbose
         self.video_sampling_frequency = video_sampling_frequency
+        self._start_times = None
+        self._stop_times = None
+        self._starting_time = None
 
     def get_metadata(self) -> DeepDict:
         # Automatically retrieve as much metadata as possible from the source files available
@@ -29,33 +34,10 @@ class EzTrackFreezingBehaviorInterface(BaseDataInterface):
 
         return metadata
 
-    def add_to_nwbfile(self, nwbfile: NWBFile, metadata: Optional[dict] = None):
-
-        import pandas as pd
-
-        freezing_behavior_df = pd.read_csv(self.file_path)
-
-        # Extract motion data
-        motion_data = freezing_behavior_df["Motion"].values
-
-        motion_series = TimeSeries(
-            name="MotionSeries",
-            description="ezTrack measures the motion of the animal by assessing the number of pixels of the behavioral "
-            "video whose grayscale change exceeds a particular threshold from one frame to the next.",
-            data=motion_data,
-            unit="n.a",
-            starting_time=freezing_behavior_df["Frame"][0] / self.video_sampling_frequency,
-            rate=self.video_sampling_frequency,
-        )
-
-        # Extract parameters, those values are unique per run
-        file = freezing_behavior_df["File"].unique()[0]
-        motion_cutoff = freezing_behavior_df["MotionCutoff"].unique()[0]
-        freeze_threshold = freezing_behavior_df["FreezeThresh"].unique()[0]
-        min_freeze_duration = freezing_behavior_df["MinFreezeDuration"].unique()[0]
-
+    def get_interval_times(self):
         # Extract start and stop times of the freezing events
         # From the discussion wih the author, the freezing events are the frames where the freezing behavior is 100
+        freezing_behavior_df = pd.read_csv(self.file_path)
         freezing_values = freezing_behavior_df["Freezing"].values
         changes_in_freezing = np.diff(freezing_values)
         freezing_start = np.where(changes_in_freezing == 100)[0] + 1
@@ -64,8 +46,48 @@ class EzTrackFreezingBehaviorInterface(BaseDataInterface):
         start_frames = freezing_behavior_df["Frame"].values[freezing_start]
         stop_frames = freezing_behavior_df["Frame"].values[freezing_stop]
 
-        start_times = start_frames / self.video_sampling_frequency
-        stop_times = stop_frames / self.video_sampling_frequency
+        start_times = (
+            self._start_times if self._start_times is not None else start_frames / self.video_sampling_frequency
+        )
+        stop_times = self._stop_times if self._stop_times is not None else stop_frames / self.video_sampling_frequency
+        return start_times, stop_times
+
+    def get_starting_time(self) -> float:
+        freezing_behavior_df = pd.read_csv(self.file_path)
+        return freezing_behavior_df["Frame"].values[0] / self.video_sampling_frequency
+
+    def set_aligned_interval_times(self, start_times: List[float], stop_times: List[float]) -> None:
+        self._start_times = start_times
+        self._stop_times = stop_times
+
+    def set_aligned_starting_time(self, aligned_start_time) -> None:
+        self._starting_time = aligned_start_time
+
+    def add_to_nwbfile(self, nwbfile: NWBFile, metadata: Optional[dict] = None, stub_test: bool = False):
+
+        freezing_behavior_df = pd.read_csv(self.file_path)
+
+        start_times, stop_times = self.get_interval_times()
+
+        # Extract motion data
+        motion_data = freezing_behavior_df["Motion"].values
+        starting_time = self._starting_time if self._starting_time is not None else self.get_starting_time()
+
+        motion_series = TimeSeries(
+            name="MotionSeries",
+            description="ezTrack measures the motion of the animal by assessing the number of pixels of the behavioral "
+            "video whose grayscale change exceeds a particular threshold from one frame to the next.",
+            data=motion_data[:100] if stub_test else motion_data,
+            unit="n.a",
+            starting_time=starting_time,
+            rate=self.video_sampling_frequency,
+        )
+
+        # Extract parameters, those values are unique per run
+        file = freezing_behavior_df["File"].unique()[0]
+        motion_cutoff = freezing_behavior_df["MotionCutoff"].unique()[0]
+        freeze_threshold = freezing_behavior_df["FreezeThresh"].unique()[0]
+        min_freeze_duration = freezing_behavior_df["MinFreezeDuration"].unique()[0]
 
         description = f"""
             Freezing behavior intervals generated using EzTrack software for file {file}. 
