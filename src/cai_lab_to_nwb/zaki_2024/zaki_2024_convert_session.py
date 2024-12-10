@@ -30,6 +30,84 @@ def session_to_nwb(
     sleep_classification_file_path: Union[str, Path] = None,
     shock_stimulus: dict = None,
 ):
+    """
+    Converts data from an experimental session into NWB (Neurodata Without Borders) format using the `Zaki2024NWBConverter`.
+
+    This function aggregates data from various sources, such as imaging, segmentation, behavioral videos, EEG signals, and other experimental data,
+    to create a single NWB file for a session. It supports customization via options such as stub testing, metadata updates, and file overwrite policies.
+
+    Parameters
+    ----------
+    output_dir_path : Union[str, Path]
+        Directory where the output NWB file will be saved.
+    subject_id : str
+        Unique identifier for the subject.
+    session_id : str
+        Unique identifier for the session.
+    date_str : str
+        Date of the session in the format 'YYYY_MM_DD'.
+    time_str : str
+        Time of the session in the format 'HH_MM_SS'.
+    session_description : str
+        Description of the session.
+    stub_test : bool, optional
+        If True, generates a smaller, test-friendly NWB file. Default is False.
+    overwrite : bool, optional
+        If True, overwrites existing NWB files in the output directory. Default is False.
+    verbose : bool, optional
+        If True, prints detailed logging information during the conversion process. Default is False.
+    experiment_dir_path : Union[str, Path], optional
+        Path to the directory containing experimental data.
+    imaging_folder_path : Union[str, Path], optional
+        Path to the folder containing imaging data. If None, imaging data will not be included.
+    minian_folder_path : Union[str, Path], optional
+        Path to the folder containing Miniscope segmentation data. If None, segmentation data will not be included.
+    video_file_path : Union[str, Path], optional
+        Path to a behavioral video file. If None, video data will not be included.
+    freezing_output_file_path : Union[str, Path], optional
+        Path to a file containing freezing behavior analysis output. If None, freezing behavior data will not be included.
+    edf_file_path : Union[str, Path], optional
+        Path to an EDF file containing EEG, EMG, temperature, or activity signals. If None, EEG/EMG data will not be included.
+    sleep_classification_file_path : Union[str, Path], optional
+        Path to a file containing sleep classification data. If None, sleep classification data will not be included.
+    shock_stimulus : dict, optional
+        Dictionary specifying shock stimulus times for fear conditioning sessions. If None, shock stimulus data will not be included.
+
+    Raises
+    ------
+    AssertionError
+        If any specified file or folder does not exist.
+    ValueError
+        If required metadata or parameters are missing or invalid.
+
+    Notes
+    -----
+    - Uses `Zaki2024NWBConverter` for the conversion process.
+    - Session start time is automatically localized to the "US/Eastern" timezone.
+    - Supports integrating multiple data modalities, each with its own conversion options.
+    - If a specific data source is not provided (set to None), it will be excluded from the conversion.
+    - Logs the total time taken for the conversion process if `verbose` is True.
+
+    Examples
+    --------
+    Convert a session for a specific subject:
+    >>> session_to_nwb(
+    >>>     output_dir_path="D:/cai_lab_conversion_nwb",
+    >>>     subject_id="Ca_EEG2-1",
+    >>>     session_id="FC",
+    >>>     time_str="10_11_24",
+    >>>     session_description="Behavioral testing session",
+    >>>     stub_test=False,
+    >>>     verbose=True,
+    >>>     overwrite=True,
+    >>>     experiment_dir_path="D:/Ca_EEG_Experiment/Ca_EEG2-1/Ca_EEG2-1_Sessions/Ca_EEG2-1_FC",
+    >>>     imaging_folder_path=" D:/Ca_EEG_Experiment/Ca_EEG2-1/Ca_EEG2-1_Sessions/Ca_EEG2-1_FC/10_11_24",
+    >>>     minian_folder_path="D:/Ca_EEG_Calcium/Ca_EEG2-1/Ca_EEG2-1_FC/minian",
+    >>>     video_file_path="D:/Ca_EEG_Experiment/Ca_EEG2-1/Ca_EEG2-1_Sessions/Ca_EEG2-1_FC/Ca_EEG2-1_FC.wmv",
+    >>>     freezing_output_file_path="D:/Ca_EEG_Experiment/Ca_EEG2-1/Ca_EEG2-1_Sessions/Ca_EEG2-1_FC/Ca_EEG2-1_FC_FreezingOutput.csv",
+    >>>     shock_stimulus={"shock_times":[120.0, 180.0, 240.0],"shock_amplitude": 1.5, "shock_duration": 2.0}
+    """
+
     print(f"Converting session {session_id}")
     if verbose:
         start = time.time()
