@@ -30,6 +30,72 @@ def session_to_nwb(
     stub_test: bool = False,
     verbose: bool = True,
 ):
+    """
+    Convert a week-long experimental session into an NWB file using the NWBConverter.
+
+    This function processes multiple data streams, including EEG/EMG signals and
+    cross-session cell registration, and generates a single NWB file representing
+    the entire week-long session for a given subject.
+
+    Parameters
+    ----------
+    data_dir_path : Union[str, Path]
+        Path to the root directory containing all session data for the subject.
+    output_dir_path : Union[str, Path]
+        Path to the directory where the resulting NWB file will be saved.
+    subject_id : str
+        Identifier for the subject whose data is being converted.
+    stub_test : bool, optional
+        If True, perform a quick test conversion using a subset of the data. Default is False.
+    verbose : bool, optional
+        If True, print detailed progress information. Default is True.
+
+    Data Streams
+    ------------
+    1. MultiEDFSignals
+       - EEG, EMG, temperature, and activity signals are extracted from `.edf` files
+         located in the `Ca_EEG_EDF/<subject_id>_EDF` folder.
+       - All `.edf` files in the directory are included.
+
+    2. CellRegistration
+       - Cross-session cell registration results are extracted from `.csv` files
+         located in subdirectories of `Ca_EEG_Calcium/<subject_id>/SpatialFootprints`.
+       - Folder and file names are matched using the regex pattern
+         `CellRegResults_OfflineDay(\d+)Session(\d+)`.
+
+    3. Other sessions within the week
+        - Epochs are added to the NWB file to define time intervals corresponding to
+          conditioning and offline sessions. If imaging data is available, session start
+          and stop times are determined from the Miniscope metadata and timestamps.
+          Otherwise, they are calculated using session notes and provided time/dates.
+
+    Output
+    ------
+    - An NWB file named `sub-<subject_id>_ses-Week.nwb` is saved in the `output_dir_path`.
+
+    Examples
+    --------
+    Convert a session with the following parameters:
+
+    ```python
+    from pathlib import Path
+    session_to_nwb(
+        data_dir_path=Path("/path/to/data"),
+        output_dir_path=Path("/path/to/output"),
+        subject_id="Subject123",
+        stub_test=True,
+        verbose=True,
+    )
+    ```
+
+    Notes
+    -----
+    - The function adds metadata to the NWB file, including subject details and
+      session description.
+    - If any required data files are missing, the function raises an assertion error
+      with a descriptive message.
+    """
+
     if verbose:
         print(f"Converting week-long session")
         start = time.time()
