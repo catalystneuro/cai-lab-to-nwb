@@ -370,11 +370,6 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         timestamps_file_path = self.miniscope_folder / "timeStamps.csv"
         assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {self.miniscope_folder}"
         timestamps_seconds = get_miniscope_timestamps(file_path=timestamps_file_path)
-        # Shift when the first timestamp is negative
-        # TODO: Figure why, I copied from Miniscope. Need to shift also session_start_time
-        if timestamps_seconds[0] < 0.0:
-            timestamps_seconds += abs(timestamps_seconds[0])
-
         return timestamps_seconds
 
     def add_to_nwbfile(
@@ -391,7 +386,7 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
 
         from neuroconv.tools.roiextractors import add_photon_series_to_nwbfile
 
-        miniscope_timestamps = self.get_original_timestamps()
+        miniscope_timestamps = self.get_timestamps()
         imaging_extractor = self.imaging_extractor
 
         if stub_test:

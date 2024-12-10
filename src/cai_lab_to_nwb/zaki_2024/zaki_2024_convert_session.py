@@ -1,7 +1,7 @@
 """Primary script to run to convert an entire session for of data using the NWBConverter."""
 
 import time
-
+import pytz
 from pathlib import Path
 from typing import Union
 from datetime import datetime, timedelta
@@ -109,8 +109,8 @@ def session_to_nwb(
     >>>     shock_stimulus={"shock_times":[120.0, 180.0, 240.0],"shock_amplitude": 1.5, "shock_duration": 2.0}
     """
 
-    print(f"Converting session {session_id}")
     if verbose:
+        print(f"Converting session {session_id}")
         start = time.time()
 
     output_dir_path = Path(output_dir_path)
@@ -140,16 +140,16 @@ def session_to_nwb(
         source_data.update(dict(MinianSegmentation=dict(folder_path=minian_folder_path)))
         conversion_options.update(dict(MinianSegmentation=dict(stub_test=stub_test)))
 
-        motion_corrected_video = minian_folder_path / "minian_mc.mp4"
-        if motion_corrected_video.is_file():
-            source_data.update(
-                dict(
-                    MinianMotionCorrection=dict(folder_path=minian_folder_path, video_file_path=motion_corrected_video)
-                )
-            )
-            conversion_options.update(dict(MinianMotionCorrection=dict(stub_test=stub_test)))
-        elif verbose and not motion_corrected_video.is_file():
-            print(f"No motion corrected data found at {motion_corrected_video}")
+        # motion_corrected_video = minian_folder_path / "minian_mc.mp4"
+        # if motion_corrected_video.is_file():
+        #     source_data.update(
+        #         dict(
+        #             MinianMotionCorrection=dict(folder_path=minian_folder_path, video_file_path=motion_corrected_video)
+        #         )
+        #     )
+        #     conversion_options.update(dict(MinianMotionCorrection=dict(stub_test=stub_test)))
+        # elif verbose and not motion_corrected_video.is_file():
+        #     print(f"No motion corrected data found at {motion_corrected_video}")
 
     # Add Behavioral Video
     if video_file_path:
@@ -165,9 +165,9 @@ def session_to_nwb(
         source_data.update(
             dict(FreezingBehavior=dict(file_path=freezing_output_file_path, video_sampling_frequency=30.0))
         )
+        conversion_options.update(dict(FreezingBehavior=dict(stub_test=stub_test)))
 
     # Add EEG, EMG, Temperature and Activity signals
-
     if edf_file_path:
         edf_file_path = Path(edf_file_path)
         assert edf_file_path.is_file(), f"{edf_file_path} does not exist"
@@ -211,7 +211,7 @@ def session_to_nwb(
         sleep_classification_file_path = Path(sleep_classification_file_path)
         assert sleep_classification_file_path.is_file(), f"{sleep_classification_file_path} does not exist"
         source_data.update(
-            dict(SleepClassification=dict(file_path=sleep_classification_file_path, video_sampling_frequency=30.0))
+            dict(SleepClassification=dict(file_path=sleep_classification_file_path, sampling_frequency=15.0))
         )
 
     # Add Shock Stimuli times for FC sessions
@@ -222,7 +222,7 @@ def session_to_nwb(
             ShockStimuli=shock_stimulus,
         )
 
-    converter = Zaki2024NWBConverter(source_data=source_data)
+    converter = Zaki2024NWBConverter(source_data=source_data, verbose=verbose)
 
     # Add datetime to conversion
     metadata = converter.get_metadata()
@@ -231,6 +231,9 @@ def session_to_nwb(
         datetime_str = date_str + " " + time_str
         session_start_time = datetime.strptime(datetime_str, "%Y_%m_%d %H_%M_%S")
         metadata["NWBFile"]["session_start_time"] = session_start_time
+
+    eastern = pytz.timezone("US/Eastern")
+    metadata["NWBFile"]["session_start_time"] = eastern.localize(metadata["NWBFile"]["session_start_time"])
 
     # Update default metadata with the editable in the corresponding yaml file
     editable_metadata_path = Path(__file__).parent / "zaki_2024_metadata.yaml"
@@ -258,10 +261,10 @@ def session_to_nwb(
 
 if __name__ == "__main__":
 
-    subject_id = "Ca_EEG3-4"
-    session_type = "OfflineDay2Session1"
+    subject_id = "Ca_EEG2-1"
+    session_type = "FC"  #
     session_id = subject_id + "_" + session_type
-    stub_test = False
+    stub_test = True
     verbose = True
     yaml_file_path = Path(__file__).parent / "utils/conversion_parameters.yaml"
     conversion_parameter_dict = load_dict_from_file(yaml_file_path)
