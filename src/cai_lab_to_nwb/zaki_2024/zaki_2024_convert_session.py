@@ -261,10 +261,10 @@ def session_to_nwb(
 
 if __name__ == "__main__":
 
-    subject_id = "Ca_EEG2-1"
-    session_type = "FC"  #
+    subject_id = "Ca_EEG3-4"
+    session_type = "OfflineDay1Session16"  #
     session_id = subject_id + "_" + session_type
-    stub_test = True
+    stub_test = False
     verbose = True
     yaml_file_path = Path(__file__).parent / "utils/conversion_parameters.yaml"
     conversion_parameter_dict = load_dict_from_file(yaml_file_path)
