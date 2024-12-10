@@ -5,7 +5,6 @@ from natsort import natsorted
 from pathlib import Path
 from typing import Union
 import re
-import pandas as pd
 from datetime import datetime
 from mne.io import read_raw_edf
 
@@ -41,7 +40,7 @@ def session_to_nwb(
         output_dir_path = output_dir_path / "nwb_stub"
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
-    nwbfile_path = output_dir_path / f"{subject_id}_week_session.nwb"
+    nwbfile_path = output_dir_path / f"sub-{subject_id}_ses-Week.nwb"
 
     source_data = dict()
     conversion_options = dict()
@@ -86,6 +85,7 @@ def session_to_nwb(
     metadata = dict_deep_update(metadata, editable_metadata)
 
     metadata["Subject"]["subject_id"] = subject_id
+    metadata["NWBFile"]["session_id"] = "Week"
 
     edf_reader = read_raw_edf(input_fname=edf_file_paths[0], verbose=verbose)
     session_start_time = edf_reader.info["meas_date"]
@@ -100,10 +100,9 @@ def session_to_nwb(
     # Add columns to TimeIntervals
     nwbfile.add_epoch_column(name="session_ids", description="ID of the session")
 
-    for task, date_str, time_str in zip(
+    for session_id, date_str, time_str in zip(
         session_times_df["Session"], session_times_df["Date"], session_times_df["Time"]
     ):
-        session_id = subject_id + "_" + task
         experiment_dir_path = get_experiment_dir_path(
             subject_id=subject_id, session_id=session_id, data_dir_path=data_dir_path
         )
@@ -136,7 +135,7 @@ def session_to_nwb(
             datetime_str = date_str + " " + time_str
             start_datetime_timestamp = datetime.strptime(datetime_str, "%Y_%m_%d %H_%M_%S")
 
-            txt_file_path = experiment_dir_path / f"{session_id}.txt"
+            txt_file_path = experiment_dir_path / f"{subject_id}_{session_id}.txt"
             session_run_time = get_session_run_time(txt_file_path=txt_file_path)
 
             start_time = (start_datetime_timestamp - session_start_time.replace(tzinfo=None)).total_seconds()

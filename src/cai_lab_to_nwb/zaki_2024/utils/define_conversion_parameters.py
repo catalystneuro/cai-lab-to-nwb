@@ -10,7 +10,7 @@ def update_conversion_parameters_yaml(
     data_dir_path: Union[str, Path],
     output_dir_path: Union[str, Path],
     experiment_design_file_path: Union[str, Path],
-    session_types: list = (),
+    session_ids: list = (),
 ):
     """
     Update a YAML file with parameters required for session-to-NWB conversion.
@@ -25,7 +25,7 @@ def update_conversion_parameters_yaml(
         Path to the output directory for NWB files.
     experiment_design_file_path : Union[str, Path]
         Path to the experiment design file.
-    session_types : list, optional
+    session_ids : list, optional
         List of session types to process. Defaults to an empty list.
 
     Returns:
@@ -34,12 +34,9 @@ def update_conversion_parameters_yaml(
     """
     yaml_file_path = Path(__file__).parent / "conversion_parameters.yaml"
     subjects_df = pd.read_excel(experiment_design_file_path)
-    session_times_df = get_session_times_df(
-        subject_id=subject_id, data_dir_path=data_dir_path, session_types=session_types
-    )
-    for session_type in session_times_df["Session"]:
-        session_id = subject_id + "_" + session_type
-        session_row = session_times_df[session_times_df["Session"] == session_type].iloc[0]
+    session_times_df = get_session_times_df(subject_id=subject_id, data_dir_path=data_dir_path, session_ids=session_ids)
+    for session_id in session_times_df["Session"]:
+        session_row = session_times_df[session_times_df["Session"] == session_id].iloc[0]
         date_str = session_row["Date"]
         time_str = session_row["Time"]
         experiment_dir_path = get_experiment_dir_path(subject_id, session_id, data_dir_path)
@@ -56,7 +53,7 @@ def update_conversion_parameters_yaml(
             sleep_classification_file_path = None
             video_file_path = get_video_file_path(subject_id, session_id, data_dir_path)
             freezing_output_file_path = get_freezing_output_file_path(subject_id, session_id, data_dir_path)
-            if session_type == "FC" or session_type == "Recall1":
+            if session_id == "FC":
                 shock_amplitude = subjects_df["Amplitude"][subjects_df["Mouse"] == subject_id].to_numpy()[0]
                 shock_amplitude = float(re.findall(r"[-+]?\d*\.\d+|\d+", shock_amplitude)[0])
                 shock_stimulus = dict(
@@ -68,7 +65,7 @@ def update_conversion_parameters_yaml(
         minian_folder_path = get_miniscope_folder_path(subject_id, session_id, data_dir_path)
 
         session_description = generate_session_description(
-            experiment_design_file_path=experiment_design_file_path, subject_id=subject_id, session_type=session_type
+            experiment_design_file_path=experiment_design_file_path, subject_id=subject_id, session_id=session_id
         )
         session_to_nwb_kwargs_per_session = {
             session_id: {
@@ -109,7 +106,7 @@ def update_conversion_parameters_yaml(
 
 if __name__ == "__main__":
     update_conversion_parameters_yaml(
-        subject_id="Ca_EEG3-4",
+        subject_id="Ca_EEG2-1",
         data_dir_path=Path("D:/"),
         output_dir_path=Path("D:/cai_lab_conversion_nwb/"),
         experiment_design_file_path=Path("D:/Ca_EEG_Design.xlsx"),

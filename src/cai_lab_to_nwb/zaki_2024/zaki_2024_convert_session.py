@@ -21,6 +21,7 @@ def session_to_nwb(
     time_str: str,
     session_description: str,
     stub_test: bool = False,
+    overwrite: bool = False,
     verbose: bool = False,
     experiment_dir_path: Union[str, Path] = None,
     imaging_folder_path: Union[str, Path] = None,
@@ -110,7 +111,7 @@ def session_to_nwb(
     """
 
     if verbose:
-        print(f"Converting session {session_id}")
+        print(f"Converting session {session_id} for subject {subject_id}")
         start = time.time()
 
     output_dir_path = Path(output_dir_path)
@@ -118,7 +119,7 @@ def session_to_nwb(
         output_dir_path = output_dir_path / "nwb_stub"
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
-    nwbfile_path = output_dir_path / f"{session_id}.nwb"
+    nwbfile_path = output_dir_path / f"sub-{subject_id}_ses-{session_id}.nwb"
 
     source_data = dict()
     conversion_options = dict()
@@ -183,7 +184,7 @@ def session_to_nwb(
             datetime_str = date_str + " " + time_str
             start_datetime_timestamp = datetime.strptime(datetime_str, "%Y_%m_%d %H_%M_%S")
 
-            txt_file_path = experiment_dir_path / f"{session_id}.txt"
+            txt_file_path = experiment_dir_path / f"{subject_id}_{session_id}.txt"
             assert txt_file_path.is_file(), f"{txt_file_path} does not exist"
 
             session_run_time = get_session_run_time(txt_file_path=txt_file_path)
@@ -242,10 +243,11 @@ def session_to_nwb(
 
     metadata["Subject"]["subject_id"] = subject_id
     metadata["NWBFile"]["session_description"] = session_description
+    metadata["NWBFile"]["session_id"] = session_id
 
     # Run conversion
     converter.run_conversion(
-        metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options, overwrite=True
+        metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options, overwrite=overwrite
     )
 
     if verbose:
@@ -262,17 +264,11 @@ def session_to_nwb(
 if __name__ == "__main__":
 
     subject_id = "Ca_EEG3-4"
-    session_type = "OfflineDay1Session16"  #
-    session_id = subject_id + "_" + session_type
-    stub_test = False
+    session_id = "NeutralExposure"
+    stub_test = True
     verbose = True
+    overwrite = True
     yaml_file_path = Path(__file__).parent / "utils/conversion_parameters.yaml"
     conversion_parameter_dict = load_dict_from_file(yaml_file_path)
     session_to_nwb_kwargs_per_session = conversion_parameter_dict[subject_id][session_id]
-    session_to_nwb_kwargs_per_session.update(
-        stub_test=stub_test,
-        verbose=verbose,
-    )
-    session_to_nwb(**session_to_nwb_kwargs_per_session)
-
-    # Alternatively one can get each path separately using the functions in utils and update the session_to_nwb_kwargs_per_session dictionary
+    session_to_nwb(**session_to_nwb_kwargs_per_session, stub_test=stub_test, verbose=verbose, overwrite=overwrite)
