@@ -110,7 +110,7 @@ def get_session_to_nwb_kwargs_per_session(
                 session_to_nwb_kwargs_per_session.append(conversion_parameter_dict[subject_id][session_id])
         else:
             print(
-                f"Conversion parameters for subject {subject_id} were not defined. Please run utils/define_conversion_parameters.py for subject {subject_id}."
+                f"Conversion parameters for subject {subject_id} were not defined in the conversion_parameters.yaml file. Please run utils/define_conversion_parameters.py for subject {subject_id}."
             )
 
     return session_to_nwb_kwargs_per_session
