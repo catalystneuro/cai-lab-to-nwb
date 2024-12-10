@@ -19,8 +19,9 @@ def session_to_nwb(
     session_id: str,
     date_str: str,
     time_str: str,
+    session_description: str,
     stub_test: bool = False,
-    verbose: bool = True,
+    verbose: bool = False,
     experiment_dir_path: Union[str, Path] = None,
     imaging_folder_path: Union[str, Path] = None,
     minian_folder_path: Union[str, Path] = None,
@@ -237,6 +238,7 @@ def session_to_nwb(
     metadata = dict_deep_update(metadata, editable_metadata)
 
     metadata["Subject"]["subject_id"] = subject_id
+    metadata["NWBFile"]["session_description"] = session_description
 
     # Run conversion
     converter.run_conversion(

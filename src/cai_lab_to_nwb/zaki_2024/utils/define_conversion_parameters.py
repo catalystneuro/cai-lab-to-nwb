@@ -1,7 +1,8 @@
 import re
 import yaml
 
-from source_data_path_resolver import *
+from .source_data_path_resolver import *
+from .generate_session_description import generate_session_description
 
 
 def update_conversion_parameters_yaml(
@@ -55,7 +56,7 @@ def update_conversion_parameters_yaml(
             sleep_classification_file_path = None
             video_file_path = get_video_file_path(subject_id, session_id, data_dir_path)
             freezing_output_file_path = get_freezing_output_file_path(subject_id, session_id, data_dir_path)
-            if session_type == "FC":
+            if session_type == "FC" or session_type == "Recall1":
                 shock_amplitude = subjects_df["Amplitude"][subjects_df["Mouse"] == subject_id].to_numpy()[0]
                 shock_amplitude = float(re.findall(r"[-+]?\d*\.\d+|\d+", shock_amplitude)[0])
                 shock_stimulus = dict(
@@ -65,6 +66,10 @@ def update_conversion_parameters_yaml(
                 shock_stimulus = None
         imaging_folder_path = get_imaging_folder_path(subject_id, session_id, data_dir_path, time_str, date_str)
         minian_folder_path = get_miniscope_folder_path(subject_id, session_id, data_dir_path)
+
+        session_description = generate_session_description(
+            experiment_design_file_path=experiment_design_file_path, subject_id=subject_id, session_type=session_type
+        )
         session_to_nwb_kwargs_per_session = {
             session_id: {
                 "output_dir_path": str(output_dir_path),
@@ -72,6 +77,7 @@ def update_conversion_parameters_yaml(
                 "session_id": session_id,
                 "date_str": date_str,
                 "time_str": time_str,
+                "session_description": session_description,
                 "experiment_dir_path": str(experiment_dir_path),
                 "imaging_folder_path": str(imaging_folder_path) if imaging_folder_path else None,
                 "minian_folder_path": str(minian_folder_path) if minian_folder_path else None,
@@ -103,7 +109,7 @@ def update_conversion_parameters_yaml(
 
 if __name__ == "__main__":
     update_conversion_parameters_yaml(
-        subject_id="Ca_EEG2-1",
+        subject_id="Ca_EEG3-4",
         data_dir_path=Path("D:/"),
         output_dir_path=Path("D:/cai_lab_conversion_nwb/"),
         experiment_design_file_path=Path("D:/Ca_EEG_Design.xlsx"),
