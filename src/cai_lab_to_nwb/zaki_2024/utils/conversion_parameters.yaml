@@ -1,0 +1,21 @@
+Ca_EEG2-1:
+  Ca_EEG2-1_FC:
+    date_str: null
+    edf_file_path: null
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_FC
+    freezing_output_file_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_FC\Ca_EEG2-1_FC_FreezingOutput.csv
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_FC\10_11_24
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG2-1\Ca_EEG2-1_FC\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_id: Ca_EEG2-1_FC
+    shock_stimulus:
+      shock_amplitude: 1.5
+      shock_duration: 2.0
+      shock_times:
+      - 120.0
+      - 180.0
+      - 240.0
+    sleep_classification_file_path: null
+    subject_id: Ca_EEG2-1
+    time_str: '10_11_24'
+    video_file_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_FC\Ca_EEG2-1_FC.wmv

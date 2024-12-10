@@ -7,6 +7,8 @@ from pprint import pformat
 import traceback
 from tqdm import tqdm
 
+from neuroconv.utils import load_dict_from_file
+
 from zaki_2024_convert_session import session_to_nwb
 
 
@@ -101,34 +103,15 @@ def get_session_to_nwb_kwargs_per_session(
     subjects = subjects_df["Mouse"]
     session_to_nwb_kwargs_per_session = []
     for subject_id in subjects:
-        session_times_file_path = data_dir_path / "Ca_EEG_Experiment" / subject_id / (subject_id + "_SessionTimes.csv")
-        if session_times_file_path.is_file():
-            session_times_df = pd.read_csv(session_times_file_path)
-            for task in session_times_df["Session"]:
-                if task == "FC":
-                    shock_amplitude = subjects_df["Amplitude"][subjects_df["Mouse"] == subject_id].to_numpy()[0]
-                    shock_amplitude = float(re.findall(r"[-+]?\d*\.\d+|\d+", shock_amplitude)[0])
-                    shock_stimulus = dict(
-                        shock_times=[120.0, 180.0, 240.0], shock_amplitude=shock_amplitude, shock_duration=2.0
-                    )
-                else:
-                    shock_stimulus = None
-                session_id = subject_id + "_" + task
-                session_row = session_times_df[session_times_df["Session"] == task].iloc[0]
-                date_str = session_row["Date"]
-                time_str = session_row["Time"]
-                session_to_nwb_kwargs_per_session.append(
-                    dict(
-                        data_dir_path=data_dir_path,
-                        subject_id=subject_id,
-                        session_id=session_id,
-                        date_str=date_str,
-                        time_str=time_str,
-                        shock_stimulus=shock_stimulus,
-                    )
-                )
+        yaml_file_path = Path(__file__).parent / "utils/conversion_parameters.yaml"
+        conversion_parameter_dict = load_dict_from_file(yaml_file_path)
+        if subject_id in conversion_parameter_dict:
+            for session_id in conversion_parameter_dict[subject_id].keys():
+                session_to_nwb_kwargs_per_session.append(conversion_parameter_dict[subject_id][session_id])
         else:
-            print("Subject {} not found".format(subject_id))
+            print(
+                f"Conversion parameters for subject {subject_id} were not defined in the conversion_parameters.yaml file. Please run utils/define_conversion_parameters.py for subject {subject_id}."
+            )
 
     return session_to_nwb_kwargs_per_session
 
