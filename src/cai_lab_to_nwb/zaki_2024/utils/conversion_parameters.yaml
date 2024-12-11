@@ -1,5 +1,5 @@
 Ca_EEG2-1:
-  Ca_EEG2-1_FC:
+  FC:
     date_str: null
     edf_file_path: null
     experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_FC
@@ -12,7 +12,7 @@ Ca_EEG2-1:
       of 1 min. Then, 30 s after the final shock, the mice were removed and returned
       to the vivarium. Context: overhead external light, external fan at medium level,
       box fan on, even grid floor, acetic acid 1pct scent'
-    session_id: Ca_EEG2-1_FC
+    session_id: FC
     shock_stimulus:
       shock_amplitude: 1.5
       shock_duration: 2.0
@@ -24,3 +24,188 @@ Ca_EEG2-1:
     subject_id: Ca_EEG2-1
     time_str: '10_11_24'
     video_file_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_FC\Ca_EEG2-1_FC.wmv
+  NeutralExposure:
+    date_str: null
+    edf_file_path: null
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_NeutralExposure
+    freezing_output_file_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_NeutralExposure\Ca_EEG2-1_NeutralExposure_FreezingOutput.csv
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_NeutralExposure\10_44_18
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG2-1\Ca_EEG2-1_NeutralExposure\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: 'Neutral Exposure session: mouse was exposed to a neutral
+      context for 10 min to explore. Context: overhead external light, external fan
+      off, box fan on, smooth floor, white curve insert, simple green 5pct scent'
+    session_id: NeutralExposure
+    shock_stimulus: null
+    sleep_classification_file_path: null
+    subject_id: Ca_EEG2-1
+    time_str: '10_44_18'
+    video_file_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_NeutralExposure\Ca_EEG2-1_NeutralExposure.wmv
+  OfflineDay2Session1:
+    date_str: '2021_10_14'
+    edf_file_path: D:\Ca_EEG_EDF\Ca_EEG2-1_EDF\Ca_EEG2-1_101421.edf
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Offline\Ca_EEG2-1_OfflineDay2
+    freezing_output_file_path: null
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Offline\Ca_EEG2-1_OfflineDay2\2021_10_14\09_24_27
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG2-1\Ca_EEG2-1_OfflineDay2Session1\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: After Neutral Exposure and Fear Conditioning sessions, mice
+      were taken out of the testing chambers and immediately placed in their homecage
+      (scope was not removed).The homecage was placed in a dark grey storage bin with
+      a webcam on top of the bin, taped to a wooden plank, looking down into the homecage.
+      Mouse behavior and calcium were recorded for an hour.
+    session_id: OfflineDay2Session1
+    shock_stimulus: null
+    sleep_classification_file_path: D:\Ca_EEG_Sleep\Ca_EEG2-1\AlignedSleep\Ca_EEG2-1_OfflineDay2Session1_AlignedSleep.csv
+    subject_id: Ca_EEG2-1
+    time_str: 09_24_27
+    video_file_path: null
+  Recall1:
+    date_str: null
+    edf_file_path: null
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_Recall1
+    freezing_output_file_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_Recall1\Ca_EEG2-1_Recall1_FreezingOutput.csv
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_Recall1\10_33_20
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG2-1\Ca_EEG2-1_Recall1\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: 'First Recall session: mouse was placed in shock context
+      for 5 min. Context: overhead external light, external fan at medium level, box
+      fan on, even grid floor, acetic acid 1pct scent'
+    session_id: Recall1
+    shock_stimulus: null
+    sleep_classification_file_path: null
+    subject_id: Ca_EEG2-1
+    time_str: '10_33_20'
+    video_file_path: D:\Ca_EEG_Experiment\Ca_EEG2-1\Ca_EEG2-1_Sessions\Ca_EEG2-1_Recall1\Ca_EEG2-1_Recall1.wmv
+Ca_EEG3-4:
+  FC:
+    date_str: '2022_09_19'
+    edf_file_path: null
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_FC
+    freezing_output_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_FC\Ca_EEG3-4_FC_FreezingOutput.csv
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_FC\2022_09_19\09_18_41
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG3-4\Ca_EEG3-4_FC\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: 'Fear Conditioning session: after a baseline period of 2
+      min, mouse received three 2s foot shocks of 0.25, with an intershock interval
+      of 1 min. Then, 30 s after the final shock, the mice were removed and returned
+      to the vivarium. Context: overhead external light, external fan at medium level,
+      box fan on, even grid floor, acetic acid 1pct scent'
+    session_id: FC
+    shock_stimulus:
+      shock_amplitude: 0.25
+      shock_duration: 2.0
+      shock_times:
+      - 120.0
+      - 180.0
+      - 240.0
+    sleep_classification_file_path: null
+    subject_id: Ca_EEG3-4
+    time_str: 09_18_41
+    video_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_FC\Ca_EEG3-4_FC.wmv
+  NeutralExposure:
+    date_str: '2022_09_17'
+    edf_file_path: null
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_NeutralExposure
+    freezing_output_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_NeutralExposure\Ca_EEG3-4_NeutralExposure_FreezingOutput.csv
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_NeutralExposure\2022_09_17\09_23_03
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG3-4\Ca_EEG3-4_NeutralExposure\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: 'Neutral Exposure session: mouse was exposed to a neutral
+      context for 10 min to explore. Context: overhead external light, external fan
+      off, box fan on, smooth floor, white curve insert, simple green 5pct scent'
+    session_id: NeutralExposure
+    shock_stimulus: null
+    sleep_classification_file_path: null
+    subject_id: Ca_EEG3-4
+    time_str: 09_23_03
+    video_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_NeutralExposure\Ca_EEG3-4_NeutralExposure.wmv
+  OfflineDay1Session1:
+    date_str: '2022_09_17'
+    edf_file_path: D:\Ca_EEG_EDF\Ca_EEG3-4_EDF\Ca_EEG3-4_091722.edf
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Offline\Ca_EEG3-4_OfflineDay1
+    freezing_output_file_path: null
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Offline\Ca_EEG3-4_OfflineDay1\2022_09_17\09_40_40
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG3-4\Ca_EEG3-4_OfflineDay1Session1\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: After Neutral Exposure and Fear Conditioning sessions, mice
+      were taken out of the testing chambers and immediately placed in their homecage
+      (scope was not removed).The homecage was placed in a dark grey storage bin with
+      a webcam on top of the bin, taped to a wooden plank, looking down into the homecage.
+      Mouse behavior and calcium were recorded for an hour.
+    session_id: OfflineDay1Session1
+    shock_stimulus: null
+    sleep_classification_file_path: D:\Ca_EEG_Sleep\Ca_EEG3-4\AlignedSleep\Ca_EEG3-4_OfflineDay1Session1_AlignedSleep.csv
+    subject_id: Ca_EEG3-4
+    time_str: 09_40_40
+    video_file_path: null
+  OfflineDay2Session1:
+    date_str: '2022_09_19'
+    edf_file_path: D:\Ca_EEG_EDF\Ca_EEG3-4_EDF\Ca_EEG3-4_091922.edf
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Offline\Ca_EEG3-4_OfflineDay2
+    freezing_output_file_path: null
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Offline\Ca_EEG3-4_OfflineDay2\2022_09_19\09_30_07
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG3-4\Ca_EEG3-4_OfflineDay2Session1\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: After Neutral Exposure and Fear Conditioning sessions, mice
+      were taken out of the testing chambers and immediately placed in their homecage
+      (scope was not removed).The homecage was placed in a dark grey storage bin with
+      a webcam on top of the bin, taped to a wooden plank, looking down into the homecage.
+      Mouse behavior and calcium were recorded for an hour.
+    session_id: OfflineDay2Session1
+    shock_stimulus: null
+    sleep_classification_file_path: D:\Ca_EEG_Sleep\Ca_EEG3-4\AlignedSleep\Ca_EEG3-4_OfflineDay2Session1_AlignedSleep.csv
+    subject_id: Ca_EEG3-4
+    time_str: 09_30_07
+    video_file_path: null
+  Recall1:
+    date_str: '2022_09_20'
+    edf_file_path: null
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall1
+    freezing_output_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall1\Ca_EEG3-4_Recall1_FreezingOutput.csv
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall1\2022_09_20\09_19_43
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG3-4\Ca_EEG3-4_Recall1\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: 'First Recall session: mouse was placed in shock context
+      for 5 min. Context: overhead external light, external fan at medium level, box
+      fan on, even grid floor, acetic acid 1pct scent'
+    session_id: Recall1
+    shock_stimulus: null
+    sleep_classification_file_path: null
+    subject_id: Ca_EEG3-4
+    time_str: 09_19_43
+    video_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall1\Ca_EEG3-4_Recall1.wmv
+  Recall2:
+    date_str: '2022_09_21'
+    edf_file_path: null
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall2
+    freezing_output_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall2\Ca_EEG3-4_Recall2_FreezingOutput.csv
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall2\2022_09_21\08_41_45
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG3-4\Ca_EEG3-4_Recall2\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: 'Second Recall session: mouse was placed in Novel context
+      for 5 min. Context: overhead external light, external fan off, box fan on, bath
+      mat floor, A frame insert, ethanol 70pct scent'
+    session_id: Recall2
+    shock_stimulus: null
+    sleep_classification_file_path: null
+    subject_id: Ca_EEG3-4
+    time_str: 08_41_45
+    video_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall2\Ca_EEG3-4_Recall2.wmv
+  Recall3:
+    date_str: '2022_09_22'
+    edf_file_path: null
+    experiment_dir_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall3
+    freezing_output_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall3\Ca_EEG3-4_Recall3_FreezingOutput.csv
+    imaging_folder_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall3\2022_09_22\08_40_12
+    minian_folder_path: D:\Ca_EEG_Calcium\Ca_EEG3-4\Ca_EEG3-4_Recall3\minian
+    output_dir_path: D:\cai_lab_conversion_nwb
+    session_description: 'Third Recall session: mouse was placed in Neutral context
+      for 5 min. Context: overhead external light, external fan off, box fan on, smooth
+      floor, white curve insert, simple green 5pct scent'
+    session_id: Recall3
+    shock_stimulus: null
+    sleep_classification_file_path: null
+    subject_id: Ca_EEG3-4
+    time_str: 08_40_12
+    video_file_path: D:\Ca_EEG_Experiment\Ca_EEG3-4\Ca_EEG3-4_Sessions\Ca_EEG3-4_Recall3\Ca_EEG3-4_Recall3.wmv
