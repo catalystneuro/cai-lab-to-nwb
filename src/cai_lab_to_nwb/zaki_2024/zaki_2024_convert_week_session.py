@@ -158,6 +158,13 @@ def session_to_nwb(
 
     metadata["NWBFile"]["session_start_time"] = session_start_time
 
+    session_description = (
+        "Week long of continuous recording with HD-X02 wireless telemetry probe of EEG, EMG, Temperature and Activity signals. "
+        "Conditioning and Offline sessions, as described in the experiment_description, were performed during the week. "
+        "The output of cell registration across conditioning and offline sessions are reported in this nwb file. "
+    )
+    metadata["NWBFile"]["session_description"] = session_description
+
     nwbfile = converter.create_nwbfile(metadata=metadata, conversion_options=conversion_options)
 
     # Add epochs table to store time range of conditioning and offline sessions
@@ -208,13 +215,6 @@ def session_to_nwb(
             stop_time = start_time + session_run_time
 
         nwbfile.add_epoch(start_time=start_time, stop_time=stop_time, session_ids=session_id)
-
-    session_description = (
-        "Week long of continuous recording with HD-X02 wireless telemetry probe of EEG, EMG, Temperature and Activity signals. "
-        "Conditioning and Offline sessions, as described in the experiment_description, were performed during the week. "
-        "The output of cell registration across conditioning and offline sessions are reported in this nwb file. "
-    )
-    metadata["NWBFile"]["session_description"] = session_description
 
     # Run conversion
     configure_and_write_nwbfile(nwbfile=nwbfile, backend="hdf5", output_filepath=nwbfile_path)
