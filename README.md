@@ -28,14 +28,6 @@ pip install -e .
 Note:
 both of the methods above install the repository in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs).
 
-### Installing conversion specific dependencies
-
-To install *all* the conversion specific dependencies you can run the following command:
-
-```
-pip install -r frozen_dependencies.txt
-```
-
 ## Repository structure
 Each conversion is organized in a directory of its own in the `src` directory:
 
@@ -79,7 +71,6 @@ cai-lab-to-nwb/
             ├── zaki_2024_convert_session.py
             ├── zaki_2024_convert_week_session.py
             ├── zaki_2024_metadata.yaml
-            ├── zaki_2024_nwbconverter.py
             ├── zaki_2024_requirements.txt
             └── zaki_2024_run_conversion.ipynb
 ```
@@ -87,7 +78,6 @@ cai-lab-to-nwb/
  For example, for the conversion `zaki_2024` you can find a directory located in `src/cai-lab-to-nwb/zaki_2024`. Inside each conversion directory you can find the following files:
 
 * `zaki_2024_convert_sesion.py`: this script defines the function to convert one full session of the conversion.
-* `zaki_2024_requirements.txt`: dependencies specific to this conversion.
 * `zaki_2024_nwbconverter.py`: the place where the `NWBConverter` class is defined.
 * `notes/zaki_2024_notes.md`: notes and comments concerning this specific conversion.
 * `interfaces/`: directory containing the interface classes for this specific conversion.

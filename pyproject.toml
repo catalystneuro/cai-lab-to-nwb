@@ -17,6 +17,11 @@ classifiers = [
 dependencies = [
   "neuroconv",
   "nwbinspector",
+  "roiextractors",
+  "openpyxl",
+  "mne",
+  "opencv-python-headless",
+  "ndx-miniscope==0.5.1",
 ]
 
 [project.urls]
