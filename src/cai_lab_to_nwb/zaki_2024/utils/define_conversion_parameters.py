@@ -1,8 +1,8 @@
 import re
 import yaml
 
-from src.cai_lab_to_nwb.zaki_2024.utils.source_data_path_resolver import *
-from src.cai_lab_to_nwb.zaki_2024.utils.generate_session_description import generate_session_description
+from cai_lab_to_nwb.zaki_2024.utils.source_data_path_resolver import *
+from cai_lab_to_nwb.zaki_2024.utils.generate_session_description import generate_session_description
 
 
 def update_conversion_parameters_yaml(
@@ -115,9 +115,9 @@ if __name__ == "__main__":
         "Recall3",
     ]
     update_conversion_parameters_yaml(
-        subject_id="Ca_EEG2-1",
-        data_dir_path=Path("D:/"),
+        subject_id="Ca_EEG3-4",
+        data_dir_path=Path("D:/Cai-CN-data-share/"),
         output_dir_path=Path("D:/cai_lab_conversion_nwb/"),
-        experiment_design_file_path=Path("D:/Ca_EEG_Design.xlsx"),
+        experiment_design_file_path=Path("D:/Cai-CN-data-share/Ca_EEG_Design.xlsx"),
         session_ids=session_ids,
     )

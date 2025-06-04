@@ -8,9 +8,9 @@ from datetime import datetime, timedelta
 
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
-from zaki_2024_nwbconverter import Zaki2024NWBConverter
-from utils import get_session_slicing_time_range, get_session_run_time
-from interfaces.miniscope_imaging_interface import get_miniscope_folder_path
+from cai_lab_to_nwb.zaki_2024.zaki_2024_nwbconverter import Zaki2024NWBConverter
+from cai_lab_to_nwb.zaki_2024.utils import get_session_slicing_time_range, get_session_run_time
+from cai_lab_to_nwb.zaki_2024.interfaces.miniscope_imaging_interface import get_miniscope_folder_path
 
 
 def session_to_nwb(

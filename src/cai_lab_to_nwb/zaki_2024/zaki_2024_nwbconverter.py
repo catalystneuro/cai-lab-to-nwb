@@ -6,7 +6,7 @@ from neuroconv import NWBConverter
 from neuroconv.datainterfaces import VideoInterface
 from neuroconv.utils.dict import DeepDict
 
-from interfaces import (
+from cai_lab_to_nwb.zaki_2024.interfaces import (
     MinianSegmentationInterface,
     Zaki2024EDFInterface,
     Zaki2024MultiEDFInterface,
@@ -50,7 +50,7 @@ class Zaki2024NWBConverter(NWBConverter):
                 metadata["NWBFile"].update(session_start_time=session_start_time - time_shift)
         return metadata
 
-    def temporally_align_data_interfaces(self):
+    def temporally_align_data_interfaces(self, metadata: dict | None = None, conversion_options: dict | None = None):
         if "MiniscopeImaging" in self.data_interface_objects:
             imaging_interface = self.data_interface_objects["MiniscopeImaging"]
             imaging_timestamps = imaging_interface.get_original_timestamps()

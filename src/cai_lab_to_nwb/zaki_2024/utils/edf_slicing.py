@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Union
 from datetime import timedelta
 
-from src.cai_lab_to_nwb.zaki_2024.interfaces.miniscope_imaging_interface import (
+from cai_lab_to_nwb.zaki_2024.interfaces.miniscope_imaging_interface import (
     get_miniscope_timestamps,
     get_recording_start_time,
 )

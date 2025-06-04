@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from neuroconv.utils import load_dict_from_file
 
-from zaki_2024_convert_session import session_to_nwb
+from cai_lab_to_nwb.zaki_2024.zaki_2024_convert_session import session_to_nwb
 
 
 def dataset_to_nwb(
@@ -97,7 +97,6 @@ def get_session_to_nwb_kwargs_per_session(
     # This can be a specific list with hard-coded sessions, a path expansion or any conversion specific logic that you might need
     #####
     import pandas as pd
-    import re
 
     subjects_df = pd.read_excel(data_dir_path / "Ca_EEG_Design.xlsx")
     subjects = subjects_df["Mouse"]
@@ -119,7 +118,7 @@ def get_session_to_nwb_kwargs_per_session(
 if __name__ == "__main__":
 
     # Parameters for conversion
-    data_dir_path = Path("D:/")
+    data_dir_path = Path("D:/Cai-CN-data-share/")
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
     max_workers = 1
     verbose = False

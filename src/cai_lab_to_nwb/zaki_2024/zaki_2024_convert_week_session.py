@@ -11,7 +11,7 @@ from mne.io import read_raw_edf
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 from neuroconv.tools.nwb_helpers import configure_and_write_nwbfile
 
-from utils import (
+from cai_lab_to_nwb.zaki_2024.utils import (
     get_session_slicing_time_range,
     get_session_run_time,
     get_session_times_df,
@@ -19,8 +19,8 @@ from utils import (
     get_experiment_dir_path,
     get_date_str_from_experiment_dir_path,
 )
-from interfaces.miniscope_imaging_interface import get_miniscope_folder_path
-from zaki_2024_nwbconverter import Zaki2024NWBConverter
+from cai_lab_to_nwb.zaki_2024.interfaces.miniscope_imaging_interface import get_miniscope_folder_path
+from cai_lab_to_nwb.zaki_2024.zaki_2024_nwbconverter import Zaki2024NWBConverter
 
 
 def session_to_nwb(
@@ -233,7 +233,7 @@ def session_to_nwb(
 if __name__ == "__main__":
 
     # Parameters for conversion
-    data_dir_path = Path("D:/")
+    data_dir_path = Path("D:/Cai-CN-data-share/")
     output_dir_path = Path("D:/cai_lab_conversion_nwb/")
     subject_id = "Ca_EEG3-4"
     stub_test = False
