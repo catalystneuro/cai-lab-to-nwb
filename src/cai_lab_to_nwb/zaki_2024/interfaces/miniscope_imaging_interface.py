@@ -8,7 +8,7 @@ import datetime
 from copy import deepcopy
 from typing import Union
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal, Iterable, Optional
 
 import numpy as np
 from pydantic import DirectoryPath, validate_call
@@ -168,8 +168,8 @@ class MiniscopeImagingExtractor(MultiImagingExtractor):
         self._image_size = self._imaging_extractors[0].get_image_size()
         self._dtype = self._imaging_extractors[0].get_dtype()
 
-    def get_num_frames(self) -> int:
-        return self._num_frames
+    def get_num_samples(self) -> int:
+        return self._num_samples
 
     def get_num_channels(self) -> int:
         return 1
@@ -185,6 +185,37 @@ class MiniscopeImagingExtractor(MultiImagingExtractor):
 
     def get_channel_names(self) -> list[str]:
         return ["OpticalChannel"]
+
+    def _check_consistency_between_imaging_extractors(self):
+        """Check that essential properties are consistent between extractors so that they can be combined appropriately.
+
+        Raises
+        ------
+        AssertionError
+            If any of the properties are not consistent between extractors.
+
+        Notes
+        -----
+        This method checks the following properties:
+            - sampling frequency
+            - image size
+            - number of channels
+            - channel names
+            - data type
+        """
+        properties_to_check = dict(
+            get_sampling_frequency="The sampling frequency",
+            get_image_size="The size of a frame",
+            get_num_channels="The number of channels",
+            get_channel_names="The name of the channels",
+            get_dtype="The data type",
+        )
+        for method, property_message in properties_to_check.items():
+            values = [getattr(extractor, method)() for extractor in self._imaging_extractors]
+            unique_values = set(tuple(v) if isinstance(v, Iterable) else v for v in values)
+            assert (
+                len(unique_values) == 1
+            ), f"{property_message} is not consistent over the files (found {unique_values})."
 
 
 class _MiniscopeSingleVideoExtractor(ImagingExtractor):
@@ -213,7 +244,7 @@ class _MiniscopeSingleVideoExtractor(ImagingExtractor):
 
         cap = self._cv2.VideoCapture(str(self.file_path))
 
-        self._num_frames = int(cap.get(self._cv2.CAP_PROP_FRAME_COUNT))
+        self._num_samples = int(cap.get(self._cv2.CAP_PROP_FRAME_COUNT))
 
         # Get the frames per second (fps)
         self._sampling_frequency = cap.get(self._cv2.CAP_PROP_FPS)
@@ -226,13 +257,13 @@ class _MiniscopeSingleVideoExtractor(ImagingExtractor):
         # Release the video capture object
         cap.release()
 
-    def get_num_frames(self) -> int:
-        return self._num_frames
+    def get_num_samples(self) -> int:
+        return self._num_samples
 
     def get_num_channels(self) -> int:
         return 1
 
-    def get_image_size(self) -> tuple[int, int]:
+    def get_image_shape(self) -> tuple[int, int]:
         return (self.frame_height, self.frame_width)
 
     def get_sampling_frequency(self):
@@ -244,43 +275,34 @@ class _MiniscopeSingleVideoExtractor(ImagingExtractor):
     def get_channel_names(self) -> list[str]:
         return ["OpticalChannel"]
 
-    def get_video(
-        self, start_frame: Optional[int] = None, end_frame: Optional[int] = None, channel: int = 0
-    ) -> np.ndarray:
-        """Get the video frames.
+    def get_series(self, start_sample: Optional[int] = None, end_sample: Optional[int] = None) -> np.ndarray:
+        """Get the series of samples.
 
         Parameters
         ----------
-        start_frame: int, optional
-            Start frame index (inclusive).
-        end_frame: int, optional
-            End frame index (exclusive).
-        channel: int, optional
-            Channel index.
+        start_sample: int, optional
+            Start sample index (inclusive).
+        end_sample: int, optional
+            End sample index (exclusive).
 
         Returns
         -------
-        video: numpy.ndarray
-            The video frames.
+        series: numpy.ndarray
+            The series of samples.
 
         Notes
         -----
         The grayscale conversion is based on minian
         https://github.com/denisecailab/minian/blob/f64c456ca027200e19cf40a80f0596106918fd09/minian/utilities.py#LL272C12-L272C12
         """
-        if channel != 0:
-            raise NotImplementedError(
-                f"The {self.extractor_name}Extractor does not currently support multiple color channels."
-            )
+        end_sample = end_sample or self.get_num_samples()
+        start_sample = start_sample or 0
 
-        end_frame = end_frame or self.get_num_frames()
-        start_frame = start_frame or 0
-
-        video = np.empty(shape=(end_frame - start_frame, *self.get_image_size()), dtype=self.get_dtype())
+        video = np.empty(shape=(end_sample - start_sample, *self.get_image_size()), dtype=self.get_dtype())
         with self._video_capture(file_path=str(self.file_path)) as video_obj:
             # Set the starting frame position
-            video_obj.current_frame = start_frame
-            for frame_number in range(end_frame - start_frame):
+            video_obj.current_frame = start_sample
+            for frame_number in range(end_sample - start_sample):
                 frame = next(video_obj)
                 video[frame_number] = self._cv2.cvtColor(frame, self._cv2.COLOR_RGB2GRAY)
 
@@ -390,7 +412,7 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         imaging_extractor = self.imaging_extractor
 
         if stub_test:
-            stub_frames = min([stub_frames, self.imaging_extractor.get_num_frames()])
+            stub_frames = min([stub_frames, self.imaging_extractor.get_num_samples()])
             imaging_extractor = self.imaging_extractor.frame_slice(start_frame=0, end_frame=stub_frames)
             miniscope_timestamps = miniscope_timestamps[:stub_frames]
 
