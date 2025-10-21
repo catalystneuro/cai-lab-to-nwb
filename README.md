@@ -67,7 +67,7 @@ cai-lab-to-nwb/
             │   ├── zaki_2024_notes.md
             │   └── ... .png
             ├── tutorials
-            │   ├── zaki_2024_tutorial.md
+            │   ├── zaki_2024_tutorial.ipynb
             │   └── ... .png
             ├── utils
             │   ├── __init__.py
