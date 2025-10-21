@@ -15,9 +15,11 @@ classifiers = [
 ]
 
 dependencies = [
-  "neuroconv",
-  "nwbinspector",
-  "roiextractors",
+  "pynwb==3.0.0",
+  "neuroconv==0.7.4",
+  "nwbinspector==0.6.3",
+  "roiextractors==0.5.13",
+  "ipykernel",
   "openpyxl",
   "mne",
   "opencv-python-headless",
