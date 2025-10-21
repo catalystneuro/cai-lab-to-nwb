@@ -50,8 +50,6 @@ cai-lab-to-nwb/
 ├── pyproject.toml
 ├── README.md
 ├── dandi_upload.md
-├── requirements.txt
-├── setup.py
 └── src
     └── cai_lab_to_nwb
         ├── another_conversion
