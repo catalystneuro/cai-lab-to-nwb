@@ -199,7 +199,7 @@ The structure is:
 
 For subject Ca_EEG3-4, the experiment folder contains a file named `Ca_EEG3-4_SessionTimes.csv` that looks like this:
 
-For subject Ca_EEG2-1, the experiment folder contains a file named `Session_Timestamps.csv` that looks like this:
+For subject Ca_EEG2-1, the experiment folder contains a file named `Session_Timestamps.csv`:
 
 The offline data are different from the conditioning sessions data. The conditioning sessions are structured as:
 

@@ -1,32 +1,44 @@
 # cai-lab-to-nwb
 NWB conversion scripts for Cai lab data to the [Neurodata Without Borders](https://nwb-overview.readthedocs.io/) data format.
 
-## Installation from Github
-We recommend installing this package directly from Github. This option has the advantage that the source code can be modifed if you need to amend some of the code we originally provided to adapt to future experimental differences.
-To install the conversion from GitHub you will need to use `git` ([installation instructions](https://github.com/git-guides/install-git)). We also recommend the installation of `conda` ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)) as it contains
-all the required machinery in a single and simple install.
+## Installation
+
+To use this conversion package, you'll need to install it directly from GitHub. This approach allows you to access the latest features and modify the source code if needed to adapt to your specific experimental requirements.
+
+### Prerequisites
+
+Before installation, ensure you have the following tools installed:
+- `git` ([installation instructions](https://github.com/git-guides/install-git))
+- `conda` ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)) - recommended for managing dependencies
+
+### Installation Steps
 
 From a terminal (note that conda should install one in your system) you can do the following:
 
-```
+```bash
 git clone https://github.com/catalystneuro/cai-lab-to-nwb
 cd cai-lab-to-nwb
 conda env create --file make_env.yml
 conda activate cai_lab_to_nwb_env
 ```
 
-This creates a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) which isolates the conversion code from your system libraries.  We recommend that you run all your conversion related tasks and analysis from the created environment in order to minimize issues related to package dependencies.
+This creates a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) which isolates the conversion code from your system libraries. We recommend that you run all your conversion related tasks and analysis from the created environment in order to minimize issues related to package dependencies.
+
+If you fork this repository and are running code from that fork, instead use:
+
+```bash
+git clone https://github.com/your_github_username/cai-lab-to-nwb
+```
 
 Alternatively, if you want to avoid conda altogether (for example if you use another virtual environment tool) you can install the repository with the following commands using only pip:
 
-```
+```bash
 git clone https://github.com/catalystneuro/cai-lab-to-nwb
 cd cai-lab-to-nwb
-pip install -e .
+pip install --editable .
 ```
 
-Note:
-both of the methods above install the repository in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs).
+Note: both of the methods above install the repository in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs). The dependencies for this environment are stored in the dependencies section of the `pyproject.toml` file.
 
 ## Repository structure
 Each conversion is organized in a directory of its own in the `src` directory:
@@ -116,3 +128,101 @@ jupyter lab
 ## Upload to the DANDI Archive
 
 Detailed instructions on how to upload the data to the DANDI archive can be found [here](dandi.md).
+
+## Customizing for New Datasets
+
+To create a new conversion or adapt this one for different experimental paradigms:
+
+### 1. Create a New Dataset Directory
+
+Follow the naming convention and create a new directory under `src/cai_lab_to_nwb/`:
+
+```bash
+mkdir src/cai_lab_to_nwb/new_experiment_2025
+```
+
+### 2. Implement Dataset-Specific Interfaces
+
+Create custom interfaces inheriting from existing ones:
+
+```python
+from neuroconv.datainterfaces import BaseDataInterface
+
+class CustomInterface(BaseDataInterface):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def add_to_nwbfile(self, nwbfile, metadata, **kwargs):
+        # Custom processing logic
+        super().add_to_nwbfile(nwbfile, metadata, **kwargs)
+```
+
+### 3. Create an NWBConverter Class
+
+Combine all interfaces for your dataset:
+
+```python
+from neuroconv import NWBConverter
+
+class NewExperimentNWBConverter(NWBConverter):
+    data_interface_classes = dict(
+        Behavior=CustomInterface,
+        Video=ExternalVideoInterface,
+        # Add other interfaces as needed
+    )
+```
+
+### 4. Write Conversion Scripts
+
+Create scripts for single sessions and batch processing following the established patterns.
+
+### 5. Create Metadata Files
+
+Develop YAML metadata files with dataset-specific experimental parameters:
+
+```yaml
+NWBFile:
+  experiment_description: "Description of your new experiment"
+  institution: "Your Institution"
+  lab: "Your Lab"
+
+Subject:
+  species: "Mus musculus"
+  # Add subject-specific metadata
+
+# Add other experimental metadata
+```
+
+Each conversion should be self-contained within its directory and follow the established patterns for consistency and maintainability.
+
+## Troubleshooting
+
+### Performance Optimization
+
+- Use `stub_test=True` for initial testing with small data subsets
+- Process sessions in parallel for large datasets
+- Consider using SSD storage for faster I/O operations
+- Monitor memory usage for large video files
+
+### Getting Help
+
+For issues specific to this conversion:
+1. Check the `notes.md` file in the conversion directory
+2. Review the metadata YAML files for parameter examples
+3. Examine the conversion scripts for usage patterns
+
+For general neuroconv issues:
+- Visit the [neuroconv documentation](https://neuroconv.readthedocs.io/)
+- Check the [neuroconv GitHub repository](https://github.com/catalystneuro/neuroconv)
+
+## Citation
+
+If you use this conversion in your research, please cite:
+
+- The original experimental work (add appropriate citation)
+- [NeuroConv](https://github.com/catalystneuro/neuroconv)
+- [NWB](https://www.nwb.org/)
+
+## License
+
+This project is licensed under the terms specified in the LICENSE file.
