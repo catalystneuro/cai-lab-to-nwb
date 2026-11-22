@@ -389,10 +389,37 @@ class MiniscopeImagingInterface(BaseImagingExtractorInterface):
         return metadata_schema
 
     def get_original_timestamps(self) -> np.ndarray:
+        """
+        Return the time of each frame in seconds, as measured by the Miniscope software in "timeStamps.csv".
+
+        Raises
+        ------
+        AssertionError
+            If the "timeStamps.csv" file is not found in the Miniscope folder.
+        ValueError
+            If the number of timestamps differs from the number of frames in the .avi files.
+        """
         timestamps_file_path = self.miniscope_folder / "timeStamps.csv"
         assert timestamps_file_path.exists(), f"Miniscope timestamps file not found in {self.miniscope_folder}"
         timestamps_seconds = get_miniscope_timestamps(file_path=timestamps_file_path)
+        num_samples = self.imaging_extractor.get_num_samples()
+        if len(timestamps_seconds) != num_samples:
+            raise ValueError(
+                f"The Miniscope timestamps file '{timestamps_file_path}' has {len(timestamps_seconds)} timestamps, "
+                f"but the .avi files have {num_samples} frames. The time of each frame cannot be determined."
+            )
         return timestamps_seconds
+
+    def get_timestamps(self) -> np.ndarray:
+        """
+        Return the aligned timestamps when they have been set, otherwise the timestamps measured by the Miniscope.
+
+        The frame index divided by the frame rate in the header of the .avi files is never used. The header does not
+        hold the acquisition frame rate (it can say 60 FPS for a recording at 30 FPS).
+        """
+        if self.imaging_extractor.has_time_vector():
+            return super().get_timestamps()
+        return self.get_original_timestamps()
 
     def add_to_nwbfile(
         self,
